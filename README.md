@@ -10,30 +10,30 @@ Mobile (Expo)  ──HTTP/Axios──▶  NestJS API  ──Prisma──▶  Pos
        └── @caffeapp/shared ◀─────────┘
 ```
 
-| Doc                                               | Mô tả                               |
-| ------------------------------------------------- | ----------------------------------- |
-| [ARCHITECTURE.md](docs/ARCHITECTURE.md)           | Kiến trúc hệ thống                  |
+| Doc                                                   | Mô tả                                 |
+| ----------------------------------------------------- | ------------------------------------- |
+| [ARCHITECTURE.md](docs/ARCHITECTURE.md)               | Kiến trúc hệ thống                    |
 | [MOBILE_ARCHITECTURE.md](docs/MOBILE_ARCHITECTURE.md) | Kiến trúc mobile (Clean Architecture) |
-| [CONVENTIONS.md](docs/CONVENTIONS.md)             | **Chuẩn hóa** folder, alias, import |
-| [ENV_SETUP.md](docs/ENV_SETUP.md)                 | Tạo `.env` API + Mobile             |
-| [SPRINT_PLAN.md](docs/SPRINT_PLAN.md)             | Lộ trình sprint                     |
-| [API_CONTRACT.md](docs/api/API_CONTRACT.md)       | REST API contract (design)          |
-| [ERD.md](docs/api/ERD.md)                          | Database schema (Prisma)            |
-| [PRD.md](docs/PRD.md)                             | Product requirements                |
-| [USER_STORIES.md](docs/USER_STORIES.md)           | User stories + acceptance criteria  |
-| [DOR_CHECKLIST.md](docs/DOR_CHECKLIST.md)         | Definition of Ready                 |
+| [CONVENTIONS.md](docs/CONVENTIONS.md)                 | **Chuẩn hóa** folder, alias, import   |
+| [ENV_SETUP.md](docs/ENV_SETUP.md)                     | Tạo `.env` API + Mobile               |
+| [SPRINT_PLAN.md](docs/SPRINT_PLAN.md)                 | Lộ trình sprint                       |
+| [API_CONTRACT.md](docs/api/API_CONTRACT.md)           | REST API contract (design)            |
+| [ERD.md](docs/api/ERD.md)                             | Database schema (Prisma)              |
+| [PRD.md](docs/PRD.md)                                 | Product requirements                  |
+| [USER_STORIES.md](docs/USER_STORIES.md)               | User stories + acceptance criteria    |
+| [DOR_CHECKLIST.md](docs/DOR_CHECKLIST.md)             | Definition of Ready                   |
 
 ### Production foundation (Sprint 0.9)
 
-| Doc | Mô tả |
-| --- | ----- |
-| [DEPLOYMENT.md](docs/DEPLOYMENT.md) | Deploy API, mobile, PostgreSQL |
-| [SECURITY.md](docs/SECURITY.md) | Security checklist & plan |
-| [TESTING.md](docs/TESTING.md) | Testing strategy |
-| [RELEASE.md](docs/RELEASE.md) | Release & rollback process |
-| [VERSIONING.md](docs/VERSIONING.md) | Semantic Versioning |
-| [GIT.md](docs/GIT.md) | Branch strategy & git init guide |
-| [CHANGELOG.md](CHANGELOG.md) | Release history |
+| Doc                                 | Mô tả                            |
+| ----------------------------------- | -------------------------------- |
+| [DEPLOYMENT.md](docs/DEPLOYMENT.md) | Deploy API, mobile, PostgreSQL   |
+| [SECURITY.md](docs/SECURITY.md)     | Security checklist & plan        |
+| [TESTING.md](docs/TESTING.md)       | Testing strategy                 |
+| [RELEASE.md](docs/RELEASE.md)       | Release & rollback process       |
+| [VERSIONING.md](docs/VERSIONING.md) | Semantic Versioning              |
+| [GIT.md](docs/GIT.md)               | Branch strategy & git init guide |
+| [CHANGELOG.md](CHANGELOG.md)        | Release history                  |
 
 ---
 
@@ -78,20 +78,20 @@ CaffeApp/
 
 ## Tech stack (2026-06-28)
 
-| Layer | Technology | Version |
-| ----- | ---------- | ------- |
-| Mobile | Expo | ~56.0.12 |
-| Mobile | React Native | 0.85.3 |
-| Mobile | React | 19.2.3 |
-| Mobile | Expo Router | ~56.2.11 |
-| Mobile | TanStack Query | ^5.74 |
-| Mobile | Zustand | ^5.0 |
-| API | NestJS | ^11.0 |
-| API | Prisma | ^6.6 |
-| API | TypeScript | ~5.8 |
-| Database | PostgreSQL | 16 |
-| Monorepo | npm workspaces | — |
-| Shared | TypeScript | ~6.0 (mobile), ~5.8 (api) |
+| Layer    | Technology     | Version                   |
+| -------- | -------------- | ------------------------- |
+| Mobile   | Expo           | ~56.0.12                  |
+| Mobile   | React Native   | 0.85.3                    |
+| Mobile   | React          | 19.2.3                    |
+| Mobile   | Expo Router    | ~56.2.11                  |
+| Mobile   | TanStack Query | ^5.74                     |
+| Mobile   | Zustand        | ^5.0                      |
+| API      | NestJS         | ^11.0                     |
+| API      | Prisma         | ^6.6                      |
+| API      | TypeScript     | ~5.8                      |
+| Database | PostgreSQL     | 16                        |
+| Monorepo | npm workspaces | —                         |
+| Shared   | TypeScript     | ~6.0 (mobile), ~5.8 (api) |
 
 ---
 
@@ -203,9 +203,9 @@ Chi tiết: [docs/CONVENTIONS.md](docs/CONVENTIONS.md)
 
 ## Sprint status
 
-| Sprint         | Trạng thái               |
-| -------------- | ------------------------ |
-| Sprint 0       | ✅ UI shell              |
-| Sprint 0.5     | ✅ FE/BE split           |
-| Enterprise std | ✅ Tooling + conventions |
-| Sprint 1       | 🔄 Auth API (in progress)|
+| Sprint         | Trạng thái                |
+| -------------- | ------------------------- |
+| Sprint 0       | ✅ UI shell               |
+| Sprint 0.5     | ✅ FE/BE split            |
+| Enterprise std | ✅ Tooling + conventions  |
+| Sprint 1       | 🔄 Auth API (in progress) |

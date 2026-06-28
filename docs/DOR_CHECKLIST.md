@@ -9,18 +9,18 @@ Mỗi User Story phải pass 100% checklist này trước khi chuyển sang `In 
 
 Checklist cho toàn dự án trước khi bắt đầu code feature:
 
-| #   | Item                        | Status     | Evidence                                              |
-| --- | --------------------------- | ---------- | ----------------------------------------------------- |
-| G1  | Discovery document approved | ✅ Pass    | [docs/DISCOVERY.md](DISCOVERY.md)                     |
-| G2  | PRD v1.0 approved           | ✅ Pass    | [docs/PRD.md](PRD.md)                                 |
-| G3  | User Stories + AC defined   | ✅ Pass    | [docs/USER_STORIES.md](USER_STORIES.md)               |
-| G4  | Tech stack decided (ADRs)   | ✅ Pass    | [docs/adr/](adr/)                                     |
-| G5  | Architecture documented     | ✅ Pass    | [docs/ARCHITECTURE.md](ARCHITECTURE.md)               |
-| G6  | ERD + API contract          | ✅ Pass    | [docs/api/ERD.md](api/ERD.md), [API_CONTRACT.md](api/API_CONTRACT.md) |
-| G7  | Design system + UI states   | ✅ Pass    | [design/DESIGN_SYSTEM.md](../design/DESIGN_SYSTEM.md) |
-| G8  | Monorepo + CI setup         | ✅ Pass    | [README.md](../README.md), `.github/workflows/ci.yml` |
-| G9  | Navigation shell            | ✅ Pass    | `apps/mobile/src/app/`                                |
-| G10 | PostgreSQL + Prisma setup   | ✅ Pass    | `infra/docker-compose.yml`, migration `initial_schema`, local `.env` |
+| #   | Item                        | Status  | Evidence                                                              |
+| --- | --------------------------- | ------- | --------------------------------------------------------------------- |
+| G1  | Discovery document approved | ✅ Pass | [docs/DISCOVERY.md](DISCOVERY.md)                                     |
+| G2  | PRD v1.0 approved           | ✅ Pass | [docs/PRD.md](PRD.md)                                                 |
+| G3  | User Stories + AC defined   | ✅ Pass | [docs/USER_STORIES.md](USER_STORIES.md)                               |
+| G4  | Tech stack decided (ADRs)   | ✅ Pass | [docs/adr/](adr/)                                                     |
+| G5  | Architecture documented     | ✅ Pass | [docs/ARCHITECTURE.md](ARCHITECTURE.md)                               |
+| G6  | ERD + API contract          | ✅ Pass | [docs/api/ERD.md](api/ERD.md), [API_CONTRACT.md](api/API_CONTRACT.md) |
+| G7  | Design system + UI states   | ✅ Pass | [design/DESIGN_SYSTEM.md](../design/DESIGN_SYSTEM.md)                 |
+| G8  | Monorepo + CI setup         | ✅ Pass | [README.md](../README.md), `.github/workflows/ci.yml`                 |
+| G9  | Navigation shell            | ✅ Pass | `apps/mobile/src/app/`                                                |
+| G10 | PostgreSQL + Prisma setup   | ✅ Pass | `infra/docker-compose.yml`, migration `initial_schema`, local `.env`  |
 
 **Global Gate Result:** ✅ **PASS**
 
@@ -50,16 +50,16 @@ Checklist cho toàn dự án trước khi bắt đầu code feature:
 
 ### US-A01: Đăng nhập
 
-| DoR Item            | Status | Notes                                                        |
-| ------------------- | ------ | ------------------------------------------------------------ |
-| User story clear    | ✅     | US-A01 in USER_STORIES.md                                    |
-| Acceptance criteria | ✅     | Given/When/Then defined                                      |
-| Design mockup       | ✅     | `design/screens/INDEX.md` → `01-dang-nhap.png`               |
+| DoR Item            | Status | Notes                                                               |
+| ------------------- | ------ | ------------------------------------------------------------------- |
+| User story clear    | ✅     | US-A01 in USER_STORIES.md                                           |
+| Acceptance criteria | ✅     | Given/When/Then defined                                             |
+| Design mockup       | ✅     | `design/screens/INDEX.md` → `01-dang-nhap.png`                      |
 | API contract        | ✅     | `POST /api/v1/auth/login` in [API_CONTRACT.md](api/API_CONTRACT.md) |
-| Dependencies        | ✅     | PostgreSQL + NestJS API running                              |
-| Estimate            | ✅     | 3 points                                                     |
-| Open questions      | ✅     | None — email vs phone: support both in one field             |
-| Test scenarios      | ✅     | Valid login, invalid creds, empty fields, network error      |
+| Dependencies        | ✅     | PostgreSQL + NestJS API running                                     |
+| Estimate            | ✅     | 3 points                                                            |
+| Open questions      | ✅     | None — email vs phone: support both in one field                    |
+| Test scenarios      | ✅     | Valid login, invalid creds, empty fields, network error             |
 
 **Verdict:** ✅ Ready
 

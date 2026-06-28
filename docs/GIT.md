@@ -33,13 +33,13 @@ git push -u origin develop
 
 ## 2. Branch strategy (Git Flow lite)
 
-| Branch | Mục đích | Merge vào |
-| ------ | -------- | --------- |
-| `main` | Production-ready releases | — |
-| `develop` | Integration branch hàng ngày | `main` (via release) |
-| `feature/*` | User story / task | `develop` |
-| `release/*` | Stabilize trước release | `main` + `develop` |
-| `hotfix/*` | Sửa khẩn production | `main` + `develop` |
+| Branch      | Mục đích                     | Merge vào            |
+| ----------- | ---------------------------- | -------------------- |
+| `main`      | Production-ready releases    | —                    |
+| `develop`   | Integration branch hàng ngày | `main` (via release) |
+| `feature/*` | User story / task            | `develop`            |
+| `release/*` | Stabilize trước release      | `main` + `develop`   |
+| `hotfix/*`  | Sửa khẩn production          | `main` + `develop`   |
 
 ### Naming convention
 
@@ -95,11 +95,11 @@ git tag -a v0.2.0 -m "Release 0.2.0 — Auth flow"
 git push origin v0.2.0
 ```
 
-| Tag pattern | Ý nghĩa |
-| ----------- | ------- |
-| `v0.1.0` | MVP internal alpha |
-| `v0.2.0` | Sprint 1 complete (Auth) |
-| `v1.0.0` | Pilot UAT production |
+| Tag pattern | Ý nghĩa                  |
+| ----------- | ------------------------ |
+| `v0.1.0`    | MVP internal alpha       |
+| `v0.2.0`    | Sprint 1 complete (Auth) |
+| `v1.0.0`    | Pilot UAT production     |
 
 Pre-release (optional): `v0.2.0-rc.1`
 
@@ -107,10 +107,10 @@ Pre-release (optional): `v0.2.0-rc.1`
 
 ## 6. Protected branches (khuyến nghị)
 
-| Branch | Rule |
-| ------ | ---- |
-| `main` | Require PR, 1+ approval, CI pass, no direct push |
-| `develop` | Require PR, CI pass |
+| Branch    | Rule                                             |
+| --------- | ------------------------------------------------ |
+| `main`    | Require PR, 1+ approval, CI pass, no direct push |
+| `develop` | Require PR, CI pass                              |
 
 ---
 

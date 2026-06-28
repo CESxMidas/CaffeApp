@@ -9,15 +9,15 @@
 
 ### Trạng thái implementation (2026-06-28)
 
-| Area | Doc | Code hiện tại |
-| ---- | --- | ------------- |
-| Route files (`src/app/`) | §2, §3 | ✅ 18 routes — khớp |
-| `QueryProvider` | §2 | ✅ Mounted ở root `_layout.tsx` |
-| `AuthProvider`, guards | §3 | ⏳ Sprint 1 — chưa implement |
-| Feature hooks / use-cases | §4 | ⏳ Empty stubs |
-| Services (`shared/lib/api/`) | §6 | ⚠️ 4/10 services (auth, order, product, table) |
-| SecureStore | §6 | ⏳ Package installed; adapter chưa wire |
-| Barista/Manager layout | §2 | ⚠️ Code dùng **Tabs**; doc mô tả Stack — cả hai hợp lệ MVP |
+| Area                         | Doc    | Code hiện tại                                              |
+| ---------------------------- | ------ | ---------------------------------------------------------- |
+| Route files (`src/app/`)     | §2, §3 | ✅ 18 routes — khớp                                        |
+| `QueryProvider`              | §2     | ✅ Mounted ở root `_layout.tsx`                            |
+| `AuthProvider`, guards       | §3     | ⏳ Sprint 1 — chưa implement                               |
+| Feature hooks / use-cases    | §4     | ⏳ Empty stubs                                             |
+| Services (`shared/lib/api/`) | §6     | ⚠️ 4/10 services (auth, order, product, table)             |
+| SecureStore                  | §6     | ⏳ Package installed; adapter chưa wire                    |
+| Barista/Manager layout       | §2     | ⚠️ Code dùng **Tabs**; doc mô tả Stack — cả hai hợp lệ MVP |
 
 ---
 
@@ -282,14 +282,14 @@ flowchart TD
 
 ### Guard strategy (per layout) — Sprint 1 target
 
-| Layout                  | Guard                              | Hành vi                               | Status |
-| ----------------------- | ---------------------------------- | ------------------------------------- | ------ |
+| Layout                  | Guard                              | Hành vi                               | Status                         |
+| ----------------------- | ---------------------------------- | ------------------------------------- | ------------------------------ |
 | `app/_layout.tsx`       | —                                  | Mount `QueryProvider`, `AuthProvider` | Partial (`QueryProvider` only) |
-| `app/index.tsx`         | Session redirect                   | `Redirect` theo `activeRole`          | ✅ Mock redirect |
-| `(auth)/_layout.tsx`    | Guest only                         | Authenticated → redirect `index`      | ⏳ Sprint 1 |
-| `(cashier)/_layout.tsx` | `RoleGuard(['cashier','manager'])` | Sai role → `index`                    | ⏳ Sprint 1 |
-| `(barista)/_layout.tsx` | `RoleGuard(['barista','manager'])` | Sai role → `index`                    | ⏳ Sprint 1 |
-| `(manager)/_layout.tsx` | `RoleGuard(['manager'])`           | Sai role → `index`                    | ⏳ Sprint 1 |
+| `app/index.tsx`         | Session redirect                   | `Redirect` theo `activeRole`          | ✅ Mock redirect               |
+| `(auth)/_layout.tsx`    | Guest only                         | Authenticated → redirect `index`      | ⏳ Sprint 1                    |
+| `(cashier)/_layout.tsx` | `RoleGuard(['cashier','manager'])` | Sai role → `index`                    | ⏳ Sprint 1                    |
+| `(barista)/_layout.tsx` | `RoleGuard(['barista','manager'])` | Sai role → `index`                    | ⏳ Sprint 1                    |
+| `(manager)/_layout.tsx` | `RoleGuard(['manager'])`           | Sai role → `index`                    | ⏳ Sprint 1                    |
 
 > Mobile `Role` type: `'cashier' | 'barista' | 'manager'` (lowercase UX).  
 > API `StaffRole`: `OWNER | MANAGER | CASHIER | BARISTA`. Mapping: `@caffeapp/shared/domain`.

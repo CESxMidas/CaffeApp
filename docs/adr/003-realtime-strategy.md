@@ -19,12 +19,12 @@ Sử dụng **Supabase Realtime** subscribe `postgres_changes` trên bảng `ord
 
 ## Replacement (current direction)
 
-| Concern | Current approach |
-| ------- | ---------------- |
+| Concern   | Current approach                                 |
+| --------- | ------------------------------------------------ |
 | Transport | NestJS WebSocket Gateway hoặc Server-Sent Events |
-| Fallback | TanStack Query `refetchInterval` khi disconnect |
-| Filter | `branchId` + `status IN (PENDING, MAKING)` |
-| Sprint | Sprint 4 (Barista Real-time) |
+| Fallback  | TanStack Query `refetchInterval` khi disconnect  |
+| Filter    | `branchId` + `status IN (PENDING, MAKING)`       |
+| Sprint    | Sprint 4 (Barista Real-time)                     |
 
 ## Alternatives Considered (historical)
 

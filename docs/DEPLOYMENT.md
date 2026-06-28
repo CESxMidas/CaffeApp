@@ -7,24 +7,24 @@
 
 ## 1. Environments
 
-| Environment | Mobile | API | Database | Mục đích |
-| ----------- | ------ | --- | -------- | -------- |
-| **Development** | Expo Go / emulator | `localhost:3000` | Docker local | Dev hàng ngày |
-| **QA** | Internal build (EAS) | Staging URL | Staging PG | Test story AC |
-| **Staging** | Internal build | Pre-prod API | Staging PG (copy prod schema) | UAT rehearsal |
-| **Production** | EAS production build | Prod API | Managed PostgreSQL | Pilot quán |
+| Environment     | Mobile               | API              | Database                      | Mục đích      |
+| --------------- | -------------------- | ---------------- | ----------------------------- | ------------- |
+| **Development** | Expo Go / emulator   | `localhost:3000` | Docker local                  | Dev hàng ngày |
+| **QA**          | Internal build (EAS) | Staging URL      | Staging PG                    | Test story AC |
+| **Staging**     | Internal build       | Pre-prod API     | Staging PG (copy prod schema) | UAT rehearsal |
+| **Production**  | EAS production build | Prod API         | Managed PostgreSQL            | Pilot quán    |
 
 ---
 
 ## 2. Prerequisites
 
-| Component | Requirement |
-| --------- | ----------- |
-| Node.js | ≥ 20 |
-| npm | ≥ 10 |
-| PostgreSQL | 16+ |
-| Docker | Optional (local dev) |
-| Expo EAS | Post-Sprint 4 (app store / internal distribution) |
+| Component  | Requirement                                       |
+| ---------- | ------------------------------------------------- |
+| Node.js    | ≥ 20                                              |
+| npm        | ≥ 10                                              |
+| PostgreSQL | 16+                                               |
+| Docker     | Optional (local dev)                              |
+| Expo EAS   | Post-Sprint 4 (app store / internal distribution) |
 
 ---
 
@@ -73,15 +73,15 @@ NODE_ENV=production node dist/src/main
 
 ### Environment variables (production)
 
-| Variable | Required | Notes |
-| -------- | -------- | ----- |
-| `DATABASE_URL` | ✅ | Managed PostgreSQL connection string |
-| `JWT_SECRET` | ✅ | Strong random secret (≥ 32 chars) |
-| `JWT_EXPIRES_IN` | ✅ | e.g. `15m` |
-| `JWT_REFRESH_EXPIRES_IN` | ✅ | e.g. `7d` |
-| `CORS_ORIGINS` | ✅ | Production mobile/web origins only |
-| `PORT` | Optional | Default `3000` |
-| `NODE_ENV` | ✅ | `production` |
+| Variable                 | Required | Notes                                |
+| ------------------------ | -------- | ------------------------------------ |
+| `DATABASE_URL`           | ✅       | Managed PostgreSQL connection string |
+| `JWT_SECRET`             | ✅       | Strong random secret (≥ 32 chars)    |
+| `JWT_EXPIRES_IN`         | ✅       | e.g. `15m`                           |
+| `JWT_REFRESH_EXPIRES_IN` | ✅       | e.g. `7d`                            |
+| `CORS_ORIGINS`           | ✅       | Production mobile/web origins only   |
+| `PORT`                   | Optional | Default `3000`                       |
+| `NODE_ENV`               | ✅       | `production`                         |
 
 ### Database migrate (production)
 
@@ -93,11 +93,11 @@ npm run db:migrate:deploy --workspace=@caffeapp/api
 
 ### Recommended hosting
 
-| Option | Fit |
-| ------ | --- |
-| Docker container + orchestrator (K8s, ECS, Railway, Render) | ✅ Recommended |
-| VM + systemd + reverse proxy (Nginx) | ✅ Acceptable |
-| Serverless | ⚠️ Not ideal for NestJS long-running |
+| Option                                                      | Fit                                  |
+| ----------------------------------------------------------- | ------------------------------------ |
+| Docker container + orchestrator (K8s, ECS, Railway, Render) | ✅ Recommended                       |
+| VM + systemd + reverse proxy (Nginx)                        | ✅ Acceptable                        |
+| Serverless                                                  | ⚠️ Not ideal for NestJS long-running |
 
 ### Reverse proxy
 
@@ -126,11 +126,11 @@ eas build --platform android --profile preview
 eas build --platform ios --profile preview
 ```
 
-| Profile | `EXPO_PUBLIC_API_URL` | Distribution |
-| ------- | ----------------------- | ------------ |
-| `development` | Dev machine / staging | Internal |
-| `preview` | Staging API | Internal testers |
-| `production` | Production API | Pilot store / MDM |
+| Profile       | `EXPO_PUBLIC_API_URL` | Distribution      |
+| ------------- | --------------------- | ----------------- |
+| `development` | Dev machine / staging | Internal          |
+| `preview`     | Staging API           | Internal testers  |
+| `production`  | Production API        | Pilot store / MDM |
 
 OTA updates (post-MVP): Expo EAS Update cho JS bundle — không thay native modules.
 
@@ -148,13 +148,13 @@ Connection: `postgresql://postgres:postgres@localhost:5432/caffeapp`
 
 ### Staging / Production
 
-| Concern | Recommendation |
-| ------- | -------------- |
-| Version | PostgreSQL 16 |
-| Backups | Daily automated + PITR |
-| Connection | Pool via Prisma (default) |
-| Migrations | CI/CD step: `db:migrate:deploy` |
-| Secrets | Vault / cloud secret manager — không trong repo |
+| Concern    | Recommendation                                  |
+| ---------- | ----------------------------------------------- |
+| Version    | PostgreSQL 16                                   |
+| Backups    | Daily automated + PITR                          |
+| Connection | Pool via Prisma (default)                       |
+| Migrations | CI/CD step: `db:migrate:deploy`                 |
+| Secrets    | Vault / cloud secret manager — không trong repo |
 
 ---
 
@@ -162,21 +162,21 @@ Connection: `postgresql://postgres:postgres@localhost:5432/caffeapp`
 
 ### Current (`.github/workflows/ci.yml`)
 
-| Job | Command |
-| --- | ------- |
-| typecheck | `npm run typecheck` |
-| lint | `npm run lint` |
-| format | `npm run format:check` |
-| api-build | `npm run api:build` |
+| Job       | Command                |
+| --------- | ---------------------- |
+| typecheck | `npm run typecheck`    |
+| lint      | `npm run lint`         |
+| format    | `npm run format:check` |
+| api-build | `npm run api:build`    |
 
 ### Target (Sprint 2+)
 
-| Stage | Action |
-| ----- | ------ |
-| PR | `npm run validate` + api-build |
-| Merge develop | Deploy staging API |
-| Release tag | Deploy production API + EAS build |
-| Post-deploy | Smoke test `/api/v1/health` |
+| Stage         | Action                            |
+| ------------- | --------------------------------- |
+| PR            | `npm run validate` + api-build    |
+| Merge develop | Deploy staging API                |
+| Release tag   | Deploy production API + EAS build |
+| Post-deploy   | Smoke test `/api/v1/health`       |
 
 ---
 

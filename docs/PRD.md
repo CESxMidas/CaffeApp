@@ -61,9 +61,9 @@ stateDiagram-v2
 
 ### State Machine — Bàn
 
-| Status        | Mô tả    | Trigger                             |
-| ------------- | -------- | ----------------------------------- |
-| `EMPTY`       | Trống    | Không có đơn active                 |
+| Status        | Mô tả    | Trigger                            |
+| ------------- | -------- | ---------------------------------- |
+| `EMPTY`       | Trống    | Không có đơn active                |
 | `OCCUPIED`    | Có khách | Đơn PENDING/MAKING/READY chưa PAID |
 | `MAINTENANCE` | Bảo trì  | MANAGER/OWNER đặt thủ công         |
 
@@ -100,7 +100,7 @@ Thanh toán được theo dõi qua bảng `payments` và `orders.status = PAID`.
 | FR-B03 | Menu theo danh mục (Cà phê, Trà, Bánh)               | Must     |
 | FR-B04 | Tùy chỉnh món: size, đường, đá, ghi chú              | Must     |
 | FR-B05 | Giỏ hàng: sửa SL, xóa món, ghi chú đơn               | Must     |
-| FR-B06 | Lưu nháp đơn (cart local, chưa gửi bếp)               | Should   |
+| FR-B06 | Lưu nháp đơn (cart local, chưa gửi bếp)              | Should   |
 | FR-B07 | Gửi vào bếp → status PENDING                         | Must     |
 | FR-B08 | Thanh toán tiền mặt (nhập tiền khách đưa, tính thừa) | Must     |
 | FR-B09 | Thanh toán chuyển khoản (QR + xác nhận)              | Must     |
@@ -125,7 +125,7 @@ Thanh toán được theo dõi qua bảng `payments` và `orders.status = PAID`.
 | FR-C01 | Danh sách đơn chờ, sắp xếp theo thời gian | Must     |
 | FR-C02 | Đơn ưu tiên (chờ > 5 phút) highlight      | Should   |
 | FR-C03 | Xem chi tiết món + ghi chú tùy chỉnh      | Must     |
-| FR-C04 | Bắt đầu pha → MAKING                                   | Must     |
+| FR-C04 | Bắt đầu pha → MAKING                      | Must     |
 | FR-C05 | Đánh dấu từng món hoàn thành              | Must     |
 | FR-C06 | Hoàn thành đơn → READY, notify thu ngân   | Must     |
 

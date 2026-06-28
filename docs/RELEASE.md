@@ -12,30 +12,30 @@ Development → QA → Staging → Production
   feature/*   develop  release/*    main (tagged)
 ```
 
-| Channel | Branch | Audience | API | Mobile build |
-| ------- | ------ | -------- | --- | ------------ |
-| **Development** | `feature/*` | Developers | Local / dev | Expo Go |
-| **QA** | `develop` | QA team | Dev/staging | EAS preview (internal) |
-| **Staging** | `release/*` | PO, pilot prep | Staging | EAS preview |
-| **Production** | `main` + tag | Pilot quán | Production | EAS production |
+| Channel         | Branch       | Audience       | API         | Mobile build           |
+| --------------- | ------------ | -------------- | ----------- | ---------------------- |
+| **Development** | `feature/*`  | Developers     | Local / dev | Expo Go                |
+| **QA**          | `develop`    | QA team        | Dev/staging | EAS preview (internal) |
+| **Staging**     | `release/*`  | PO, pilot prep | Staging     | EAS preview            |
+| **Production**  | `main` + tag | Pilot quán     | Production  | EAS production         |
 
 ---
 
 ## 2. Release cadence
 
-| Type | Frequency | Version bump |
-| ---- | --------- | ------------ |
-| Sprint release | ~2 weeks | MINOR (`0.1.0` → `0.2.0`) |
-| Hotfix | As needed | PATCH (`0.2.0` → `0.2.1`) |
-| Breaking change | Rare (pre-1.0) | MAJOR when stable |
+| Type            | Frequency      | Version bump              |
+| --------------- | -------------- | ------------------------- |
+| Sprint release  | ~2 weeks       | MINOR (`0.1.0` → `0.2.0`) |
+| Hotfix          | As needed      | PATCH (`0.2.0` → `0.2.1`) |
+| Breaking change | Rare (pre-1.0) | MAJOR when stable         |
 
 Milestone mapping: [SPRINT_PLAN.md](SPRINT_PLAN.md)
 
-| Milestone | Target version |
-| --------- | -------------- |
-| M0 Foundation | `v0.9.0` |
-| M1 Auth (Sprint 1) | `v0.2.0` |
-| M4 Pilot UAT (Sprint 6) | `v1.0.0` |
+| Milestone               | Target version |
+| ----------------------- | -------------- |
+| M0 Foundation           | `v0.9.0`       |
+| M1 Auth (Sprint 1)      | `v0.2.0`       |
+| M4 Pilot UAT (Sprint 6) | `v1.0.0`       |
 
 ---
 
@@ -55,11 +55,11 @@ git checkout -b release/0.2.0
 
 ### Step 2 — Staging deploy
 
-| Component | Action |
-| --------- | ------ |
-| API | Deploy build to staging + `db:migrate:deploy` |
-| Mobile | EAS build `preview` profile → internal testers |
-| Smoke | Health check + critical path manual |
+| Component | Action                                         |
+| --------- | ---------------------------------------------- |
+| API       | Deploy build to staging + `db:migrate:deploy`  |
+| Mobile    | EAS build `preview` profile → internal testers |
+| Smoke     | Health check + critical path manual            |
 
 ### Step 3 — Production release
 
@@ -74,11 +74,11 @@ git merge release/0.2.0
 git push origin develop
 ```
 
-| Component | Action |
-| --------- | ------ |
-| API | Deploy to production |
-| DB | `db:migrate:deploy` (backup trước) |
-| Mobile | EAS production build |
+| Component | Action                                 |
+| --------- | -------------------------------------- |
+| API       | Deploy to production                   |
+| DB        | `db:migrate:deploy` (backup trước)     |
+| Mobile    | EAS production build                   |
 | Changelog | Update [CHANGELOG.md](../CHANGELOG.md) |
 
 ### Step 4 — Post-release
@@ -104,11 +104,11 @@ git push origin develop
 
 ### Database rollback
 
-| Scenario | Action |
-| -------- | ------ |
-| Migration chưa deploy prod | Không áp dụng |
-| Migration đã deploy, lỗi logic | Forward migration fix |
-| Data corruption | Restore từ backup PITR |
+| Scenario                       | Action                 |
+| ------------------------------ | ---------------------- |
+| Migration chưa deploy prod     | Không áp dụng          |
+| Migration đã deploy, lỗi logic | Forward migration fix  |
+| Data corruption                | Restore từ backup PITR |
 
 ---
 

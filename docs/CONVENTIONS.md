@@ -85,11 +85,11 @@ import { something } from '../../../common/...'; // deep relative in API
 
 ## 5. Scripts (root)
 
-| Command             | Description               |
-| ------------------- | ------------------------- |
-| `npm run validate`  | format:check + lint + typecheck |
-| `npm run format`    | Prettier write all        |
-| `npm run lint`      | ESLint all workspaces     |
+| Command               | Description                            |
+| --------------------- | -------------------------------------- |
+| `npm run validate`    | format:check + lint + typecheck        |
+| `npm run format`      | Prettier write all                     |
+| `npm run lint`        | ESLint all workspaces                  |
 | `npm run db:generate` | Prisma generate (root → api workspace) |
 | `npm run db:migrate`  | Prisma migrate dev                     |
 | `npm run db:seed`     | Seed database                          |

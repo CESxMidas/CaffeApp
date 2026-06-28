@@ -8,11 +8,11 @@
 
 Format: **`MAJOR.MINOR.PATCH`** (ví dụ `0.2.0`)
 
-| Bump | Khi nào | Ví dụ |
-| ---- | ------- | ----- |
+| Bump      | Khi nào                                            | Ví dụ             |
+| --------- | -------------------------------------------------- | ----------------- |
 | **MAJOR** | Breaking API/contract, migration không tương thích | `1.0.0` → `2.0.0` |
-| **MINOR** | Feature mới, backward compatible | `0.1.0` → `0.2.0` |
-| **PATCH** | Bug fix, docs-only release tag | `0.2.0` → `0.2.1` |
+| **MINOR** | Feature mới, backward compatible                   | `0.1.0` → `0.2.0` |
+| **PATCH** | Bug fix, docs-only release tag                     | `0.2.0` → `0.2.1` |
 
 Pre-release: `0.2.0-rc.1`, `0.2.0-beta.1`
 
@@ -20,12 +20,12 @@ Pre-release: `0.2.0-rc.1`, `0.2.0-beta.1`
 
 ## 2. Trạng thái hiện tại
 
-| Package | `package.json` version | Ghi chú |
-| ------- | ---------------------- | ------- |
-| Root `caffeapp` | `1.0.0-mvp` | Chuyển sang SemVer tại release đầu tiên |
-| `@caffeapp/api` | `1.0.0-mvp` | Lockstep với root (monorepo) |
-| `@caffeapp/mobile` | `1.0.0-mvp` | Lockstep với root |
-| `@caffeapp/shared` | `1.0.0-mvp` | Lockstep với root |
+| Package            | `package.json` version | Ghi chú                                 |
+| ------------------ | ---------------------- | --------------------------------------- |
+| Root `caffeapp`    | `1.0.0-mvp`            | Chuyển sang SemVer tại release đầu tiên |
+| `@caffeapp/api`    | `1.0.0-mvp`            | Lockstep với root (monorepo)            |
+| `@caffeapp/mobile` | `1.0.0-mvp`            | Lockstep với root                       |
+| `@caffeapp/shared` | `1.0.0-mvp`            | Lockstep với root                       |
 
 **Khuyến nghị Sprint 1 kickoff:** đặt version **`0.1.0`** (foundation) hoặc **`0.2.0`** khi Auth E2E xong.
 
@@ -52,12 +52,12 @@ git tag v0.2.0
 
 ## 4. Commit ↔ version mapping
 
-| Commit type | Version impact |
-| ----------- | -------------- |
-| `feat:` | MINOR bump |
-| `fix:` | PATCH bump |
-| `feat!:` hoặc `BREAKING CHANGE:` | MAJOR bump |
-| `docs:`, `chore:`, `ci:` | Không bump (trừ khi release housekeeping) |
+| Commit type                      | Version impact                            |
+| -------------------------------- | ----------------------------------------- |
+| `feat:`                          | MINOR bump                                |
+| `fix:`                           | PATCH bump                                |
+| `feat!:` hoặc `BREAKING CHANGE:` | MAJOR bump                                |
+| `docs:`, `chore:`, `ci:`         | Không bump (trừ khi release housekeeping) |
 
 ---
 

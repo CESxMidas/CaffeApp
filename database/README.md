@@ -4,13 +4,13 @@ PostgreSQL 16 is the **single source of truth** for CaffeApp POS data.
 
 ## Schema management
 
-| Artifact | Path |
-| -------- | ---- |
-| Prisma schema | `apps/api/prisma/schema.prisma` |
-| Migrations | `apps/api/prisma/migrations/` |
+| Artifact          | Path                            |
+| ----------------- | ------------------------------- |
+| Prisma schema     | `apps/api/prisma/schema.prisma` |
+| Migrations        | `apps/api/prisma/migrations/`   |
 | Initial migration | `20260628032842_initial_schema` |
-| Seed | `apps/api/prisma/seed.ts` |
-| ERD documentation | `docs/api/ERD.md` |
+| Seed              | `apps/api/prisma/seed.ts`       |
+| ERD documentation | `docs/api/ERD.md`               |
 
 ## Legacy Supabase SQL
 

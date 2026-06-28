@@ -24,12 +24,12 @@ Stack: Jest (NestJS default) · future Detox/Maestro (mobile E2E)
 
 ### Unit tests
 
-| Target | Tool | Location (planned) |
-| ------ | ---- | ------------------ |
-| API services | Jest | `apps/api/src/**/*.spec.ts` |
-| Shared utils | Jest/Vitest | `packages/shared/**/*.spec.ts` |
-| Mobile hooks | Jest + RTL | `apps/mobile/src/**/*.test.ts` |
-| Use-cases | Jest | `apps/mobile/src/features/*/use-cases/*.test.ts` |
+| Target       | Tool        | Location (planned)                               |
+| ------------ | ----------- | ------------------------------------------------ |
+| API services | Jest        | `apps/api/src/**/*.spec.ts`                      |
+| Shared utils | Jest/Vitest | `packages/shared/**/*.spec.ts`                   |
+| Mobile hooks | Jest + RTL  | `apps/mobile/src/**/*.test.ts`                   |
+| Use-cases    | Jest        | `apps/mobile/src/features/*/use-cases/*.test.ts` |
 
 **When:** Sprint 1+ — auth service, session store, DTO mappers
 
@@ -42,11 +42,11 @@ npm run test --workspace=@caffeapp/mobile
 
 ### Integration tests
 
-| Target | Scope |
-| ------ | ----- |
-| Auth flow | `POST /auth/login` → JWT → `GET /auth/me` |
-| Orders | Create order → update status → payment |
-| Branch isolation | User A cannot read Branch B data |
+| Target           | Scope                                     |
+| ---------------- | ----------------------------------------- |
+| Auth flow        | `POST /auth/login` → JWT → `GET /auth/me` |
+| Orders           | Create order → update status → payment    |
+| Branch isolation | User A cannot read Branch B data          |
 
 **Setup:**
 
@@ -58,10 +58,10 @@ npm run test --workspace=@caffeapp/mobile
 
 ### E2E tests
 
-| Target | Tool options |
-| ------ | ------------ |
-| Mobile flows | Maestro / Detox |
-| API smoke | supertest / Postman collection |
+| Target       | Tool options                   |
+| ------------ | ------------------------------ |
+| Mobile flows | Maestro / Detox                |
+| API smoke    | supertest / Postman collection |
 
 **Critical paths:**
 
@@ -73,11 +73,11 @@ npm run test --workspace=@caffeapp/mobile
 
 ### Manual tests
 
-| When | Who |
-| ---- | --- |
-| Every PR with UI | Developer |
-| Sprint review | QA + PO |
-| UAT | Pilot quán (Sprint 6) |
+| When             | Who                   |
+| ---------------- | --------------------- |
+| Every PR with UI | Developer             |
+| Sprint review    | QA + PO               |
+| UAT              | Pilot quán (Sprint 6) |
 
 Checklist: User Story **Given/When/Then** in [USER_STORIES.md](USER_STORIES.md)
 
@@ -94,10 +94,10 @@ Sprint 1+: thêm smoke login với test account.
 
 ### Regression tests
 
-| Trigger | Scope |
-| ------- | ----- |
-| Pre-release | Full sprint test suite |
-| Hotfix | Affected module + smoke |
+| Trigger     | Scope                   |
+| ----------- | ----------------------- |
+| Pre-release | Full sprint test suite  |
+| Hotfix      | Affected module + smoke |
 
 Automated regression: CI chạy unit + integration trên mỗi PR.
 
@@ -105,12 +105,12 @@ Automated regression: CI chạy unit + integration trên mỗi PR.
 
 ## 3. Coverage targets (goals)
 
-| Layer | Target | Sprint |
-| ----- | ------ | ------ |
-| API services (critical) | ≥ 80% | Sprint 2 |
-| Shared contracts/utils | ≥ 70% | Sprint 1 |
-| Mobile hooks | ≥ 60% | Sprint 2 |
-| E2E critical paths | 100% paths | Sprint 4 |
+| Layer                   | Target     | Sprint   |
+| ----------------------- | ---------- | -------- |
+| API services (critical) | ≥ 80%      | Sprint 2 |
+| Shared contracts/utils  | ≥ 70%      | Sprint 1 |
+| Mobile hooks            | ≥ 60%      | Sprint 2 |
+| E2E critical paths      | 100% paths | Sprint 4 |
 
 Hiện tại: **0%** — placeholders in `package.json` test scripts.
 
@@ -118,16 +118,16 @@ Hiện tại: **0%** — placeholders in `package.json` test scripts.
 
 ## 4. Test data
 
-| Source | Use |
-| ------ | --- |
-| `prisma/seed.ts` | Dev + integration baseline |
-| Factory helpers (planned) | `test/factories/` Sprint 1+ |
-| Không dùng production data | Ever |
+| Source                     | Use                         |
+| -------------------------- | --------------------------- |
+| `prisma/seed.ts`           | Dev + integration baseline  |
+| Factory helpers (planned)  | `test/factories/` Sprint 1+ |
+| Không dùng production data | Ever                        |
 
 Test accounts (planned Sprint 1 seed):
 
-| Email | Role | Password |
-| ----- | ---- | -------- |
+| Email               | Role    | Password   |
+| ------------------- | ------- | ---------- |
 | `cashier@caffe.app` | CASHIER | (dev only) |
 | `barista@caffe.app` | BARISTA | (dev only) |
 | `manager@caffe.app` | MANAGER | (dev only) |

@@ -180,22 +180,22 @@ erDiagram
 
 ### `StaffRole`
 
-| Value | Mô tả |
-| ----- | ----- |
-| `OWNER` | Chủ quán — toàn quyền |
-| `MANAGER` | Quản lý chi nhánh |
-| `CASHIER` | Thu ngân |
-| `BARISTA` | Barista |
+| Value     | Mô tả                 |
+| --------- | --------------------- |
+| `OWNER`   | Chủ quán — toàn quyền |
+| `MANAGER` | Quản lý chi nhánh     |
+| `CASHIER` | Thu ngân              |
+| `BARISTA` | Barista               |
 
 ### `OrderStatus`
 
-| Value | Mô tả |
-| ----- | ----- |
-| `PENDING` | Đã gửi bếp, chờ pha |
-| `MAKING` | Barista đang pha |
-| `READY` | Sẵn sàng giao / thanh toán |
-| `PAID` | Đã thanh toán |
-| `CANCELLED` | Đã hủy |
+| Value       | Mô tả                      |
+| ----------- | -------------------------- |
+| `PENDING`   | Đã gửi bếp, chờ pha        |
+| `MAKING`    | Barista đang pha           |
+| `READY`     | Sẵn sàng giao / thanh toán |
+| `PAID`      | Đã thanh toán              |
+| `CANCELLED` | Đã hủy                     |
 
 Flow: `PENDING → MAKING → READY → PAID` (hoặc `CANCELLED` trước `PAID`).
 
@@ -219,17 +219,17 @@ Flow: `PENDING → MAKING → READY → PAID` (hoặc `CANCELLED` trước `PAID
 
 ## Indexes (Prisma)
 
-| Model | Index |
-| ----- | ----- |
-| `staff` | `(branch_id, role)` |
-| `tables` | `(branch_id, status)`, unique `(branch_id, code)` |
-| `products` | `(branch_id, category_id)` |
-| `product_categories` | unique `(branch_id, slug)` |
-| `shifts` | `(branch_id, status)` |
-| `orders` | `(branch_id, status)`, `(created_at)`, unique `(branch_id, order_number)` |
-| `order_items` | `(order_id)` |
-| `payments` | `(order_id)` |
-| `audit_logs` | `(entity_type, entity_id)`, `(branch_id, created_at)` |
+| Model                | Index                                                                     |
+| -------------------- | ------------------------------------------------------------------------- |
+| `staff`              | `(branch_id, role)`                                                       |
+| `tables`             | `(branch_id, status)`, unique `(branch_id, code)`                         |
+| `products`           | `(branch_id, category_id)`                                                |
+| `product_categories` | unique `(branch_id, slug)`                                                |
+| `shifts`             | `(branch_id, status)`                                                     |
+| `orders`             | `(branch_id, status)`, `(created_at)`, unique `(branch_id, order_number)` |
+| `order_items`        | `(order_id)`                                                              |
+| `payments`           | `(order_id)`                                                              |
+| `audit_logs`         | `(entity_type, entity_id)`, `(branch_id, created_at)`                     |
 
 ---
 
@@ -247,8 +247,8 @@ Flow: `PENDING → MAKING → READY → PAID` (hoặc `CANCELLED` trước `PAID
 
 ## Migrations
 
-| Migration | Mô tả |
-| --------- | ----- |
+| Migration                       | Mô tả                               |
+| ------------------------------- | ----------------------------------- |
 | `20260628032842_initial_schema` | Schema ban đầu — 11 models, 6 enums |
 
 Chạy: `npm run db:migrate` (từ repo root).
@@ -267,8 +267,8 @@ Seed mở rộng (staff, menu, bàn) — Sprint 1+.
 
 ## Related documents
 
-| Doc | Content |
-| --- | ------- |
-| [API_CONTRACT.md](API_CONTRACT.md) | REST endpoints + DTOs |
-| [database/README.md](../../database/README.md) | Commands + business rules |
-| [schema.prisma](../../apps/api/prisma/schema.prisma) | Prisma source of truth |
+| Doc                                                  | Content                   |
+| ---------------------------------------------------- | ------------------------- |
+| [API_CONTRACT.md](API_CONTRACT.md)                   | REST endpoints + DTOs     |
+| [database/README.md](../../database/README.md)       | Commands + business rules |
+| [schema.prisma](../../apps/api/prisma/schema.prisma) | Prisma source of truth    |

@@ -10,10 +10,10 @@
 
 ### Trạng thái implementation (2026-06-28)
 
-| Endpoint | Status | Ghi chú |
-| -------- | ------ | ------- |
-| `GET /health` | ✅ Implemented | Response **không** bọc `{ data }` — trả raw `{ status, service, timestamp }` |
-| Tất cả endpoint khác | 📋 Design only | Module shells tại `apps/api/src/modules/` |
+| Endpoint             | Status         | Ghi chú                                                                      |
+| -------------------- | -------------- | ---------------------------------------------------------------------------- |
+| `GET /health`        | ✅ Implemented | Response **không** bọc `{ data }` — trả raw `{ status, service, timestamp }` |
+| Tất cả endpoint khác | 📋 Design only | Module shells tại `apps/api/src/modules/`                                    |
 
 OpenAPI machine-readable: **chưa generate**. Archive Supabase: [docs/legacy/openapi-supabase.yaml](../legacy/openapi-supabase.yaml).
 
@@ -103,11 +103,11 @@ PENDING → MAKING → READY → PAID
 
 ## 1.7 Health check
 
-|            |                         |
-| ---------- | ----------------------- |
-| **Method** | `GET`                   |
-| **URL**    | `/health`               |
-| **Auth**   | `Public`                |
+|            |           |
+| ---------- | --------- |
+| **Method** | `GET`     |
+| **URL**    | `/health` |
+| **Auth**   | `Public`  |
 
 **Response `200` (implemented — no envelope):**
 
@@ -125,16 +125,16 @@ PENDING → MAKING → READY → PAID
 
 ### 1.8.1 Danh sách chi nhánh
 
-|            |                              |
-| ---------- | ---------------------------- |
-| **Method** | `GET`                        |
-| **URL**    | `/branches`                  |
+|            |                                  |
+| ---------- | -------------------------------- |
+| **Method** | `GET`                            |
+| **URL**    | `/branches`                      |
 | **DTO**    | `BranchDto[]` (trong `{ data }`) |
 
 **Query params:**
 
-| Param      | Type    | Mô tả                          |
-| ---------- | ------- | ------------------------------ |
+| Param      | Type    | Mô tả                               |
+| ---------- | ------- | ----------------------------------- |
 | `isActive` | boolean | Lọc chi nhánh active (default true) |
 
 **Authorization:** `Auth` — staff chỉ thấy branch được gán (OWNER: tất cả)
