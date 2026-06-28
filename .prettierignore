@@ -1,0 +1,7 @@
+node_modules
+dist
+.expo
+coverage
+apps/api/dist
+packages/shared/dist
+package-lock.json

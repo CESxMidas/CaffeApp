@@ -1,0 +1,17 @@
+{
+  "name": "@caffeapp/tsconfig",
+  "version": "1.0.0-mvp",
+  "private": true,
+  "files": [
+    "base.json",
+    "nestjs.json",
+    "react-native.json",
+    "shared.json"
+  ],
+  "exports": {
+    "./base.json": "./base.json",
+    "./nestjs.json": "./nestjs.json",
+    "./react-native.json": "./react-native.json",
+    "./shared.json": "./shared.json"
+  }
+}

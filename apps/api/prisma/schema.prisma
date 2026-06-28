@@ -1,0 +1,262 @@
+// Prisma schema — source of truth for PostgreSQL (NestJS API)
+// Run migrations: npm run db:migrate --workspace=@caffeapp/api
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum StaffRole {
+  OWNER
+  MANAGER
+  CASHIER
+  BARISTA
+}
+
+enum OrderType {
+  DINE_IN
+  TAKE_AWAY
+}
+
+enum OrderStatus {
+  PENDING
+  MAKING
+  READY
+  PAID
+  CANCELLED
+}
+
+enum PaymentMethod {
+  CASH
+  BANK_TRANSFER
+  CARD
+  E_WALLET
+}
+
+enum TableStatus {
+  EMPTY
+  OCCUPIED
+  MAINTENANCE
+}
+
+enum ShiftStatus {
+  OPEN
+  CLOSED
+}
+
+model User {
+  id           String   @id @default(uuid()) @db.Uuid
+  email        String   @unique
+  passwordHash String   @map("password_hash")
+  fullName     String   @map("full_name")
+  isActive     Boolean  @default(true) @map("is_active")
+  createdAt    DateTime @default(now()) @map("created_at")
+  updatedAt    DateTime @updatedAt @map("updated_at")
+
+  staff     Staff?
+  auditLogs AuditLog[] @relation("AuditActor")
+
+  @@map("users")
+}
+
+model Staff {
+  id        String    @id @default(uuid()) @db.Uuid
+  userId    String    @unique @map("user_id") @db.Uuid
+  branchId  String?   @map("branch_id") @db.Uuid
+  role      StaffRole
+  fullName  String    @map("full_name")
+  phone     String?
+  isActive  Boolean   @default(true) @map("is_active")
+  createdAt DateTime  @default(now()) @map("created_at")
+  updatedAt DateTime  @updatedAt @map("updated_at")
+
+  user   User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  branch Branch? @relation(fields: [branchId], references: [id])
+
+  @@index([branchId, role])
+  @@map("staff")
+}
+
+model Branch {
+  id        String   @id @default(uuid()) @db.Uuid
+  name      String
+  address   String?
+  phone     String?
+  bankInfo  Json?    @map("bank_info")
+  isActive  Boolean  @default(true) @map("is_active")
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  staff              Staff[]
+  tables             Table[]
+  productCategories  ProductCategory[]
+  products           Product[]
+  orders             Order[]
+  shifts             Shift[]
+  auditLogs          AuditLog[]
+
+  @@map("branches")
+}
+
+model Table {
+  id        String      @id @default(uuid()) @db.Uuid
+  branchId  String      @map("branch_id") @db.Uuid
+  code      String
+  floor     String?
+  capacity  Int         @default(4)
+  status    TableStatus @default(EMPTY)
+  createdAt DateTime    @default(now()) @map("created_at")
+  updatedAt DateTime    @updatedAt @map("updated_at")
+
+  branch Branch  @relation(fields: [branchId], references: [id], onDelete: Cascade)
+  orders Order[]
+
+  @@unique([branchId, code])
+  @@index([branchId, status])
+  @@map("tables")
+}
+
+model ProductCategory {
+  id        String   @id @default(uuid()) @db.Uuid
+  branchId  String   @map("branch_id") @db.Uuid
+  name      String
+  slug      String
+  sortOrder Int      @default(0) @map("sort_order")
+  isActive  Boolean  @default(true) @map("is_active")
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  branch   Branch    @relation(fields: [branchId], references: [id], onDelete: Cascade)
+  products Product[]
+
+  @@unique([branchId, slug])
+  @@map("product_categories")
+}
+
+model Product {
+  id          String   @id @default(uuid()) @db.Uuid
+  branchId    String   @map("branch_id") @db.Uuid
+  categoryId  String   @map("category_id") @db.Uuid
+  name        String
+  description String?
+  price       Int
+  imageUrl    String?  @map("image_url")
+  isAvailable Boolean  @default(true) @map("is_available")
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  branch   Branch          @relation(fields: [branchId], references: [id], onDelete: Cascade)
+  category ProductCategory @relation(fields: [categoryId], references: [id], onDelete: Restrict)
+  items    OrderItem[]
+
+  @@index([branchId, categoryId])
+  @@map("products")
+}
+
+model Shift {
+  id             String      @id @default(uuid()) @db.Uuid
+  branchId       String      @map("branch_id") @db.Uuid
+  name           String
+  shiftType      String      @map("shift_type")
+  startTime      String      @map("start_time")
+  endTime        String      @map("end_time")
+  openedAt       DateTime?   @map("opened_at")
+  closedAt       DateTime?   @map("closed_at")
+  status         ShiftStatus @default(OPEN)
+  totalRevenue   Int         @default(0) @map("total_revenue")
+  totalOrders    Int         @default(0) @map("total_orders")
+  createdAt      DateTime    @default(now()) @map("created_at")
+  updatedAt      DateTime    @updatedAt @map("updated_at")
+
+  branch Branch  @relation(fields: [branchId], references: [id], onDelete: Cascade)
+  orders Order[]
+
+  @@index([branchId, status])
+  @@map("shifts")
+}
+
+model Order {
+  id          String      @id @default(uuid()) @db.Uuid
+  branchId    String      @map("branch_id") @db.Uuid
+  shiftId     String?     @map("shift_id") @db.Uuid
+  tableId     String?     @map("table_id") @db.Uuid
+  orderNumber String      @map("order_number")
+  orderType   OrderType   @map("order_type")
+  status      OrderStatus @default(PENDING)
+  subtotal    Int         @default(0)
+  taxAmount   Int         @default(0) @map("tax_amount")
+  total       Int         @default(0)
+  notes       String?
+  createdAt   DateTime    @default(now()) @map("created_at")
+  updatedAt   DateTime    @updatedAt @map("updated_at")
+  paidAt      DateTime?   @map("paid_at")
+
+  branch   Branch      @relation(fields: [branchId], references: [id], onDelete: Restrict)
+  shift    Shift?      @relation(fields: [shiftId], references: [id], onDelete: SetNull)
+  table    Table?      @relation(fields: [tableId], references: [id], onDelete: SetNull)
+  items    OrderItem[]
+  payments Payment[]
+
+  @@unique([branchId, orderNumber])
+  @@index([branchId, status])
+  @@index([createdAt])
+  @@map("orders")
+}
+
+model OrderItem {
+  id          String   @id @default(uuid()) @db.Uuid
+  orderId     String   @map("order_id") @db.Uuid
+  productId   String   @map("product_id") @db.Uuid
+  productName String   @map("product_name")
+  quantity    Int
+  unitPrice   Int      @map("unit_price")
+  lineTotal   Int      @map("line_total")
+  notes       String?
+  createdAt   DateTime @default(now()) @map("created_at")
+
+  order   Order   @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  product Product @relation(fields: [productId], references: [id], onDelete: Restrict)
+
+  @@index([orderId])
+  @@map("order_items")
+}
+
+model Payment {
+  id           String        @id @default(uuid()) @db.Uuid
+  orderId      String        @map("order_id") @db.Uuid
+  method       PaymentMethod
+  amount       Int
+  changeAmount Int?          @map("change_amount")
+  reference    String?
+  paidAt       DateTime      @default(now()) @map("paid_at")
+  createdAt    DateTime      @default(now()) @map("created_at")
+
+  order Order @relation(fields: [orderId], references: [id], onDelete: Cascade)
+
+  @@index([orderId])
+  @@map("payments")
+}
+
+model AuditLog {
+  id         String   @id @default(uuid()) @db.Uuid
+  branchId   String?  @map("branch_id") @db.Uuid
+  actorId    String?  @map("actor_id") @db.Uuid
+  entityType String   @map("entity_type")
+  entityId   String   @map("entity_id") @db.Uuid
+  action     String
+  beforeData Json?    @map("before_data")
+  afterData  Json?    @map("after_data")
+  metadata   Json?
+  createdAt  DateTime @default(now()) @map("created_at")
+
+  branch Branch? @relation(fields: [branchId], references: [id], onDelete: SetNull)
+  actor  User?   @relation("AuditActor", fields: [actorId], references: [id], onDelete: SetNull)
+
+  @@index([entityType, entityId])
+  @@index([branchId, createdAt])
+  @@map("audit_logs")
+}
