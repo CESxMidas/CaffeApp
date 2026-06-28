@@ -4,3 +4,4 @@
  */
 export type { Role } from '../domain/session.types';
 export { STAFF_ROLE_TO_MOBILE_ROLE, MOBILE_ROLE_TO_STAFF_ROLE } from '../domain/session.types';
+export { ROLE_TIERS, isStaffRoleInTier, isOwnerStaffRole, rolesForStaff } from '../domain/rbac';

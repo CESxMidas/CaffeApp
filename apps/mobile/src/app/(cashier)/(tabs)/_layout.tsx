@@ -9,14 +9,15 @@ export default function CashierTabsLayout() {
         tabBarActiveTintColor: colors.primary,
         tabBarInactiveTintColor: colors.textMuted,
         headerStyle: { backgroundColor: colors.surface },
-        tabBarStyle: { backgroundColor: colors.surface },
+        tabBarStyle: { backgroundColor: colors.surface, height: 60, paddingBottom: 6 },
       }}
     >
       <Tabs.Screen
         name="home"
         options={{
           title: 'Trang chủ',
-          tabBarIcon: ({ color, size }) => (
+          headerTitle: 'Phục vụ bàn',
+          tabBarIcon: ({ color, size }: { color: string; size: number }) => (
             <Ionicons name="home-outline" size={size} color={color} />
           ),
         }}
@@ -25,8 +26,18 @@ export default function CashierTabsLayout() {
         name="orders"
         options={{
           title: 'Đơn hàng',
-          tabBarIcon: ({ color, size }) => (
-            <Ionicons name="receipt-outline" size={size} color={color} />
+          tabBarIcon: ({ color, size }: { color: string; size: number }) => (
+            <Ionicons name="clipboard-outline" size={size} color={color} />
+          ),
+        }}
+      />
+      <Tabs.Screen
+        name="tables"
+        options={{
+          title: 'Bàn',
+          headerShown: false,
+          tabBarIcon: ({ color, size }: { color: string; size: number }) => (
+            <Ionicons name="grid-outline" size={size} color={color} />
           ),
         }}
       />
@@ -34,7 +45,7 @@ export default function CashierTabsLayout() {
         name="settings"
         options={{
           title: 'Cài đặt',
-          tabBarIcon: ({ color, size }) => (
+          tabBarIcon: ({ color, size }: { color: string; size: number }) => (
             <Ionicons name="settings-outline" size={size} color={color} />
           ),
         }}

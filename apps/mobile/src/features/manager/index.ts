@@ -1,2 +1,1 @@
-/** Manager feature public API — Sprint 5+ */
-export {};
+export { useRevenueReport } from './hooks';

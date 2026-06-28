@@ -10,7 +10,10 @@ export default () => ({
     refreshExpiresIn: process.env.JWT_REFRESH_EXPIRES_IN ?? '7d',
   },
   cors: {
-    origins: (process.env.CORS_ORIGINS ?? 'http://localhost:8081,http://localhost:19006')
+    origins: (
+      process.env.CORS_ORIGINS ??
+      'http://localhost:8081,http://127.0.0.1:8081,http://localhost:19006,http://127.0.0.1:19006'
+    )
       .split(',')
       .map((origin) => origin.trim())
       .filter(Boolean),

@@ -1,32 +1,65 @@
 import { useState } from 'react';
 import { KeyboardAvoidingView, Platform, Pressable, StyleSheet, Text, View } from 'react-native';
-import { router } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
+import { isAxiosError } from 'axios';
 import { colors, spacing } from '@caffeapp/shared';
-import { Button, Input } from '@shared/components/ui';
+import { useLogin } from '@features/auth';
+import { navigateAfterLogin } from '@shared/lib/auth/postLoginNavigation';
+import { Button, ErrorBanner, Input } from '@shared/components/ui';
 
 export default function LoginScreen() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [error, setError] = useState('');
-  const [loading, setLoading] = useState(false);
+  const [emailError, setEmailError] = useState('');
+  const [passwordError, setPasswordError] = useState('');
+  const [formError, setFormError] = useState('');
+  const login = useLogin();
+
+  const handleEmailChange = (value: string) => {
+    setEmail(value);
+    if (emailError) setEmailError('');
+    if (formError) setFormError('');
+  };
+
+  const handlePasswordChange = (value: string) => {
+    setPassword(value);
+    if (passwordError) setPasswordError('');
+    if (formError) setFormError('');
+  };
 
   const handleLogin = async () => {
-    setError('');
+    setEmailError('');
+    setPasswordError('');
+    setFormError('');
+
+    let hasFieldError = false;
     if (!email.trim()) {
-      setError('Vui lòng nhập email hoặc SĐT');
-      return;
+      setEmailError('Vui lòng nhập email hoặc SĐT');
+      hasFieldError = true;
     }
     if (!password) {
-      setError('Vui lòng nhập mật khẩu');
-      return;
+      setPasswordError('Vui lòng nhập mật khẩu');
+      hasFieldError = true;
     }
-    setLoading(true);
-    // Sprint 1: integrate Supabase auth
-    setTimeout(() => {
-      setLoading(false);
-      router.push('/(auth)/branch');
-    }, 800);
+    if (hasFieldError) return;
+
+    try {
+      const data = await login.mutateAsync({ email: email.trim().toLowerCase(), password });
+      navigateAfterLogin(data);
+    } catch (err) {
+      if (isAxiosError(err)) {
+        if (!err.response) {
+          setFormError(
+            'Không thể kết nối máy chủ. Chạy API (npm run api) và kiểm tra EXPO_PUBLIC_API_URL.',
+          );
+          return;
+        }
+        const message = err.response.data?.message;
+        setFormError(typeof message === 'string' ? message : 'Email hoặc mật khẩu không đúng');
+      } else {
+        setFormError('Không thể kết nối máy chủ. Kiểm tra API và mạng.');
+      }
+    }
   };
 
   return (
@@ -46,23 +79,27 @@ export default function LoginScreen() {
         <Input
           label="Email / SĐT"
           value={email}
-          onChangeText={setEmail}
+          onChangeText={handleEmailChange}
           autoCapitalize="none"
           keyboardType="email-address"
-          placeholder="minh@cafe.vn"
+          placeholder="cashier@caffe.app"
+          error={emailError}
         />
         <Input
           label="Mật khẩu"
           value={password}
-          onChangeText={setPassword}
+          onChangeText={handlePasswordChange}
           secureTextEntry
           placeholder="••••••••"
-          error={error}
+          error={passwordError}
         />
         <Pressable>
           <Text style={styles.forgot}>Quên mật khẩu?</Text>
         </Pressable>
-        <Button title="Đăng nhập" onPress={handleLogin} loading={loading} />
+        {formError ? (
+          <ErrorBanner message={formError} onDismiss={() => setFormError('')} />
+        ) : null}
+        <Button title="Đăng nhập" onPress={handleLogin} loading={login.isPending} />
       </View>
 
       <View style={styles.biometric}>

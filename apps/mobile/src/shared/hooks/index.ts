@@ -1,2 +1,1 @@
-/** TanStack Query hooks — Sprint 1+ */
-export {};
+export { usePermission, useIsOwner } from './usePermission';

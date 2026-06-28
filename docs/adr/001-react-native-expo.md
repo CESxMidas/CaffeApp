@@ -10,9 +10,9 @@ CaffeApp cần app mobile cho 3 vai trò (thu ngân, barista, quản lý) trên 
 
 ## Decision
 
-Sử dụng **React Native với Expo SDK 56** và **Expo Router** cho navigation.
+Sử dụng **React Native với Expo SDK 54** và **Expo Router** cho navigation.
 
-**Versions (as of 2026-06-28):** Expo `~56.0.12`, React Native `0.85.3`, React `19.2.3`, expo-router `~56.2.11`.
+**Versions (as of 2026-06-28):** Expo `~54.0.0`, React Native `0.81.5`, React `19.1.0`, expo-router `~6.0.24`.
 
 ## Alternatives Considered
 

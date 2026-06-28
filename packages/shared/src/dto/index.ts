@@ -1,4 +1,11 @@
-import type { OrderStatus, OrderType, PaymentMethod, StaffRole, TableStatus } from '../enums';
+import type {
+  OrderStatus,
+  OrderType,
+  PaymentMethod,
+  StaffRole,
+  TableStatus,
+  BranchAssignmentStatus,
+} from '../enums';
 
 /** API request/response contracts shared between mobile and NestJS */
 
@@ -10,8 +17,21 @@ export interface LoginRequestDto {
 export interface LoginResponseDto {
   accessToken: string;
   refreshToken: string;
+  expiresIn: number;
   user: UserDto;
   staff: StaffDto;
+  /** Assigned branch (staff: only when APPROVED; owner: null until session pick). */
+  branch: BranchDto | null;
+}
+
+export interface MeResponseDto {
+  user: UserDto;
+  staff: StaffDto;
+  branch: BranchDto | null;
+}
+
+export interface ApiDataResponse<T> {
+  data: T;
 }
 
 export interface UserDto {
@@ -27,6 +47,13 @@ export interface StaffDto {
   role: StaffRole;
   fullName: string;
   isActive: boolean;
+  branchAssignmentStatus: BranchAssignmentStatus;
+}
+
+/** Staff row for manager/owner lists (includes email + branch name). */
+export interface StaffListItemDto extends StaffDto {
+  email: string;
+  branchName: string | null;
 }
 
 export interface BranchDto {
@@ -44,6 +71,8 @@ export interface TableDto {
   floor: string | null;
   capacity: number;
   status: TableStatus;
+  /** ISO timestamp — đơn active sớm nhất trên bàn (để hiển thị thời gian phục vụ). */
+  occupiedSince?: string | null;
 }
 
 export interface ProductCategoryDto {
@@ -64,6 +93,8 @@ export interface ProductDto {
   price: number;
   imageUrl: string | null;
   isAvailable: boolean;
+  /** Populated on menu list endpoints */
+  categoryName?: string;
 }
 
 export interface OrderItemDto {
@@ -126,6 +157,30 @@ export interface PaymentDto {
   changeAmount: number | null;
   reference: string | null;
   paidAt: string;
+}
+
+export interface RevenueReportDto {
+  summary: {
+    totalRevenue: number;
+    totalOrders: number;
+    averageOrderValue: number;
+    cancelledOrders: number;
+    guestCount: number;
+  };
+  series: Array<{ period: string; revenue: number; orders: number }>;
+}
+
+export type NotificationType = 'ORDER_READY' | 'ORDER_NEW' | 'BRANCH_ASSIGNMENT' | 'SYSTEM';
+
+export interface NotificationDto {
+  id: string;
+  branchId: string;
+  type: NotificationType;
+  title: string;
+  body: string;
+  readAt: string | null;
+  metadata: Record<string, unknown> | null;
+  createdAt: string;
 }
 
 export interface ApiErrorDto {

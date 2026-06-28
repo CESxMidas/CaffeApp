@@ -1,5 +1,9 @@
 import { Module } from '@nestjs/common';
+import { BranchesController } from './branches.controller';
+import { BranchesService } from './branches.service';
 
-/** Sprint 1: branch listing */
-@Module({})
+@Module({
+  controllers: [BranchesController],
+  providers: [BranchesService],
+})
 export class BranchesModule {}

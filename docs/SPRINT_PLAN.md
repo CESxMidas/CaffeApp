@@ -60,20 +60,24 @@
 
 ---
 
-## Sprint 1: Auth Flow (10 pts) — 🔄 IN PROGRESS
+## Sprint 1: Auth Flow (10 pts) — ✅ Done
 
 **Stories:** US-A01 → US-A04  
 **Screens:** 01–04  
 **Backend:** NestJS Auth module + JWT + Prisma users/staff
 
-| Story                        | Points | FE                                | BE                        | Status |
-| ---------------------------- | ------ | --------------------------------- | ------------------------- | ------ |
-| US-A01 Đăng nhập (API + JWT) | 3      | `authService.login` + SecureStore | `POST /api/v1/auth/login` | TODO   |
-| US-A02 Chọn chi nhánh        | 2      | `useBranches` query               | `GET /api/v1/branches`    | TODO   |
-| US-A03 Chọn vai trò          | 2      | Session store + staff role        | `GET /api/v1/auth/me`     | TODO   |
-| US-A04 Trang chủ Thu ngân    | 3      | Wire home screen                  | Shift context API         | TODO   |
+| Story                        | Points | FE                                | BE                        | Status  |
+| ---------------------------- | ------ | --------------------------------- | ------------------------- | ------- |
+| US-A01 Đăng nhập (API + JWT) | 3      | `authService.login` + SecureStore | `POST /api/v1/auth/login` | ✅ Done |
+| US-A02 Chọn chi nhánh        | 2      | `useBranches` query               | `GET /api/v1/branches`    | ✅ Done |
+| US-A03 Chọn vai trò          | 2      | Session store + staff role        | `GET /api/v1/auth/me`     | ✅ Done |
+| US-A04 Trang chủ Thu ngân    | 3      | Wire home screen                  | Shift context API         | ✅ Done |
 
-**Infrastructure done:** Prisma migration `initial_schema`, seed 1 branch, API health endpoint, mobile nav shell.
+**Demo accounts** (password: `password123`):
+
+- `cashier@caffe.app` — CASHIER
+- `barista@caffe.app` — BARISTA
+- `manager@caffe.app` — MANAGER
 
 **DoD:** Login E2E qua NestJS API, session persist SecureStore, mobile không gọi DB trực tiếp
 

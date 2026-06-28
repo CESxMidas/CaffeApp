@@ -1,2 +1,8 @@
-/** Secure storage adapters (Expo SecureStore) — Sprint 1+. */
-export {};
+export {
+  saveTokens,
+  saveStaffRole,
+  saveSessionContext,
+  loadPersistedSession,
+  clearPersistedSession,
+  type PersistedSession,
+} from './tokenStorage';

@@ -7,12 +7,13 @@ import { StaffRole } from '../enums';
 export type Role = 'cashier' | 'barista' | 'manager';
 
 export const STAFF_ROLE_TO_MOBILE_ROLE: Record<
-  StaffRole.CASHIER | StaffRole.BARISTA | StaffRole.MANAGER,
+  StaffRole.CASHIER | StaffRole.BARISTA | StaffRole.MANAGER | StaffRole.OWNER,
   Role
 > = {
   [StaffRole.CASHIER]: 'cashier',
   [StaffRole.BARISTA]: 'barista',
   [StaffRole.MANAGER]: 'manager',
+  [StaffRole.OWNER]: 'manager',
 };
 
 export const MOBILE_ROLE_TO_STAFF_ROLE: Record<Role, StaffRole> = {

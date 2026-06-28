@@ -1,5 +1,9 @@
 import { Module } from '@nestjs/common';
+import { TablesController } from './tables.controller';
+import { TablesService } from './tables.service';
 
-/** Sprint 2: table floor plan */
-@Module({})
+@Module({
+  controllers: [TablesController],
+  providers: [TablesService],
+})
 export class TablesModule {}

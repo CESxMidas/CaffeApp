@@ -1,2 +1,1 @@
-/** Manager hooks — Sprint 5+ */
-export {};
+export { useRevenueReport } from './useRevenueReport';

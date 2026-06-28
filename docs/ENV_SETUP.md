@@ -78,6 +78,8 @@ cp apps/mobile/.env.example apps/mobile/.env
 | `EXPO_PUBLIC_API_URL` | Base URL NestJS API | Xem bảng dưới           |
 | `EXPO_PUBLIC_APP_ENV` | Label môi trường    | `development`           |
 
+> **Android / JDK:** Expo SDK 54 — xem [ANDROID_JDK.md](ANDROID_JDK.md).
+
 ### `EXPO_PUBLIC_API_URL` theo thiết bị
 
 | Môi trường                         | URL                        |

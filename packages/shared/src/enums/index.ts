@@ -7,6 +7,7 @@ export enum OrderStatus {
   PENDING = 'PENDING',
   MAKING = 'MAKING',
   READY = 'READY',
+  SERVING = 'SERVING',
   PAID = 'PAID',
   CANCELLED = 'CANCELLED',
 }
@@ -34,4 +35,12 @@ export enum TableStatus {
 export enum ShiftStatus {
   OPEN = 'OPEN',
   CLOSED = 'CLOSED',
+}
+
+/** Manager proposes branch → Owner approves before staff can work. */
+export enum BranchAssignmentStatus {
+  NONE = 'NONE',
+  PENDING_OWNER = 'PENDING_OWNER',
+  APPROVED = 'APPROVED',
+  REJECTED = 'REJECTED',
 }

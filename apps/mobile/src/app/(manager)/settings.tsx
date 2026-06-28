@@ -1,20 +1,11 @@
 import { Pressable, StyleSheet, Text, View } from 'react-native';
-import { router } from 'expo-router';
 import { colors, spacing } from '@caffeapp/shared';
-import { useSessionStore } from '@shared/stores/session';
+import { logout } from '@shared/lib/auth/logout';
 
 export default function ManagerSettingsScreen() {
-  const clearSession = useSessionStore((s) => s.clearSession);
-
   return (
     <View style={styles.container}>
-      <Pressable
-        style={styles.logoutButton}
-        onPress={() => {
-          clearSession();
-          router.replace('/(auth)/login');
-        }}
-      >
+      <Pressable style={styles.logoutButton} onPress={() => void logout()}>
         <Text style={styles.logoutText}>Đăng xuất</Text>
       </Pressable>
     </View>

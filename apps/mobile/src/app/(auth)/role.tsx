@@ -1,28 +1,66 @@
+import { useEffect, useMemo } from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { router } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
-import type { Role } from '@caffeapp/shared';
-import { ROLE_LABELS, colors, spacing } from '@caffeapp/shared';
+import { ROLE_LABELS, rolesForStaff, type Role } from '@caffeapp/shared';
+import { colors, spacing } from '@caffeapp/shared';
 import { Card } from '@shared/components/ui';
+import { saveSessionContext } from '@shared/lib/storage';
 import { useSessionStore } from '@shared/stores/session';
 
-const ROLES: { role: Role; icon: keyof typeof Ionicons.glyphMap; desc: string }[] = [
-  { role: 'cashier', icon: 'cash-outline', desc: 'Tạo đơn, thanh toán' },
+const ALL_ROLES: { role: Role; icon: keyof typeof Ionicons.glyphMap; desc: string }[] = [
+  { role: 'cashier', icon: 'restaurant-outline', desc: 'Phục vụ bàn, pha chế, thu tiền' },
   { role: 'barista', icon: 'cafe-outline', desc: 'Pha chế, hoàn thành đơn' },
   { role: 'manager', icon: 'bar-chart-outline', desc: 'Báo cáo, quản lý' },
 ];
 
 export default function RoleScreen() {
-  const setSession = useSessionStore((s) => s.setSession);
+  const staffRole = useSessionStore((s) => s.staffRole);
+  const activeBranchId = useSessionStore((s) => s.activeBranchId);
+  const activeBranchName = useSessionStore((s) => s.activeBranchName);
+  const employeeName = useSessionStore((s) => s.employeeName);
+  const accessToken = useSessionStore((s) => s.accessToken);
+  const completeSession = useSessionStore((s) => s.completeSession);
 
-  const handleSelect = (role: Role) => {
-    setSession({ branchId: '1', role, name: 'Nguyễn Văn Minh' });
+  const availableRoles = useMemo(() => {
+    const allowed = new Set(rolesForStaff(staffRole));
+    return ALL_ROLES.filter(({ role }) => allowed.has(role));
+  }, [staffRole]);
+
+  useEffect(() => {
+    if (!accessToken) {
+      router.replace('/(auth)/login');
+      return;
+    }
+    if (!activeBranchId) {
+      router.replace('/(auth)/branch');
+    }
+  }, [accessToken, activeBranchId]);
+
+  const handleSelect = async (role: Role) => {
+    if (!activeBranchId || !activeBranchName || !employeeName || !staffRole) return;
+
+    await saveSessionContext({
+      activeBranchId,
+      activeBranchName,
+      activeRole: role,
+      staffRole,
+      employeeName,
+    });
+
+    completeSession({
+      branchId: activeBranchId,
+      branchName: activeBranchName,
+      role,
+      name: employeeName,
+    });
+
     switch (role) {
       case 'cashier':
         router.replace('/(cashier)/(tabs)/home');
         break;
       case 'barista':
-        router.replace('/(barista)/queue');
+        router.replace('/(barista)/(tabs)/queue');
         break;
       case 'manager':
         router.replace('/(manager)/dashboard');
@@ -34,7 +72,7 @@ export default function RoleScreen() {
     <View style={styles.container}>
       <Text style={styles.desc}>Chọn vai trò làm việc trong ca</Text>
       <View style={styles.list}>
-        {ROLES.map(({ role, icon, desc }) => (
+        {availableRoles.map(({ role, icon, desc }) => (
           <Pressable key={role} onPress={() => handleSelect(role)}>
             <Card style={styles.card}>
               <View style={styles.cardRow}>

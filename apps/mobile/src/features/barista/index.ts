@@ -1,2 +1,1 @@
-/** Barista feature public API — Sprint 4+ */
-export {};
+export { useBaristaQueue } from './hooks';

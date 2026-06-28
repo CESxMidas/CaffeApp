@@ -32,13 +32,13 @@ Stack: NestJS · JWT · Prisma · PostgreSQL · Expo SecureStore
 
 ## 3. Authorization (RBAC) checklist
 
-| Control                    | Status        | Sprint | Notes                                      |
-| -------------------------- | ------------- | ------ | ------------------------------------------ |
-| `StaffRole` enum           | ✅ Schema     | —      | OWNER, MANAGER, CASHIER, BARISTA           |
-| Route guards               | ⏳ Planned    | 1      | `common/guards/`                           |
-| Permission matrix          | ✅ Documented | —      | [API_CONTRACT.md §14](api/API_CONTRACT.md) |
-| Branch scoping in services | ⏳ Planned    | 1      | Filter by JWT `branchId`                   |
-| Client-side role UI gating | ⏳ Planned    | 1      | UX only — not security boundary            |
+| Control                    | Status        | Sprint | Notes                                                 |
+| -------------------------- | ------------- | ------ | ----------------------------------------------------- |
+| `StaffRole` enum           | ✅ Schema     | —      | OWNER, MANAGER, CASHIER, BARISTA                      |
+| Route guards               | ⏳ Planned    | 1      | `common/guards/`                                      |
+| Permission matrix          | ✅ Documented | —      | [API_CONTRACT.md §14](api/API_CONTRACT.md)            |
+| Branch scoping in services | ⏳ Planned    | 1      | Filter by JWT `branchId`                              |
+| Client-side role UI gating | ✅ Done       | 1      | `permissions.config.ts`, `RoleGuard`, `usePermission` |
 
 ---
 

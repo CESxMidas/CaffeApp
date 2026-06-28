@@ -1,48 +1,118 @@
 import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { router } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
-import { colors, spacing, borderRadius } from '@caffeapp/shared';
+import { colors, spacing, borderRadius, OrderType } from '@caffeapp/shared';
 import { Card } from '@shared/components/ui';
+import type { PermissionAction } from '@shared/config/permissions.config';
+import { useUnreadNotificationCount } from '@features/notifications';
+import { usePermission } from '@shared/hooks/usePermission';
 import { useSessionStore } from '@shared/stores/session';
+import { useCartStore } from '@shared/stores/cart';
 
-const ACTIONS = [
-  { label: 'Tạo đơn', icon: 'add-circle-outline' as const, route: '/(cashier)/order-type' },
-  { label: 'Danh sách đơn', icon: 'list-outline' as const, route: '/(cashier)/(tabs)/orders' },
-  { label: 'Lịch sử', icon: 'time-outline' as const, route: null },
-  { label: 'Sơ đồ bàn', icon: 'grid-outline' as const, route: null },
-  { label: 'Thông báo', icon: 'notifications-outline' as const, badge: 3, route: null },
-  { label: 'Món đã xong', icon: 'checkmark-done-outline' as const, route: null },
+type ActionDef = {
+  label: string;
+  icon: keyof typeof Ionicons.glyphMap;
+  route: string | null;
+  permission: PermissionAction;
+  requiresOrder?: boolean;
+  readyFilter?: boolean;
+};
+
+const ACTIONS: ActionDef[] = [
+  {
+    label: 'Tạo đơn',
+    icon: 'document-text-outline',
+    route: '/(cashier)/order-type',
+    permission: 'orders:create',
+  },
+  {
+    label: 'Danh sách đơn',
+    icon: 'list-outline',
+    route: '/(cashier)/(tabs)/orders',
+    permission: 'orders:list',
+  },
+  {
+    label: 'Lịch sử',
+    icon: 'time-outline',
+    route: '/(cashier)/history',
+    permission: 'orders:list',
+  },
+  {
+    label: 'Sơ đồ bàn',
+    icon: 'grid-outline',
+    route: '/(cashier)/tables',
+    permission: 'tables:view',
+    requiresOrder: true,
+  },
+  {
+    label: 'Thông báo',
+    icon: 'notifications-outline',
+    route: '/(cashier)/notifications',
+    permission: 'orders:list',
+  },
+  {
+    label: 'Món đã xong',
+    icon: 'restaurant-outline',
+    route: '/(cashier)/(tabs)/orders',
+    permission: 'orders:list',
+  },
 ];
+
+function ActionTile({ action, badge }: { action: ActionDef; badge?: number }) {
+  const allowed = usePermission(action.permission);
+  const startOrder = useCartStore((s) => s.startOrder);
+  const activeBranchId = useSessionStore((s) => s.activeBranchId);
+
+  if (!allowed) return null;
+
+  const onPress = () => {
+    if (!action.route) return;
+    if (action.requiresOrder && activeBranchId) {
+      startOrder({ branchId: activeBranchId, orderType: OrderType.DINE_IN });
+    }
+    router.push(action.route as never);
+  };
+
+  return (
+    <Pressable style={styles.gridItem} onPress={onPress}>
+      <Card style={styles.actionCard}>
+        <View style={styles.iconWrap}>
+          <Ionicons name={action.icon} size={32} color={colors.primary} />
+          {badge && badge > 0 ? (
+            <View style={styles.badge}>
+              <Text style={styles.badgeText}>{badge > 99 ? '99+' : badge}</Text>
+            </View>
+          ) : null}
+        </View>
+        <Text style={styles.actionLabel}>{action.label}</Text>
+      </Card>
+    </Pressable>
+  );
+}
 
 export default function CashierHomeScreen() {
   const employeeName = useSessionStore((s) => s.employeeName);
+  const activeBranchName = useSessionStore((s) => s.activeBranchName);
+  const { data: unreadCount } = useUnreadNotificationCount();
+
+  const branchLabel = activeBranchName?.startsWith('CN')
+    ? `Chi nhánh ${activeBranchName.replace('CN ', '')}`
+    : (activeBranchName ?? 'Chi nhánh');
 
   return (
     <ScrollView style={styles.container} contentContainerStyle={styles.content}>
       <View style={styles.greeting}>
-        <Text style={styles.hello}>Xin chào, {employeeName ?? 'bạn'} 👋</Text>
-        <Text style={styles.branch}>Chi nhánh Quận 1</Text>
+        <Text style={styles.hello}>Xin chào, {employeeName?.split(' ').pop() ?? 'bạn'} 👋</Text>
+        <Text style={styles.branch}>{branchLabel}</Text>
       </View>
 
       <View style={styles.grid}>
         {ACTIONS.map((action) => (
-          <Pressable
+          <ActionTile
             key={action.label}
-            style={styles.gridItem}
-            onPress={() => action.route && router.push(action.route as never)}
-          >
-            <Card style={styles.actionCard}>
-              <View style={styles.iconWrap}>
-                <Ionicons name={action.icon} size={28} color={colors.primary} />
-                {action.badge ? (
-                  <View style={styles.badge}>
-                    <Text style={styles.badgeText}>{action.badge}</Text>
-                  </View>
-                ) : null}
-              </View>
-              <Text style={styles.actionLabel}>{action.label}</Text>
-            </Card>
-          </Pressable>
+            action={action}
+            badge={action.label === 'Thông báo' ? unreadCount : undefined}
+          />
         ))}
       </View>
     </ScrollView>
@@ -51,9 +121,9 @@ export default function CashierHomeScreen() {
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: colors.background },
-  content: { padding: spacing.base },
-  greeting: { marginBottom: spacing.lg },
-  hello: { fontSize: 22, fontWeight: '600', color: colors.text },
+  content: { padding: spacing.base, paddingBottom: spacing.xl },
+  greeting: { marginBottom: spacing.lg, marginTop: spacing.sm },
+  hello: { fontSize: 24, fontWeight: '700', color: colors.text },
   branch: { fontSize: 14, color: colors.textSecondary, marginTop: spacing.xs },
   grid: {
     flexDirection: 'row',
@@ -61,16 +131,22 @@ const styles = StyleSheet.create({
     gap: spacing.md,
   },
   gridItem: { width: '47%' },
-  actionCard: { alignItems: 'center', paddingVertical: spacing.lg },
+  actionCard: {
+    alignItems: 'center',
+    paddingVertical: spacing.lg,
+    minHeight: 120,
+    justifyContent: 'center',
+  },
   iconWrap: { position: 'relative', marginBottom: spacing.sm },
   badge: {
     position: 'absolute',
-    top: -4,
-    right: -8,
+    top: -6,
+    right: -10,
     backgroundColor: colors.error,
     borderRadius: borderRadius.full,
     minWidth: 18,
     height: 18,
+    paddingHorizontal: 4,
     alignItems: 'center',
     justifyContent: 'center',
   },

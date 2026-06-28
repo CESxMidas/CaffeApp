@@ -1,5 +1,10 @@
 export { apiClient, getApiBaseUrl, setApiAccessToken } from './apiClient';
 export { authService } from './authService';
+export { branchesService } from './branchesService';
+export { staffService } from './staffService';
 export { orderService } from './orderService';
+export { paymentService } from './paymentService';
 export { productService } from './productService';
+export { reportService } from './reportService';
+export { notificationService } from './notificationService';
 export { tableService } from './tableService';

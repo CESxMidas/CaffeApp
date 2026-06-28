@@ -1,7 +1,10 @@
 import { Module } from '@nestjs/common';
+import { APP_GUARD } from '@nestjs/core';
 import { ConfigModule } from '@nestjs/config';
 import configuration from '@/config/configuration';
 import { validateEnv } from '@/config/env.validation';
+import { JwtAuthGuard } from '@common/guards/jwt-auth.guard';
+import { RolesGuard } from '@common/guards/roles.guard';
 import { PrismaModule } from '@common/prisma/prisma.module';
 import { HealthModule } from '@common/health/health.module';
 import { AuditModule } from '@common/audit/audit.module';
@@ -14,6 +17,7 @@ import { ProductsModule } from '@modules/products/products.module';
 import { OrdersModule } from '@modules/orders/orders.module';
 import { PaymentsModule } from '@modules/payments/payments.module';
 import { ReportsModule } from '@modules/reports/reports.module';
+import { NotificationsModule } from '@modules/notifications/notifications.module';
 
 @Module({
   imports: [
@@ -35,6 +39,17 @@ import { ReportsModule } from '@modules/reports/reports.module';
     OrdersModule,
     PaymentsModule,
     ReportsModule,
+    NotificationsModule,
+  ],
+  providers: [
+    {
+      provide: APP_GUARD,
+      useClass: JwtAuthGuard,
+    },
+    {
+      provide: APP_GUARD,
+      useClass: RolesGuard,
+    },
   ],
 })
 export class AppModule {}

@@ -1,19 +1,11 @@
 import { Pressable, StyleSheet, Text, View } from 'react-native';
-import { router } from 'expo-router';
 import { colors, spacing } from '@caffeapp/shared';
-import { useSessionStore } from '@shared/stores/session';
+import { logout } from '@shared/lib/auth/logout';
 
 export default function CashierSettingsScreen() {
-  const clearSession = useSessionStore((s) => s.clearSession);
-
-  const handleLogout = () => {
-    clearSession();
-    router.replace('/(auth)/login');
-  };
-
   return (
     <View style={styles.container}>
-      <Pressable style={styles.logoutButton} onPress={handleLogout}>
+      <Pressable style={styles.logoutButton} onPress={() => void logout()}>
         <Text style={styles.logoutText}>Đăng xuất</Text>
       </Pressable>
       <Text style={styles.version}>CaffeApp v1.0.0-mvp</Text>

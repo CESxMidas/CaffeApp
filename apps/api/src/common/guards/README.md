@@ -1,9 +1,11 @@
 # Guards
 
-Placeholder for enterprise auth/RBAC guards (Sprint 1+):
+Auth/RBAC guards:
 
-- `jwt-auth.guard.ts` — validate access token
-- `roles.guard.ts` — enforce `StaffRole`
-- `branch-scope.guard.ts` — enforce `branchId` tenant isolation
+- `jwt-auth.guard.ts` — validate JWT access token; respects `@Public()`
+- `roles.guard.ts` — enforce `@Roles(...)` from JWT `StaffRole`; skip when no decorator
+- Branch scoping — `common/utils/branch-scope.util.ts` (`resolveBranchScope`, `assertBranchAccess`)
 
-Do not implement business rules here until Sprint 1.
+Global guards registered in `app.module.ts` via `APP_GUARD` (JwtAuthGuard then RolesGuard).
+
+Decorators: `@Public()`, `@CurrentUser()`, `@Roles(...StaffRole)`.

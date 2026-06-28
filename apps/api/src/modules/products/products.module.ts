@@ -1,5 +1,9 @@
 import { Module } from '@nestjs/common';
+import { ProductsController } from './products.controller';
+import { ProductsService } from './products.service';
 
-/** Sprint 2: menu / products */
-@Module({})
+@Module({
+  controllers: [ProductsController],
+  providers: [ProductsService],
+})
 export class ProductsModule {}

@@ -126,11 +126,12 @@ Hiện tại: **0%** — placeholders in `package.json` test scripts.
 
 Test accounts (planned Sprint 1 seed):
 
-| Email               | Role    | Password   |
-| ------------------- | ------- | ---------- |
-| `cashier@caffe.app` | CASHIER | (dev only) |
-| `barista@caffe.app` | BARISTA | (dev only) |
-| `manager@caffe.app` | MANAGER | (dev only) |
+| Email               | Role    | Password      |
+| ------------------- | ------- | ------------- |
+| `cashier@caffe.app` | CASHIER | `password123` |
+| `barista@caffe.app` | BARISTA | `password123` |
+| `manager@caffe.app` | MANAGER | `password123` |
+| `owner@caffe.app`   | OWNER   | `password123` |
 
 ---
 

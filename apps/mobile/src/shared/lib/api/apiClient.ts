@@ -1,7 +1,7 @@
 import axios, { type AxiosError, type InternalAxiosRequestConfig } from 'axios';
-import { API_TIMEOUT_MS } from '@shared/config/api.config';
+import { API_TIMEOUT_MS, resolveApiUrl } from '@shared/config/api.config';
 
-const API_URL = process.env.EXPO_PUBLIC_API_URL ?? 'http://localhost:3000';
+const API_URL = resolveApiUrl();
 
 export const apiClient = axios.create({
   baseURL: API_URL,

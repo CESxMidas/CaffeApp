@@ -1,2 +1,1 @@
-/** Barista hooks — Sprint 4+ */
-export {};
+export { useBaristaQueue } from './useBaristaQueue';

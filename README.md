@@ -16,6 +16,7 @@ Mobile (Expo)  ──HTTP/Axios──▶  NestJS API  ──Prisma──▶  Pos
 | [MOBILE_ARCHITECTURE.md](docs/MOBILE_ARCHITECTURE.md) | Kiến trúc mobile (Clean Architecture) |
 | [CONVENTIONS.md](docs/CONVENTIONS.md)                 | **Chuẩn hóa** folder, alias, import   |
 | [ENV_SETUP.md](docs/ENV_SETUP.md)                     | Tạo `.env` API + Mobile               |
+| [ANDROID_JDK.md](docs/ANDROID_JDK.md)                 | JDK 17 + Expo Go / Android build      |
 | [SPRINT_PLAN.md](docs/SPRINT_PLAN.md)                 | Lộ trình sprint                       |
 | [API_CONTRACT.md](docs/api/API_CONTRACT.md)           | REST API contract (design)            |
 | [ERD.md](docs/api/ERD.md)                             | Database schema (Prisma)              |
@@ -80,10 +81,10 @@ CaffeApp/
 
 | Layer    | Technology     | Version                   |
 | -------- | -------------- | ------------------------- |
-| Mobile   | Expo           | ~56.0.12                  |
-| Mobile   | React Native   | 0.85.3                    |
-| Mobile   | React          | 19.2.3                    |
-| Mobile   | Expo Router    | ~56.2.11                  |
+| Mobile   | Expo           | ~54.0.0                   |
+| Mobile   | React Native   | 0.81.5                    |
+| Mobile   | React          | 19.1.0                    |
+| Mobile   | Expo Router    | ~6.0.24                   |
 | Mobile   | TanStack Query | ^5.74                     |
 | Mobile   | Zustand        | ^5.0                      |
 | API      | NestJS         | ^11.0                     |
@@ -203,9 +204,9 @@ Chi tiết: [docs/CONVENTIONS.md](docs/CONVENTIONS.md)
 
 ## Sprint status
 
-| Sprint         | Trạng thái                |
-| -------------- | ------------------------- |
-| Sprint 0       | ✅ UI shell               |
-| Sprint 0.5     | ✅ FE/BE split            |
-| Enterprise std | ✅ Tooling + conventions  |
-| Sprint 1       | 🔄 Auth API (in progress) |
+| Sprint         | Trạng thái               |
+| -------------- | ------------------------ |
+| Sprint 0       | ✅ UI shell              |
+| Sprint 0.5     | ✅ FE/BE split           |
+| Enterprise std | ✅ Tooling + conventions |
+| Sprint 1       | ✅ Auth API              |
