@@ -26,7 +26,6 @@ enum OrderStatus {
   PENDING
   MAKING
   READY
-  SERVING
   PAID
   CANCELLED
 }
@@ -215,6 +214,7 @@ model Order {
   createdAt   DateTime    @default(now()) @map("created_at")
   updatedAt   DateTime    @updatedAt @map("updated_at")
   paidAt      DateTime?   @map("paid_at")
+  deliveredAt DateTime?   @map("delivered_at")
 
   branch   Branch      @relation(fields: [branchId], references: [id], onDelete: Restrict)
   shift    Shift?      @relation(fields: [shiftId], references: [id], onDelete: SetNull)

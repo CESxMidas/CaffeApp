@@ -1,0 +1,44 @@
+{
+  "passwordNote": "Mật khẩu mặc định: STAGING_SEED_PASSWORD hoặc password123. Đổi trước UAT thật.",
+  "branches": [
+    {
+      "id": "a0000000-0000-0000-0000-000000000001",
+      "slug": "q1",
+      "name": "CN Quận 1",
+      "address": "123 Nguyễn Huệ, Q.1, TP.HCM",
+      "phone": "02838221111",
+      "bankInfo": {
+        "bank": "Vietcombank",
+        "bankCode": "VCB",
+        "account": "1023456789",
+        "holder": "CTY TNHH CA PHE PILOT Q1"
+      }
+    },
+    {
+      "id": "a0000000-0000-0000-0000-000000000002",
+      "slug": "q3",
+      "name": "CN Quận 3",
+      "address": "45 Võ Văn Tần, Q.3, TP.HCM",
+      "phone": "02839332222",
+      "bankInfo": {
+        "bank": "Techcombank",
+        "bankCode": "TCB",
+        "account": "1987654321",
+        "holder": "CTY TNHH CA PHE PILOT Q3"
+      }
+    },
+    {
+      "id": "a0000000-0000-0000-0000-000000000003",
+      "slug": "q7",
+      "name": "CN Quận 7",
+      "address": "88 Nguyễn Thị Thập, Q.7, TP.HCM",
+      "phone": "02837773333",
+      "bankInfo": {
+        "bank": "MB Bank",
+        "bankCode": "MB",
+        "account": "0901234567",
+        "holder": "CTY TNHH CA PHE PILOT Q7"
+      }
+    }
+  ]
+}

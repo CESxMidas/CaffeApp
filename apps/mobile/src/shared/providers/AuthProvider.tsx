@@ -9,7 +9,7 @@ interface AuthProviderProps {
 }
 
 export function AuthProvider({ children }: AuthProviderProps) {
-  const completeSession = useSessionStore((s) => s.completeSession);
+  const activateSession = useSessionStore((s) => s.activateSession);
   const setLoginResult = useSessionStore((s) => s.setLoginResult);
   const setBranch = useSessionStore((s) => s.setBranch);
   const setHydrated = useSessionStore((s) => s.setHydrated);
@@ -37,13 +37,14 @@ export function AuthProvider({ children }: AuthProviderProps) {
             fullName: persisted.employeeName ?? '',
           },
           staff: {
-            id: '',
+            id: persisted.staffId ?? '',
             userId: '',
             branchId: persisted.activeBranchId,
             role: staffRole,
             fullName: persisted.employeeName ?? '',
             isActive: true,
             branchAssignmentStatus: BranchAssignmentStatus.APPROVED,
+            isStationAccount: persisted.isStationDevice,
           },
           branch:
             persisted.activeBranchId && persisted.activeBranchName
@@ -62,16 +63,16 @@ export function AuthProvider({ children }: AuthProviderProps) {
         }
 
         if (
-          persisted.activeRole &&
           persisted.activeBranchId &&
           persisted.activeBranchName &&
-          persisted.employeeName
+          persisted.employeeName &&
+          persisted.staffRole
         ) {
-          completeSession({
+          activateSession({
             branchId: persisted.activeBranchId,
             branchName: persisted.activeBranchName,
-            role: persisted.activeRole,
-            name: persisted.employeeName,
+            staffRole: persisted.staffRole,
+            employeeName: persisted.employeeName,
           });
         }
       } catch {
@@ -88,7 +89,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
     return () => {
       mounted = false;
     };
-  }, [completeSession, setBranch, setHydrated, setLoginResult]);
+  }, [activateSession, setBranch, setHydrated, setLoginResult]);
 
   return children;
 }

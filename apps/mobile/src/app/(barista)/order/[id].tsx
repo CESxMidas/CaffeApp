@@ -7,8 +7,10 @@ import {
   colors,
   formatCurrency,
   spacing,
+  StaffRole,
 } from '@caffeapp/shared';
 import { useOrder, useUpdateOrderStatus } from '@features/orders';
+import { useStaffActor } from '@features/staff';
 import { Button, Card, ErrorScreen } from '@shared/components/ui';
 import { showMessage } from '@shared/lib/ui/confirm';
 
@@ -16,6 +18,7 @@ export default function BaristaOrderDetailScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const { data: order, isLoading, isError, refetch } = useOrder(id ?? null);
   const updateStatus = useUpdateOrderStatus();
+  const { runWithActor, pickerModal } = useStaffActor({ operatorRoles: [StaffRole.BARISTA] });
 
   if (isLoading) {
     return (
@@ -34,25 +37,27 @@ export default function BaristaOrderDetailScreen() {
   }
 
   const handleStatus = (status: OrderStatus) => {
-    updateStatus.mutate(
-      { orderId: order.id, status },
-      {
-        onSuccess: () => {
-          if (status === OrderStatus.READY) {
-            showMessage('Hoàn thành', `Đơn #${order.orderNumber} sẵn sàng giao`, 'success');
-            router.back();
-            return;
-          }
-          showMessage('Đã cập nhật', ORDER_STATUS_LABELS[status], 'success');
+    runWithActor((actedByStaffId) => {
+      updateStatus.mutate(
+        { orderId: order.id, status, actedByStaffId },
+        {
+          onSuccess: () => {
+            if (status === OrderStatus.READY) {
+              showMessage('Hoàn thành', `Đơn #${order.orderNumber} sẵn sàng giao`, 'success');
+              router.back();
+              return;
+            }
+            showMessage('Đã cập nhật', ORDER_STATUS_LABELS[status], 'success');
+          },
+          onError: (err: unknown) => {
+            const msg =
+              (err as { response?: { data?: { message?: string } } })?.response?.data?.message ??
+              'Không cập nhật được';
+            showMessage('Lỗi', msg, 'error');
+          },
         },
-        onError: (err: unknown) => {
-          const msg =
-            (err as { response?: { data?: { message?: string } } })?.response?.data?.message ??
-            'Không cập nhật được';
-          showMessage('Lỗi', msg, 'error');
-        },
-      },
-    );
+      );
+    });
   };
 
   return (
@@ -92,6 +97,7 @@ export default function BaristaOrderDetailScreen() {
           />
         ) : null}
       </View>
+      {pickerModal}
     </ScrollView>
   );
 }

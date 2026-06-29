@@ -50,14 +50,14 @@ export default function LoginScreen() {
       if (isAxiosError(err)) {
         if (!err.response) {
           setFormError(
-            'Không thể kết nối máy chủ. Chạy API (npm run api) và kiểm tra EXPO_PUBLIC_API_URL.',
+            'Không thể kết nối máy chủ. ',
           );
           return;
         }
         const message = err.response.data?.message;
         setFormError(typeof message === 'string' ? message : 'Email hoặc mật khẩu không đúng');
       } else {
-        setFormError('Không thể kết nối máy chủ. Kiểm tra API và mạng.');
+        setFormError('Không thể kết nối máy chủ.');
       }
     }
   };

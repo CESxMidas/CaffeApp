@@ -18,6 +18,7 @@ import {
   useNotifications,
 } from '@features/notifications';
 import { Button, Card, EmptyState, ErrorScreen } from '@shared/components/ui';
+import { opStack } from '@shared/lib/navigation/operationalRoutes';
 
 const TYPE_ICON: Record<
   NotificationDto['type'],
@@ -88,7 +89,7 @@ export default function NotificationsScreen() {
                 if (!item.readAt) markRead.mutate(item.id);
                 const orderId = item.metadata?.orderId;
                 if (typeof orderId === 'string') {
-                  router.push(`/(cashier)/order/${orderId}` as never);
+                  router.push(opStack(`/order/${orderId}`));
                 }
               }}
             />

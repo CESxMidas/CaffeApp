@@ -6,7 +6,6 @@ export const ORDER_STATUS_LABELS: Record<OrderStatus, string> = {
   [OrderStatus.PENDING]: 'Chờ pha',
   [OrderStatus.MAKING]: 'Đang pha',
   [OrderStatus.READY]: 'Sẵn sàng',
-  [OrderStatus.SERVING]: 'Đang phục vụ',
   [OrderStatus.PAID]: 'Đã thanh toán',
   [OrderStatus.CANCELLED]: 'Đã hủy',
 };
@@ -65,8 +64,13 @@ export function formatCurrency(amount: number): string {
   return `${amount.toLocaleString('vi-VN')}đ`;
 }
 
-export function calculateOrderTotal(subtotal: number, vatRate = VAT_RATE) {
-  const tax_amount = Math.round(subtotal * vatRate);
-  const total = subtotal + tax_amount;
-  return { subtotal, tax_amount, total };
+/**
+ * Prices are VAT-inclusive (D-17). `subtotal` = sum of line totals (gross).
+ * `total` equals `subtotal`; `tax_amount` is the VAT portion for bill display only.
+ */
+export function calculateOrderTotal(grossSubtotal: number, vatRate = VAT_RATE) {
+  const total = grossSubtotal;
+  const tax_amount = Math.round((total * vatRate) / (1 + vatRate));
+  const pretax_subtotal = total - tax_amount;
+  return { subtotal: grossSubtotal, pretax_subtotal, tax_amount, total };
 }

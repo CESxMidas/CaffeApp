@@ -1,20 +1,26 @@
 import type {
   ApiDataResponse,
   CreateOrderDto,
+  DeliverOrderRequestDto,
   OrderDto,
-  OrderStatus,
   UpdateOrderStatusDto,
 } from '@caffeapp/shared';
 import { API_ENDPOINTS } from '@shared/config/api.config';
 import { apiClient } from './apiClient';
 
 export const orderService = {
-  async listOrders(branchId?: string, status?: string, tableId?: string): Promise<OrderDto[]> {
+  async listOrders(
+    branchId?: string,
+    status?: string,
+    tableId?: string,
+    deliveryState?: 'awaiting_delivery' | 'awaiting_payment',
+  ): Promise<OrderDto[]> {
     const { data } = await apiClient.get<ApiDataResponse<OrderDto[]>>(API_ENDPOINTS.orders, {
       params: {
         ...(branchId ? { branchId } : {}),
         ...(status ? { status } : {}),
         ...(tableId ? { tableId } : {}),
+        ...(deliveryState ? { deliveryState } : {}),
       },
     });
     return data.data;
@@ -32,10 +38,17 @@ export const orderService = {
     return data.data;
   },
 
-  async updateStatus(orderId: string, status: OrderStatus): Promise<OrderDto> {
-    const body: UpdateOrderStatusDto = { status };
+  async updateStatus(orderId: string, body: UpdateOrderStatusDto): Promise<OrderDto> {
     const { data } = await apiClient.patch<ApiDataResponse<OrderDto>>(
       `${API_ENDPOINTS.orders}/${orderId}/status`,
+      body,
+    );
+    return data.data;
+  },
+
+  async deliver(orderId: string, body: DeliverOrderRequestDto = {}): Promise<OrderDto> {
+    const { data } = await apiClient.post<ApiDataResponse<OrderDto>>(
+      `${API_ENDPOINTS.orders}/${orderId}/deliver`,
       body,
     );
     return data.data;

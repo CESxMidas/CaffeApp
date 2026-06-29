@@ -13,10 +13,44 @@ Versioning: [Semantic Versioning](docs/VERSIONING.md)
 
 - Sprint 0.9 production foundation documentation (DEPLOYMENT, SECURITY, TESTING, RELEASE, VERSIONING, GIT)
 - Documentation audit & repair (ERD sync Prisma, ADR superseded markers, API contract status)
+- **Doc Freeze Memo** (`docs/DOC_FREEZE_MEMO.md`) — tag `docs-v2.0-mvp`, ngày 2026-06-29
+- **API/ERD refactor checklist** (`docs/API_ERD_REFACTOR_CHECKLIST.md`) — xác nhận scope Phase 2
 
 ### Changed
 
 - Documentation aligned with NestJS + Prisma + Expo 56 stack
+- **MVP v2 doc sync (2026-06-29):** PRD, USER_STORIES, SPRINT_PLAN, API_CONTRACT, ERD, DEVICE_POLICY, BRANCH_ASSIGNMENT, TESTING, MOBILE_ARCHITECTURE, GO_LIVE_PLAN — questionnaire khách đã ký
+- **refactor(auth):** route by `StaffRole` (TASK-P2-01) — bỏ màn chọn role
+- **refactor(orders):** `deliveredAt` thay `SERVING` (TASK-P2-02) — `POST /orders/:id/deliver`, payment khi `READY`
+- **feat(tablet):** staff picker trạm (TASK-P2-03) — `actedByStaffId`, `StaffPickerModal`
+- **feat(station):** Tab Bếp tablet trạm (TASK-P2-03b) — `(station)/` shell, `BaristaQueueView`, `operationalRoutes`
+- **fix(vat):** VAT 8% inclusive pricing (TASK-P2-04) — `calculateOrderTotal`, bill breakdown cart/payment
+- **chore(seed):** Staging seed menu thật D-13 (TASK-P2-06) — `db:seed:staging`, 3 CN, 50 bàn/CN
+
+### Doc Freeze 2026-06-29 — Thông báo nội bộ team (trước Phase 2 refactor)
+
+**Tóm tắt:** Bộ docs MVP v2 đã freeze. Questionnaire stakeholder đã chốt với khách. **Code hiện tại chưa khớp docs** — Phase 2 refactor bắt buộc trước demo/UAT.
+
+**3 gap code ↔ docs (ưu tiên P0):**
+
+| # | Gap | File / vùng ảnh hưởng |
+| - | --- | --------------------- |
+| 1 | Màn chọn role sau login (đã bỏ theo C-11) | ~~`role.tsx`~~ ✅ P2-01 — route theo `StaffRole` |
+| 2 | Enum `SERVING` còn trong code (docs dùng `deliveredAt`) | ~~`packages/shared`~~ ✅ P2-02 — `deliveredAt` + deliver endpoint |
+| 3 | `activeRole` (user chọn) vs `StaffRole` cố định từ JWT | ~~`session.ts`~~ ✅ P2-01 — `activateSession` + `useMobileRole` |
+
+**Thứ tự PR refactor (không đổi):**
+
+1. **P2-01** — Auth routing (bỏ role screen)
+2. **P2-02** — `deliveredAt` / gỡ `SERVING`
+3. **P2-03** — Tablet trạm: picker chọn NV (`actedByStaffId`)
+4. **P2-03b** — Tablet trạm: Tab Bếp (hoàn thành món → READY, giống barista) — **PO duyệt 2026-06-29**
+5. **P2-04** — VAT 8% trên bill
+6. **P2-05** — E2E C-15 (SecureStore thiết bị thật)
+
+**Tham chiếu:** [GO_LIVE_PLAN.md — Phase 2](docs/GO_LIVE_PLAN.md#phase-2--code-refactor) · [DOC_FREEZE_MEMO.md](docs/DOC_FREEZE_MEMO.md)
+
+**Freeze rule:** Thay đổi nghiệp vụ sau freeze → ticket + PO + cập nhật questionnaire trước khi code.
 
 ---
 

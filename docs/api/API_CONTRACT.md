@@ -99,7 +99,46 @@ PENDING → MAKING → READY → PAID
  CANCELLED  CANCELLED  CANCELLED (chỉ trước PAID)
 ```
 
----
+**Đã giao món:** không dùng status `SERVING`. Set `deliveredAt` trên order khi NV ấn "Đã giao" (B-33, F-12).  
+UI tab **Chờ giao** = `READY` + `deliveredAt IS NULL`; **Chờ thanh toán** = `deliveredAt` set + chưa `PAID` (C-14).
+
+### 1.7.1 Shift module (pilot)
+
+- **Pilot / Sprint 1–4:** `shift_id` **optional** — gắn theo `created_at` / ca hệ thống (B-05)
+- **Sprint 5+:** bắt buộc shift `OPEN` khi tạo order (GAP-06)
+
+### 1.7.2 Station device — `actedByStaffId`
+
+Tablet trạm dùng tài khoản chung (A-09, B-15). Mỗi mutation quan trọng có thể gửi **`actedByStaffId`** (UUID staff thực hiện):
+
+| Endpoint | Field trong body |
+| -------- | ---------------- |
+| `POST /orders` | `actedByStaffId` optional |
+| `PATCH /orders/{id}/status` | `actedByStaffId` optional |
+| `POST /orders/{id}/deliver` | `actedByStaffId` optional |
+| `POST /orders/{id}/cancel` | `actedByStaffId` optional |
+| `POST /payments` | `actedByStaffId` optional |
+
+**Rules:**
+
+- **ĐT cá nhân:** không gửi — server dùng `staff.id` từ JWT
+- **Tablet trạm:** **bắt buộc** `actedByStaffId` (station account ≠ NV thao tác)
+- Staff phải `isActive` và cùng `branchId` với request
+- Audit `actor_id` = `actedByStaffId` nếu có, else JWT staff
+
+Xem thêm [API_ERD_REFACTOR_CHECKLIST.md](../API_ERD_REFACTOR_CHECKLIST.md) §3.
+
+### 1.7.3 OrderDto — fields lifecycle
+
+| Field | Type | Mô tả |
+| ----- | ---- | ----- |
+| `deliveredAt` | ISO timestamp \| null | Set khi NV ấn "Đã giao"; `null` = chưa giao (tab Chờ giao) |
+| `paidAt` | ISO timestamp \| null | Set khi thanh toán thành công |
+
+**List filter** (`GET /orders`): query `deliveryState` = `awaiting_delivery` \| `awaiting_payment` (C-14):
+
+- `awaiting_delivery`: `status=READY` AND `deliveredAt IS NULL`
+- `awaiting_payment`: `deliveredAt IS NOT NULL` AND `status != PAID`
 
 ## 1.7 Health check
 
@@ -585,6 +624,24 @@ PENDING → MAKING → READY → PAID
 
 - Default filter `branchId` = JWT branch
 - OWNER có thể `?branchId=` hoặc xem all
+
+---
+
+### 4.1.1 Danh sách NV thao tác (tablet picker)
+
+|            |                                                     |
+| ---------- | --------------------------------------------------- |
+| **Method** | `GET`                                               |
+| **URL**    | `/staff/branch-operators`                           |
+| **DTO**    | — → `{ data: BranchOperatorDto[] }`               |
+
+**Response `200`:** Active staff `CASHIER` / `BARISTA` / `MANAGER` tại JWT branch (đã APPROVED), **loại trừ** tài khoản trạm (`station@*`).
+
+| Status | `200`, `400` (chưa có branch), `403` |
+
+**Authorization:** `CASHIER+`
+
+**Use case:** Tablet trạm — modal chọn NV trước mutation (B-15).
 
 ---
 
@@ -1137,6 +1194,7 @@ PENDING → MAKING → READY → PAID
   "orderType": "DINE_IN",
   "tableId": "uuid",
   "notes": "Ít đường",
+  "actedByStaffId": "uuid",
   "items": [{ "productId": "uuid", "quantity": 2, "notes": "Không đá" }]
 }
 ```
@@ -1153,6 +1211,7 @@ PENDING → MAKING → READY → PAID
 | `items[].productId` | required, UUID, available                       |
 | `items[].quantity`  | required, integer 1–99                          |
 | `items[].notes`     | optional, max 200 chars                         |
+| `actedByStaffId`    | optional UUID; **required** tablet trạm (§1.7.2) |
 
 **Authorization:** `CASHIER+`
 
@@ -1160,9 +1219,10 @@ PENDING → MAKING → READY → PAID
 
 - `branchId` từ JWT; `orderNumber` auto: `{branchCode}-{YYYYMMDD}-{seq}`
 - Snapshot `productName`, `unitPrice` từ product tại thời điểm tạo
-- Tính `lineTotal = quantity * unitPrice`, `subtotal = sum(lineTotal)`, `taxAmount = 0` (MVP), `total = subtotal`
+- Tính `lineTotal = quantity * unitPrice`, `subtotal = sum(lineTotal)`
+- **VAT:** giá sản phẩm **đã gồm 8%**; `taxAmount` = phần VAT tách từ `total` để hiển thị bill (D-17); `total = subtotal` (không cộng thêm VAT)
 - DINE_IN + `tableId` → set table `OCCUPIED`
-- Phải có shift `OPEN` trong branch (nếu shift enabled)
+- **Pilot:** `shift_id` optional (B-05). **Sprint 5+:** phải có shift `OPEN` khi shift enabled
 - Status ban đầu: `PENDING`
 - Ghi audit `ORDER_CREATE`
 
@@ -1208,7 +1268,8 @@ PENDING → MAKING → READY → PAID
 
 ```json
 {
-  "status": "MAKING"
+  "status": "MAKING",
+  "actedByStaffId": "uuid"
 }
 ```
 
@@ -1222,19 +1283,57 @@ PENDING → MAKING → READY → PAID
 | ---------------- | ----------------------------- |
 | PENDING → MAKING | BARISTA+, CASHIER+            |
 | MAKING → READY   | BARISTA+                      |
-| READY → PAID     | CASHIER+ (thường qua Payment) |
+| READY → delivered | CASHIER+ — `POST /orders/{id}/deliver` sets `deliveredAt` |
+| READY → PAID     | CASHIER+ (Payment; mặc định sau `deliveredAt`, E-01) |
 | * → CANCELLED    | CASHIER+, MANAGER+            |
 
 **Business rules:**
 
 - Validate state machine (§1.7)
-- CANCELLED: chỉ khi chưa PAID; release table nếu DINE_IN
+- `deliveredAt`: khi NV ấn "Đã giao" (B-33, C-14)
+- CANCELLED: chỉ khi chưa PAID; bắt buộc `reason`; release table nếu DINE_IN
 - PAID chỉ qua endpoint Payment (không set trực tiếp trừ MANAGER+ override)
 - Ghi audit `ORDER_STATUS_CHANGE`
 
 ---
 
-### 8.6 Hủy order
+### 8.6 Đánh dấu đã giao món
+
+|            |                                      |
+| ---------- | ------------------------------------ |
+| **Method** | `POST`                               |
+| **URL**    | `/orders/{orderId}/deliver`          |
+| **DTO**    | `DeliverOrderRequestDto` → `OrderDto` |
+
+**Request:**
+
+```json
+{
+  "actedByStaffId": "uuid"
+}
+```
+
+| Status | `200`, `400`, `404`, `409` |
+
+**Validation:**
+
+| Field | Rules |
+| ----- | ----- |
+| `actedByStaffId` | optional UUID; **required** tablet trạm (§1.7.2) |
+
+**Authorization:** `CASHIER+`
+
+**Business rules:**
+
+- Order phải `status = READY`
+- `deliveredAt` phải `null` (idempotent: đã giao → `409` hoặc `200` no-op — implement chọn một)
+- **Không** đổi `status` — vẫn `READY` cho đến khi thanh toán
+- Set `deliveredAt = now()`
+- Ghi audit `ORDER_DELIVERED` với `actor_id` = NV được chọn
+
+---
+
+### 8.7 Hủy order
 
 |            |                                      |
 | ---------- | ------------------------------------ |
@@ -1246,7 +1345,8 @@ PENDING → MAKING → READY → PAID
 
 ```json
 {
-  "reason": "Khách hủy"
+  "reason": "Khách hủy",
+  "actedByStaffId": "uuid"
 }
 ```
 
@@ -1310,7 +1410,8 @@ PENDING → MAKING → READY → PAID
   "method": "CASH",
   "amount": 100000,
   "changeAmount": 5000,
-  "reference": null
+  "reference": null,
+  "actedByStaffId": "uuid"
 }
 ```
 
@@ -1330,7 +1431,7 @@ PENDING → MAKING → READY → PAID
 
 **Business rules:**
 
-- Order phải `status = READY` (hoặc `PENDING/MAKING` nếu MANAGER+ `allowEarlyPayment`)
+- Order phải `status = READY` và (`deliveredAt` set **hoặc** `allowEarlyPayment` / mang đi trả trước — E-01)
 - `amount` ≥ `order.total` (thiếu → `400`)
 - CASH: `changeAmount = amount - total` (server validate)
 - Non-CASH: `changeAmount` phải null/0
@@ -1821,7 +1922,7 @@ Các DTO cần bổ sung vào `@caffeapp/shared/contracts`:
 | `ProductCategoryDto`, `CreateCategoryRequestDto`                   | Categories ✅ partial |
 | `ProductDto`, `CreateProductRequestDto`                            | Products ✅ partial   |
 | `TableDto`, `CreateTableRequestDto`, `UpdateTableStatusRequestDto` | Tables ✅ partial     |
-| `OrderDto`, `CreateOrderDto`, `UpdateOrderStatusDto`               | Orders ✅             |
+| `OrderDto`, `CreateOrderDto`, `UpdateOrderStatusDto`, `DeliverOrderRequestDto` | Orders ✅             |
 | `PaymentDto`, `CreatePaymentDto`                                   | Payments ✅           |
 | `RevenueReportDto`, `TopProductsReportDto`, `ShiftReportDto`       | Reports               |
 | `InventoryItemDto`, `InventoryMovementDto`, movement requests      | Inventory             |

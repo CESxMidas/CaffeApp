@@ -55,7 +55,7 @@ flowchart TB
 | KiotViet F&B     | Đầy đủ tính năng, in hóa đơn            | Phức tạp, chi phí cao cho quán nhỏ    |
 | Sapo             | POS + kho                               | Không tối ưu workflow barista         |
 | iPOS / Misa      | Phổ biến VN                             | UI cũ, không mobile-first             |
-| **CaffeApp MVP** | Mobile-first, 3 role, real-time barista | Chưa có in hóa đơn, 1 chi nhánh pilot |
+| **CaffeApp MVP** | Mobile-first, tablet trạm + real-time barista | Chưa in hóa đơn; pilot **3 CN** |
 
 ---
 
@@ -74,29 +74,34 @@ flowchart TB
 
 ### Must Have (Sprint 1–4)
 
-- Đăng nhập, chọn chi nhánh, chọn vai trò (A)
+- Đăng nhập; OWNER chọn CN phiên; staff CN từ assignment (A)
+- Tablet trạm: Thu ngân + Bếp; chọn tên NV khi thao tác (A, B-15)
 - Tạo đơn tại bàn/mang đi, sơ đồ bàn, menu, giỏ hàng (B)
-- Thanh toán tiền mặt + chuyển khoản (B)
-- Barista queue real-time, pha chế, hoàn thành (C)
+- Thanh toán **tiền mặt + chuyển khoản** VietQR (B)
+- Barista queue (polling → WS), pha chế, READY + Đã giao (C)
 - Dashboard doanh thu cơ bản (D)
 
 ### Should Have (Sprint 5–6)
 
-- Thanh toán thẻ, ví điện tử (B)
-- Quản lý menu, nhân viên (D)
-- Thông báo, cài đặt (E)
+- Thanh toán thẻ / ví (ghi nhận hoặc VNPay Sandbox)
+- Gộp/chuyển/tách bàn; giảm giá cơ bản (B-30, B-31)
+- Quản lý menu, nhân viên, audit UI (D)
+- Thông báo push, cài đặt (E)
+- Module shift bắt buộc (Sprint 5)
 
 ### Could Have (Post-MVP)
 
-- Multi-branch đồng bộ
 - In hóa đơn Bluetooth
-- Offline-first với sync
+- VNPay / MoMo production
+- Ảnh món upload, export PDF
 
-### Won't Have (MVP)
+### Won't Have (MVP pilot)
 
 - Loyalty / tích điểm khách
 - Đặt bàn online từ khách
 - Kho nguyên liệu chi tiết
+- **Offline-first** — mất mạng → vận hành tay (B-18)
+- Giao hàng Grab/ShopeeFood (A-08)
 
 ---
 

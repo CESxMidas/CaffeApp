@@ -22,6 +22,7 @@ import { useTables } from '@features/orders';
 import { Button, EmptyState, ErrorScreen, SkeletonTableGrid } from '@shared/components/ui';
 import { useSessionStore } from '@shared/stores/session';
 import { useCartStore } from '@shared/stores/cart';
+import { opStack } from '@shared/lib/navigation/operationalRoutes';
 
 const FLOORS = ['Tầng 1', 'Tầng 2'] as const;
 
@@ -71,7 +72,7 @@ function handleOccupiedTable(table: TableDto) {
   if (table.activeOrderId) {
     buttons.unshift({
       text: 'Xem đơn hiện tại',
-      onPress: () => router.push(`/(cashier)/order/${table.activeOrderId}`),
+      onPress: () => router.push(opStack(`/order/${table.activeOrderId}`)),
     });
   }
   Alert.alert(`Bàn ${table.code}`, 'Bàn đang phục vụ khách', buttons);
@@ -121,7 +122,7 @@ export default function TablesScreen() {
       tableId: selected.id,
       tableCode: selected.code,
     });
-    router.push('/(cashier)/menu');
+    router.push(opStack('/menu'));
   };
 
   if (!accessToken) {

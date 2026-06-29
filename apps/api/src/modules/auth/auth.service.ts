@@ -8,7 +8,7 @@ import type {
   StaffDto,
   UserDto,
 } from '@caffeapp/shared';
-import { BranchAssignmentStatus as SharedBranchAssignmentStatus } from '@caffeapp/shared';
+import { BranchAssignmentStatus as SharedBranchAssignmentStatus, isStationAccountEmail } from '@caffeapp/shared';
 import * as bcrypt from 'bcrypt';
 import { BranchAssignmentStatus, StaffRole, type Staff } from '@prisma/client';
 import { PrismaService } from '@common/prisma/prisma.service';
@@ -53,7 +53,7 @@ export class AuthService {
       ...tokens,
       expiresIn,
       user: this.toUserDto(user),
-      staff: this.toStaffDto(staff),
+      staff: this.toStaffDto(staff, user.email),
       branch,
     };
   }
@@ -72,7 +72,7 @@ export class AuthService {
 
     return {
       user: this.toUserDto(user),
-      staff: this.toStaffDto(user.staff),
+      staff: this.toStaffDto(user.staff, user.email),
       branch,
     };
   }
@@ -155,7 +155,7 @@ export class AuthService {
     };
   }
 
-  private toStaffDto(staff: Staff): StaffDto {
+  private toStaffDto(staff: Staff, email: string): StaffDto {
     return {
       id: staff.id,
       userId: staff.userId,
@@ -164,6 +164,7 @@ export class AuthService {
       fullName: staff.fullName,
       isActive: staff.isActive,
       branchAssignmentStatus: staff.branchAssignmentStatus as SharedBranchAssignmentStatus,
+      isStationAccount: isStationAccountEmail(email),
     };
   }
 

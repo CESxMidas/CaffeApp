@@ -1,7 +1,8 @@
 # Gán chi nhánh — Quy trình duyệt
 
-**Version:** 1.0  
-**Nguyên tắc:** Nhân viên **không tự chọn** chi nhánh. Quản lý đề xuất → Chủ quán duyệt.
+**Version:** 2.0  
+**Nguyên tắc:** Nhân viên **không tự chọn** chi nhánh. Quản lý đề xuất → Chủ quán duyệt.  
+**Nguồn:** [STAKEHOLDER_QUESTIONNAIRE.md](STAKEHOLDER_QUESTIONNAIRE.md) (C-08, C-10, G-15)
 
 ---
 
@@ -21,16 +22,16 @@ sequenceDiagram
   Note over API: APPROVED hoặc REJECTED
   S->>API: POST /auth/login
   Note over API: Chỉ cho login nếu APPROVED
-  S->>S: Chọn vai trò ca (không chọn CN)
+  S->>S: Vào khu vận hành (CN từ DB, không chọn CN)
 ```
 
 | Bước | Ai            | Hành động                                                   |
 | ---- | ------------- | ----------------------------------------------------------- |
 | 1    | **Quản lý**   | Đề xuất gán nhân viên vào chi nhánh (bất kỳ CN nào)         |
 | 2    | Hệ thống      | `branchAssignmentStatus = PENDING_OWNER`                    |
-| 3    | **Chủ quán**  | Duyệt hoặc từ chối                                          |
+| 3    | **Chủ quán**  | Duyệt hoặc từ chối (in-app; push MVP v2 — C-10)             |
 | 4    | Hệ thống      | `APPROVED` → nhân viên login được · `REJECTED` → chặn login |
-| 5    | **Nhân viên** | Login → **không** chọn CN → chọn vai trò ca                 |
+| 5    | **Nhân viên** | Login → **không** chọn CN → vào UI theo `StaffRole` (C-11) |
 
 ---
 
@@ -63,8 +64,8 @@ Body đề xuất: `{ "branchId": "uuid" }`
 
 | User                        | Sau login                                                          |
 | --------------------------- | ------------------------------------------------------------------ |
-| CASHIER / BARISTA / MANAGER | CN từ assignment đã duyệt → **Chọn vai trò**                       |
-| OWNER                       | **Chọn chi nhánh phiên** (xem báo cáo đa CN) — không phải “tự gán” |
+| CASHIER / BARISTA / MANAGER | CN từ assignment đã duyệt → **khu vận hành / QL** (không chọn CN)   |
+| OWNER                       | **Chọn chi nhánh phiên** (xem báo cáo đa CN) — C-09                |
 
 | Màn hình                | Ai             | Đường dẫn                     |
 | ----------------------- | -------------- | ----------------------------- |
@@ -72,6 +73,8 @@ Body đề xuất: `{ "branchId": "uuid" }`
 | Duyệt gán chi nhánh     | OWNER          | `/(manager)/branch-approvals` |
 
 Màn `02-chon-chi-nhanh` design: **chỉ dùng cho chủ quán** (phiên làm việc).
+
+Màn `03-chon-vai-tro`: **deprecated** — không dùng (C-11).
 
 ---
 

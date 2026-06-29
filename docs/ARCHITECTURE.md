@@ -2,7 +2,8 @@
 
 **Version:** 2.0.0-arch  
 **Status:** Production foundation (Sprint 0.5 → Enterprise refactor)  
-**Last updated:** 2026-06-27
+**Last updated:** 2026-06-29  
+**Nghiệp vụ:** [STAKEHOLDER_QUESTIONNAIRE.md](STAKEHOLDER_QUESTIONNAIRE.md) · [PRD.md](PRD.md)
 
 ---
 

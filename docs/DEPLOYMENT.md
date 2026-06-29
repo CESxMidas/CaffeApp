@@ -44,6 +44,9 @@ npm run db:generate
 npm run db:migrate
 npm run db:seed
 
+# Staging / UAT (menu thật D-13, 3 CN, 50 bàn/CN) — xem mục 9
+# npm run db:seed:staging
+
 # 4. Run
 npm run api          # Terminal 1 → http://localhost:3000/api/v1/health
 npm run mobile:android   # Terminal 2
@@ -198,6 +201,74 @@ Connection: `postgresql://postgres:postgres@localhost:5432/caffeapp`
 - [ ] Mobile app connects to correct API URL
 - [ ] Logs accessible (stdout / aggregator)
 - [ ] Rollback plan documented ([RELEASE.md](RELEASE.md))
+
+---
+
+## 9. Staging seed (TASK-P2-06 / I-03)
+
+Seed **dev local** (`npm run db:seed`) dùng menu demo ngắn — 2 CN, phục vụ dev hàng ngày.
+
+Seed **staging / UAT** (`npm run db:seed:staging`) import data giống quán thật:
+
+| Hạng mục | Nội dung |
+| -------- | -------- |
+| Chi nhánh | 3 CN (Q1, Q3, Q7) — `prisma/data/staging-branches.json` |
+| Bàn | 50/CN: Tầng 1 ×20, Tầng 2 ×20, Sân ×10 |
+| Menu | 38 món / 8 category từ D-13 — `prisma/data/staging-menu.json` |
+| Tài khoản | `owner@caffe.app` + QL/CASHIER/BARISTA/station mỗi CN |
+| VietQR | `bankInfo` theo CN (STK placeholder — chủ quán cập nhật JSON trước go-live) |
+
+### Chạy trên staging DB
+
+```bash
+# 1. Trỏ DATABASE_URL tới staging (secret manager / .env staging — không commit)
+export DATABASE_URL="postgresql://..."
+# Windows PowerShell:
+# $env:DATABASE_URL="postgresql://..."
+
+# 2. Migration (nếu chưa)
+npm run db:migrate:deploy --workspace=@caffeapp/api
+
+# 3. Seed staging
+npm run db:seed:staging
+
+# Tùy chọn: đổi mật khẩu mặc định
+# $env:STAGING_SEED_PASSWORD="your-strong-password"
+```
+
+Script in ra số lượng bàn/món sau khi chạy. **Không** chạy trên production.
+
+### Cập nhật menu / STK
+
+1. Sửa `apps/api/prisma/data/staging-menu.json` (giá, món mới) hoặc `staging-branches.json` (STK VietQR).
+2. Chạy lại `npm run db:seed:staging` (idempotent upsert).
+
+### Verify API
+
+Đăng nhập bằng tài khoản staging (vd. `cashier.q1@caffe.app`), rồi:
+
+```bash
+# Health
+curl -s https://<staging-api>/api/v1/health
+
+# Branches (Bearer token)
+curl -s -H "Authorization: Bearer <token>" https://<staging-api>/api/v1/branches
+
+# Products / tables (branchId = CN Quận 1)
+curl -s -H "Authorization: Bearer <token>" "https://<staging-api>/api/v1/products?branchId=a0000000-0000-0000-0000-000000000001"
+curl -s -H "Authorization: Bearer <token>" "https://<staging-api>/api/v1/tables?branchId=a0000000-0000-0000-0000-000000000001"
+```
+
+Tài khoản staging (mật khẩu mặc định `password123` hoặc `STAGING_SEED_PASSWORD`):
+
+| Email | Vai trò |
+| ----- | ------- |
+| `owner@caffe.app` | OWNER |
+| `manager.q1@caffe.app` | MANAGER CN Q1 |
+| `cashier.q1@caffe.app` | CASHIER |
+| `barista.q1@caffe.app` | BARISTA |
+| `station.q1@caffe.app` | Tablet trạm (CASHIER) |
+| `manager.q3@` / `q7@` … | Tương tự cho CN khác |
 
 ---
 

@@ -1,23 +1,20 @@
 # CaffeApp — Mobile Architecture
 
-**Version:** 1.0.0  
-**Stack:** Expo 56 · React Native · Expo Router · Zustand · TanStack Query · Axios  
-**Pattern:** Clean Architecture (Uncle Bob) — dependency rule inward
+**Version:** 1.1.0  
+**Nguồn nghiệp vụ:** [STAKEHOLDER_QUESTIONNAIRE.md](STAKEHOLDER_QUESTIONNAIRE.md) · [DEVICE_POLICY.md](DEVICE_POLICY.md)
 
-> Tài liệu **thiết kế** — không implement UI hay business logic.  
-> Liên kết: [API Contract](api/API_CONTRACT.md) · [Conventions](CONVENTIONS.md) · [Architecture](ARCHITECTURE.md)
-
-### Trạng thái implementation (2026-06-28)
+### Trạng thái implementation (2026-06-29)
 
 | Area                         | Doc    | Code hiện tại                                              |
 | ---------------------------- | ------ | ---------------------------------------------------------- |
-| Route files (`src/app/`)     | §2, §3 | ✅ 18 routes — khớp                                        |
+| Route files (`src/app/`)     | §2, §3 | ✅ Routes cashier/barista/manager — ⏳ **station shell** (GAP-11, P2-03b) |
 | `QueryProvider`              | §2     | ✅ Mounted ở root `_layout.tsx`                            |
-| `AuthProvider`, guards       | §3     | ⏳ Sprint 1 — chưa implement                               |
-| Feature hooks / use-cases    | §4     | ⏳ Empty stubs                                             |
-| Services (`shared/lib/api/`) | §6     | ⚠️ 4/10 services (auth, order, product, table)             |
-| SecureStore                  | §6     | ⏳ Package installed; adapter chưa wire                    |
-| Barista/Manager layout       | §2     | ⚠️ Code dùng **Tabs**; doc mô tả Stack — cả hai hợp lệ MVP |
+| `AuthProvider`, guards       | §3     | ✅ Implemented — cần E2E thiết bị thật (C-15)              |
+| Station tablet tabs          | §3     | ✅ P2-03b — `(station)/` Thu ngân + Bếp                    |
+| Feature hooks / use-cases    | §4     | ⏳ In progress (Sprint 2+)                                 |
+| Services (`shared/lib/api/`) | §6     | ⚠️ Partial                                                 |
+| SecureStore                  | §6     | ✅ Wired — verify kill app (C-15)                          |
+| Routing                      | §3     | ✅ P2-01 route theo `StaffRole` — station cần shell `isStationDevice` |
 
 ---
 
@@ -252,6 +249,13 @@ Expo Router file-based routing. **3 role stacks** sau auth.
 │       ├── queue          /(barista)/queue
 │       └── settings       /(barista)/settings
 │
+├── [isStationDevice = true]  ← P2-03b (target)
+│   └── (station)/
+│       ├── (tabs)/
+│       │   ├── front        Tab Thu ngân → reuse (cashier) flows
+│       │   └── kitchen      Tab Bếp → reuse (barista)/queue + order/[id]
+│       └── … shared stacks (cart, payment, order detail)
+│
 └── [role = manager]
     └── (manager)/
         ├── dashboard      /(manager)/dashboard
@@ -285,7 +289,7 @@ flowchart TD
 | Layout                  | Guard                              | Hành vi                               | Status                         |
 | ----------------------- | ---------------------------------- | ------------------------------------- | ------------------------------ |
 | `app/_layout.tsx`       | —                                  | Mount `QueryProvider`, `AuthProvider` | Partial (`QueryProvider` only) |
-| `app/index.tsx`         | Session redirect                   | `Redirect` theo `activeRole`          | ✅ Mock redirect               |
+| `app/index.tsx`         | Session redirect                   | Redirect theo `StaffRole` (không `activeRole`) | ⚠️ Refactor C-11 |
 | `(auth)/_layout.tsx`    | Guest only                         | Authenticated → redirect `index`      | ⏳ Sprint 1                    |
 | `(cashier)/_layout.tsx` | `RoleGuard(['cashier','manager'])` | Sai role → `index`                    | ⏳ Sprint 1                    |
 | `(barista)/_layout.tsx` | `RoleGuard(['barista','manager'])` | Sai role → `index`                    | ⏳ Sprint 1                    |
@@ -717,24 +721,25 @@ useLogout.mutate()
 
 ## 10. Offline Strategy
 
-POS app — **online-first**, selective offline (không full offline-first Sprint 1).
+**Pilot policy (B-18):** Mất mạng → **app không vận hành**; quán xử lý thủ công. Không offline queue MVP.
 
-### Connectivity tiers
+### Connectivity
 
-| Tier         | Mô tả                       | UX                                  |
-| ------------ | --------------------------- | ----------------------------------- |
-| **Online**   | API reachable               | Normal                              |
-| **Degraded** | High latency / intermittent | Stale cache + banner "Kết nối chậm" |
-| **Offline**  | No network                  | Read cache; block mutations         |
+| Tier         | UX                                  |
+| ------------ | ----------------------------------- |
+| **Online**   | Normal                              |
+| **Degraded** | Banner "Kết nối chậm"; polling fallback (F-16) |
+| **Offline**  | Thông báo lỗi; **không** queue đơn  |
 
 ### Phase rollout
 
 | Sprint | Capability                                       |
 | ------ | ------------------------------------------------ |
-| 1      | Detect offline (`NetInfo`); banner; block login  |
-| 2      | Cache `products`, `tables` (persist Query cache) |
-| 3      | Offline queue: draft orders sync khi online      |
-| 4      | Barista queue cache + conflict resolution        |
+| 1–3    | NetInfo banner; block mutations khi offline      |
+| 2      | Cache `products`, `tables` (read-only, online)   |
+| 4+     | WS reconnect; **không** offline-first sync       |
+
+> Nháp giỏ **trước gửi bếp** được lưu local (D-30) — khác offline order sync.
 
 ### Offline read cache
 
@@ -991,10 +996,10 @@ Layer 3: API                  403 Forbidden → ErrorState
 
 | Sprint | Mobile architecture deliverables                            |
 | ------ | ----------------------------------------------------------- |
-| **1**  | Auth flow, SecureStore, token refresh, AuthProvider, guards |
-| **2**  | orders/products/tables hooks, cart store, query keys        |
-| **3**  | reports hooks, permission matrix complete, persist cache    |
-| **4**  | inventory feature, offline queue, NetInfo banner            |
+| **1**  | Auth, SecureStore, AuthProvider; routing StaffRole; **tablet trạm tabs (P2-03b)** |
+| **2**  | orders/products/tables hooks, cart draft persist (D-30)             |
+| **3**  | payments TM/CK, reports hooks                                       |
+| **4**  | WebSocket barista; polling fallback — **no offline queue**          |
 
 ---
 

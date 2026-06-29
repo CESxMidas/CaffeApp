@@ -1,7 +1,9 @@
 import { BadRequestException, ForbiddenException, Injectable } from '@nestjs/common';
-import type { StaffDto, StaffListItemDto } from '@caffeapp/shared';
+import type { BranchOperatorDto, StaffDto, StaffListItemDto } from '@caffeapp/shared';
+import { isStationAccountEmail } from '@caffeapp/shared';
 import { BranchAssignmentStatus, StaffRole } from '@prisma/client';
 import { PrismaService } from '@common/prisma/prisma.service';
+import { assertBranchAccess } from '@common/utils/branch-scope.util';
 import type { JwtPayload } from '@common/types/jwt-payload.types';
 
 @Injectable()
@@ -44,6 +46,43 @@ export class StaffService {
     });
 
     return { data: rows.map((s) => this.toStaffListItemDto(s)) };
+  }
+
+  /** CASHIER+ lists active operators for station tablet staff picker (B-15). */
+  async listBranchOperators(
+    payload: JwtPayload,
+    roles?: StaffRole[],
+  ): Promise<{ data: BranchOperatorDto[] }> {
+    if (!payload.branchId) {
+      throw new BadRequestException('Chưa chọn chi nhánh');
+    }
+    assertBranchAccess(payload, payload.branchId);
+
+    const roleFilter =
+      roles?.length && roles.length > 0
+        ? roles
+        : [StaffRole.CASHIER, StaffRole.BARISTA, StaffRole.MANAGER];
+
+    const rows = await this.prisma.staff.findMany({
+      where: {
+        branchId: payload.branchId,
+        isActive: true,
+        branchAssignmentStatus: BranchAssignmentStatus.APPROVED,
+        role: { in: roleFilter },
+      },
+      include: { user: { select: { email: true } } },
+      orderBy: { fullName: 'asc' },
+    });
+
+    return {
+      data: rows
+        .filter((s) => !isStationAccountEmail(s.user.email))
+        .map((s) => ({
+          id: s.id,
+          fullName: s.fullName,
+          role: s.role as BranchOperatorDto['role'],
+        })),
+    };
   }
 
   /** MANAGER+ proposes branch for a staff member — awaits OWNER approval. */

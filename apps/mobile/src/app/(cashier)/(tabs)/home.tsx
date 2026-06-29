@@ -1,18 +1,19 @@
 import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
-import { router } from 'expo-router';
+import { router, type Href } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { colors, spacing, borderRadius, OrderType } from '@caffeapp/shared';
 import { Card } from '@shared/components/ui';
 import type { PermissionAction } from '@shared/config/permissions.config';
 import { useUnreadNotificationCount } from '@features/notifications';
 import { usePermission } from '@shared/hooks/usePermission';
+import { opFrontTab, opStack } from '@shared/lib/navigation/operationalRoutes';
 import { useSessionStore } from '@shared/stores/session';
 import { useCartStore } from '@shared/stores/cart';
 
 type ActionDef = {
   label: string;
   icon: keyof typeof Ionicons.glyphMap;
-  route: string | null;
+  route: () => Href;
   permission: PermissionAction;
   requiresOrder?: boolean;
   readyFilter?: boolean;
@@ -22,38 +23,38 @@ const ACTIONS: ActionDef[] = [
   {
     label: 'Tạo đơn',
     icon: 'document-text-outline',
-    route: '/(cashier)/order-type',
+    route: () => opStack('/order-type'),
     permission: 'orders:create',
   },
   {
     label: 'Danh sách đơn',
     icon: 'list-outline',
-    route: '/(cashier)/(tabs)/orders',
+    route: () => opFrontTab('orders'),
     permission: 'orders:list',
   },
   {
     label: 'Lịch sử',
     icon: 'time-outline',
-    route: '/(cashier)/history',
+    route: () => opStack('/history'),
     permission: 'orders:list',
   },
   {
     label: 'Sơ đồ bàn',
     icon: 'grid-outline',
-    route: '/(cashier)/tables',
+    route: () => opStack('/tables'),
     permission: 'tables:view',
     requiresOrder: true,
   },
   {
     label: 'Thông báo',
     icon: 'notifications-outline',
-    route: '/(cashier)/notifications',
+    route: () => opStack('/notifications'),
     permission: 'orders:list',
   },
   {
     label: 'Món đã xong',
     icon: 'restaurant-outline',
-    route: '/(cashier)/(tabs)/orders',
+    route: () => opFrontTab('orders'),
     permission: 'orders:list',
   },
 ];
@@ -66,11 +67,10 @@ function ActionTile({ action, badge }: { action: ActionDef; badge?: number }) {
   if (!allowed) return null;
 
   const onPress = () => {
-    if (!action.route) return;
     if (action.requiresOrder && activeBranchId) {
       startOrder({ branchId: activeBranchId, orderType: OrderType.DINE_IN });
     }
-    router.push(action.route as never);
+    router.push(action.route());
   };
 
   return (

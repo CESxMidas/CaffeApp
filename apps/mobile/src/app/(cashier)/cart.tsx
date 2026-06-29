@@ -1,11 +1,21 @@
-import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
 import { router } from 'expo-router';
+import { useState } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
 import { Ionicons } from '@expo/vector-icons';
-import { colors, spacing, borderRadius, formatCurrency, calculateOrderTotal } from '@caffeapp/shared';
+import {
+  colors,
+  spacing,
+  borderRadius,
+  formatCurrency,
+  calculateOrderTotal,
+  StaffRole,
+} from '@caffeapp/shared';
 import { useCreateOrder } from '@features/orders';
+import { useStaffActor } from '@features/staff';
 import { Button, Card } from '@shared/components/ui';
 import { showMessage } from '@shared/lib/ui/confirm';
+import { opFrontTab } from '@shared/lib/navigation/operationalRoutes';
 import { useCartStore } from '@shared/stores/cart';
 
 export default function CartScreen() {
@@ -18,9 +28,11 @@ export default function CartScreen() {
   const clearCart = useCartStore((s) => s.clearCart);
   const subtotal = useCartStore((s) => s.subtotal());
   const createOrder = useCreateOrder();
+  const { runWithActor, pickerModal } = useStaffActor({ operatorRoles: [StaffRole.CASHIER] });
   const queryClient = useQueryClient();
+  const [orderNotes, setOrderNotes] = useState('');
 
-  const { tax_amount, total } = calculateOrderTotal(subtotal);
+  const { pretax_subtotal, tax_amount, total } = calculateOrderTotal(subtotal);
 
   const handleSubmit = () => {
     if (!branchId || !orderType || items.length === 0) {
@@ -28,41 +40,42 @@ export default function CartScreen() {
       return;
     }
 
-    createOrder.mutate(
-      {
-        branchId,
-        orderType,
-        tableId: tableId ?? undefined,
-        items: items.map((i) => ({
-          productId: i.productId,
-          quantity: i.quantity,
-          unitPrice: i.unitPrice,
-          notes: i.notes ?? undefined,
-        })),
-      },
-      {
-        onSuccess: (order) => {
-          clearCart();
-          showMessage('Đã gửi bếp', `Đơn ${order.orderNumber} đang chờ pha`, 'success');
-          router.replace('/(cashier)/(tabs)/home');
+    runWithActor((actedByStaffId) => {
+      createOrder.mutate(
+        {
+          branchId,
+          orderType,
+          tableId: tableId ?? undefined,
+          notes: orderNotes.trim() || undefined,
+          actedByStaffId,
+          items: items.map((i) => ({
+            productId: i.productId,
+            quantity: i.quantity,
+            unitPrice: i.unitPrice,
+            notes: i.notes ?? undefined,
+          })),
         },
-        onError: (err: unknown) => {
-          const msg =
-            (err as { response?: { data?: { message?: string } } })?.response?.data?.message ??
-            'Không gửi được đơn';
-          const isTableConflict =
-            msg.includes('Bàn đã được chọn') || msg.includes('đang có khách');
-          showMessage(
-            isTableConflict ? 'Bàn không khả dụng' : 'Lỗi',
-            msg,
-            'error',
-          );
-          if (isTableConflict) {
-            void queryClient.invalidateQueries({ queryKey: ['tables'] });
-          }
+        {
+          onSuccess: (order) => {
+            clearCart();
+            setOrderNotes('');
+            showMessage('Đã gửi bếp', `Đơn ${order.orderNumber} đang chờ pha`, 'success');
+            router.replace(opFrontTab('home'));
+          },
+          onError: (err: unknown) => {
+            const msg =
+              (err as { response?: { data?: { message?: string } } })?.response?.data?.message ??
+              'Không gửi được đơn';
+            const isTableConflict =
+              msg.includes('Bàn đã được chọn') || msg.includes('đang có khách');
+            showMessage(isTableConflict ? 'Bàn không khả dụng' : 'Lỗi', msg, 'error');
+            if (isTableConflict) {
+              void queryClient.invalidateQueries({ queryKey: ['tables'] });
+            }
+          },
         },
-      },
-    );
+      );
+    });
   };
 
   return (
@@ -95,18 +108,29 @@ export default function CartScreen() {
                   </Pressable>
                 </View>
               </View>
-              <Text style={styles.lineTotal}>
-                {formatCurrency(item.unitPrice * item.quantity)}
-              </Text>
+              <Text style={styles.lineTotal}>{formatCurrency(item.unitPrice * item.quantity)}</Text>
             </Card>
           ))
         )}
+        <View style={styles.notesBlock}>
+          <Text style={styles.notesLabel}>Ghi chú đơn</Text>
+          <TextInput
+            value={orderNotes}
+            onChangeText={setOrderNotes}
+            placeholder="Nhập ghi chú cho đơn hàng..."
+            placeholderTextColor={colors.textMuted}
+            style={styles.orderNotesInput}
+            multiline
+            maxLength={200}
+          />
+          <Text style={styles.notesCounter}>{orderNotes.length}/200</Text>
+        </View>
       </ScrollView>
 
       <View style={styles.summary}>
         <View style={styles.summaryRow}>
-          <Text style={styles.summaryLabel}>Tạm tính</Text>
-          <Text style={styles.summaryValue}>{formatCurrency(subtotal)}</Text>
+          <Text style={styles.summaryLabel}>Tiền hàng (chưa thuế)</Text>
+          <Text style={styles.summaryValue}>{formatCurrency(pretax_subtotal)}</Text>
         </View>
         <View style={styles.summaryRow}>
           <Text style={styles.summaryLabel}>VAT 8%</Text>
@@ -123,6 +147,7 @@ export default function CartScreen() {
           onPress={handleSubmit}
         />
       </View>
+      {pickerModal}
     </View>
   );
 }
@@ -146,6 +171,26 @@ const styles = StyleSheet.create({
     color: colors.primary,
     marginTop: spacing.sm,
     textAlign: 'right',
+  },
+  notesBlock: { marginTop: spacing.md },
+  notesLabel: { fontSize: 14, fontWeight: '600', color: colors.text, marginBottom: spacing.sm },
+  orderNotesInput: {
+    minHeight: 112,
+    borderWidth: 1,
+    borderColor: colors.border,
+    borderRadius: borderRadius.md,
+    paddingHorizontal: spacing.base,
+    paddingVertical: spacing.md,
+    color: colors.text,
+    fontSize: 14,
+    backgroundColor: colors.surface,
+    textAlignVertical: 'top',
+  },
+  notesCounter: {
+    alignSelf: 'flex-end',
+    color: colors.textMuted,
+    fontSize: 12,
+    marginTop: spacing.xs,
   },
   summary: {
     padding: spacing.base,

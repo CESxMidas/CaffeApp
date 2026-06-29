@@ -14,6 +14,7 @@ import { Roles } from '@common/decorators/roles.decorator';
 import type { JwtPayload } from '@common/types/jwt-payload.types';
 import { CancelOrderDto } from './dto/cancel-order.dto';
 import { CreateOrderDto } from './dto/create-order.dto';
+import { DeliverOrderDto } from './dto/deliver-order.dto';
 import { UpdateOrderStatusDto } from './dto/update-order-status.dto';
 import { OrdersService } from './orders.service';
 
@@ -28,8 +29,15 @@ export class OrdersController {
     @Query('branchId') branchId?: string,
     @Query('status') status?: string,
     @Query('tableId') tableId?: string,
+    @Query('deliveryState') deliveryState?: 'awaiting_delivery' | 'awaiting_payment',
   ): Promise<{ data: OrderDto[] }> {
-    const data = await this.ordersService.listForBranch(user, branchId, status, tableId);
+    const data = await this.ordersService.listForBranch(
+      user,
+      branchId,
+      status,
+      tableId,
+      deliveryState,
+    );
     return { data };
   }
 
@@ -64,6 +72,17 @@ export class OrdersController {
     return { data };
   }
 
+  @Post(':orderId/deliver')
+  @Roles(StaffRole.CASHIER, StaffRole.BARISTA, StaffRole.MANAGER, StaffRole.OWNER)
+  async deliver(
+    @CurrentUser() user: JwtPayload,
+    @Param('orderId') orderId: string,
+    @Body() dto: DeliverOrderDto,
+  ): Promise<{ data: OrderDto }> {
+    const data = await this.ordersService.deliver(user, orderId, dto);
+    return { data };
+  }
+
   @Post(':orderId/cancel')
   @Roles(StaffRole.CASHIER, StaffRole.MANAGER, StaffRole.OWNER)
   async cancel(
@@ -71,7 +90,7 @@ export class OrdersController {
     @Param('orderId') orderId: string,
     @Body() dto: CancelOrderDto,
   ): Promise<{ data: OrderDto }> {
-    const data = await this.ordersService.cancel(user, orderId, dto.reason);
+    const data = await this.ordersService.cancel(user, orderId, dto);
     return { data };
   }
 }

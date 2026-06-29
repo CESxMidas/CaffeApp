@@ -6,16 +6,22 @@ import {
   OrderType,
   colors,
   formatCurrency,
+  isAwaitingDelivery,
+  isAwaitingPayment,
   spacing,
+  StaffRole,
 } from '@caffeapp/shared';
-import { useOrder, useUpdateOrderStatus } from '@features/orders';
+import { useDeliverOrder, useOrder } from '@features/orders';
+import { useStaffActor } from '@features/staff';
 import { Button, Card, ErrorScreen } from '@shared/components/ui';
 import { showMessage } from '@shared/lib/ui/confirm';
+import { opStack } from '@shared/lib/navigation/operationalRoutes';
 
 export default function CashierOrderDetailScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const { data: order, isLoading, isError, refetch } = useOrder(id ?? null);
-  const updateStatus = useUpdateOrderStatus();
+  const deliverOrder = useDeliverOrder();
+  const { runWithActor, pickerModal } = useStaffActor({ operatorRoles: [StaffRole.CASHIER] });
 
   if (isLoading) {
     return (
@@ -33,33 +39,38 @@ export default function CashierOrderDetailScreen() {
     );
   }
 
-  const canMarkServed = order.status === OrderStatus.READY;
-  const canPay = order.status === OrderStatus.SERVING;
+  const canMarkDelivered = isAwaitingDelivery(order);
+  const canPay = order.status === OrderStatus.READY;
 
-  const handleMarkServed = () => {
-    updateStatus.mutate(
-      { orderId: order.id, status: OrderStatus.SERVING },
-      {
-        onSuccess: () => {
-          showMessage('Đã giao nước', 'Đơn đang phục vụ — có thể thu tiền khi khách xong', 'success');
+  const handleDeliver = () => {
+    runWithActor((actedByStaffId) => {
+      deliverOrder.mutate(
+        { orderId: order.id, actedByStaffId },
+        {
+          onSuccess: () => {
+            showMessage('Đã giao món', 'Có thể thu tiền khi khách sẵn sàng', 'success');
+          },
+          onError: (err: unknown) => {
+            const msg =
+              (err as { response?: { data?: { message?: string } } })?.response?.data?.message ??
+              'Không cập nhật được trạng thái';
+            showMessage('Lỗi', msg, 'error');
+          },
         },
-        onError: (err: unknown) => {
-          const msg =
-            (err as { response?: { data?: { message?: string } } })?.response?.data?.message ??
-            'Không cập nhật được trạng thái';
-          showMessage('Lỗi', msg, 'error');
-        },
-      },
-    );
+      );
+    });
   };
+
+  const statusLabel = isAwaitingPayment(order)
+    ? 'Chờ thanh toán'
+    : ORDER_STATUS_LABELS[order.status];
 
   return (
     <ScrollView style={styles.container} contentContainerStyle={styles.content}>
       <Card>
         <Text style={styles.orderNumber}>#{order.orderNumber}</Text>
         <Text style={styles.meta}>
-          {order.orderType === OrderType.DINE_IN ? 'Tại bàn' : 'Mang đi'} ·{' '}
-          {ORDER_STATUS_LABELS[order.status]}
+          {order.orderType === OrderType.DINE_IN ? 'Tại bàn' : 'Mang đi'} · {statusLabel}
         </Text>
         <Text style={styles.total}>{formatCurrency(order.total)}</Text>
       </Card>
@@ -74,11 +85,11 @@ export default function CashierOrderDetailScreen() {
         </Card>
       ))}
 
-      {canMarkServed ? (
+      {canMarkDelivered ? (
         <Button
-          title="Đã giao nước"
-          onPress={handleMarkServed}
-          loading={updateStatus.isPending}
+          title="Đã giao"
+          onPress={handleDeliver}
+          loading={deliverOrder.isPending}
           style={{ marginTop: spacing.lg }}
         />
       ) : null}
@@ -86,14 +97,15 @@ export default function CashierOrderDetailScreen() {
       {canPay ? (
         <Button
           title="Thanh toán"
-          onPress={() => router.push(`/(cashier)/payment/${order.id}` as never)}
+          onPress={() => router.push(opStack(`/payment/${order.id}`))}
           style={{ marginTop: spacing.lg }}
         />
       ) : null}
 
-      {order.status === OrderStatus.READY ? (
-        <Text style={styles.hint}>Pha xong — giao nước cho khách trước khi thu tiền</Text>
+      {canMarkDelivered ? (
+        <Text style={styles.hint}>Pha xong — giao món cho khách (hoặc thu tiền trước nếu khách yêu cầu)</Text>
       ) : null}
+      {pickerModal}
     </ScrollView>
   );
 }

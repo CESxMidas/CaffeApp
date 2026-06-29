@@ -5,8 +5,10 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import type { PaymentDto } from '@caffeapp/shared';
-import { OrderStatus, PaymentMethod, StaffRole } from '@prisma/client';
+import { OrderStatus, PaymentMethod } from '@prisma/client';
 import { PrismaService } from '@common/prisma/prisma.service';
+import { ActorResolverService } from '@common/audit/actor-resolver.service';
+import { AuditService } from '@common/audit/audit.service';
 import { assertBranchAccess } from '@common/utils/branch-scope.util';
 import { syncTableEmptyIfIdle } from '@common/utils/table-status.util';
 import type { JwtPayload } from '@common/types/jwt-payload.types';
@@ -14,7 +16,11 @@ import type { CreatePaymentDto } from './dto/create-payment.dto';
 
 @Injectable()
 export class PaymentsService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly audit: AuditService,
+    private readonly actorResolver: ActorResolverService,
+  ) {}
 
   async create(payload: JwtPayload, dto: CreatePaymentDto): Promise<PaymentDto> {
     const order = await this.prisma.order.findUnique({
@@ -31,16 +37,7 @@ export class PaymentsService {
       throw new ConflictException('Đơn đã thanh toán');
     }
 
-    const canEarlyPay =
-      payload.role === StaffRole.MANAGER || payload.role === StaffRole.OWNER;
-    if (order.status !== OrderStatus.SERVING && !canEarlyPay) {
-      throw new BadRequestException('Đơn chưa giao nước — xác nhận "Đã giao nước" trước khi thanh toán');
-    }
-    if (
-      canEarlyPay &&
-      order.status !== OrderStatus.SERVING &&
-      order.status !== OrderStatus.READY
-    ) {
+    if (order.status !== OrderStatus.READY) {
       throw new BadRequestException('Đơn chưa sẵn sàng để thanh toán');
     }
 
@@ -59,6 +56,11 @@ export class PaymentsService {
     }
 
     const paidAt = new Date();
+    const actorUserId = await this.actorResolver.resolveActorUserId(
+      payload,
+      dto.actedByStaffId,
+      order.branchId,
+    );
 
     const payment = await this.prisma.$transaction(async (tx) => {
       const created = await tx.payment.create({
@@ -82,6 +84,22 @@ export class PaymentsService {
       }
 
       return created;
+    });
+
+    void this.audit.log({
+      branchId: order.branchId,
+      actorId: actorUserId,
+      entityType: 'payment',
+      entityId: payment.id,
+      action: 'payment.created',
+      afterData: {
+        orderId: order.id,
+        method: payment.method,
+        amount: payment.amount,
+      },
+      metadata: dto.actedByStaffId
+        ? ({ actedByStaffId: dto.actedByStaffId } as import('@prisma/client').Prisma.InputJsonValue)
+        : undefined,
     });
 
     return {

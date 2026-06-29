@@ -15,38 +15,52 @@ import {
   ORDER_STATUS_LABELS,
   colors,
   formatCurrency,
+  isAwaitingDelivery,
+  isAwaitingPayment,
   spacing,
   borderRadius,
 } from '@caffeapp/shared';
 import { useOrders } from '@features/orders';
 import { Card, EmptyState, ErrorScreen } from '@shared/components/ui';
 import { useSessionStore } from '@shared/stores/session';
+import { opStack } from '@shared/lib/navigation/operationalRoutes';
 
 const TABS = [
-  { key: 'all', label: 'Tất cả', statuses: null },
-  {
-    key: 'active',
-    label: 'Đang pha',
-    statuses: [OrderStatus.PENDING, OrderStatus.MAKING],
-  },
-  { key: 'ready', label: 'Sẵn sàng giao', statuses: [OrderStatus.READY] },
-  { key: 'serving', label: 'Chờ thanh toán', statuses: [OrderStatus.SERVING] },
-  { key: 'done', label: 'Hoàn thành', statuses: [OrderStatus.PAID] },
+  { key: 'all', label: 'Tất cả' },
+  { key: 'active', label: 'Đang pha' },
+  { key: 'ready', label: 'Chờ giao' },
+  { key: 'awaiting_payment', label: 'Chờ thanh toán' },
+  { key: 'done', label: 'Hoàn thành' },
 ] as const;
+
+type TabKey = (typeof TABS)[number]['key'];
+
+function matchesTab(order: OrderDto, tab: TabKey): boolean {
+  switch (tab) {
+    case 'all':
+      return true;
+    case 'active':
+      return order.status === OrderStatus.PENDING || order.status === OrderStatus.MAKING;
+    case 'ready':
+      return isAwaitingDelivery(order);
+    case 'awaiting_payment':
+      return isAwaitingPayment(order);
+    case 'done':
+      return order.status === OrderStatus.PAID;
+    default:
+      return true;
+  }
+}
 
 export default function CashierOrdersScreen() {
   const activeBranchId = useSessionStore((s) => s.activeBranchId);
-  const [tab, setTab] = useState<(typeof TABS)[number]['key']>('all');
+  const [tab, setTab] = useState<TabKey>('all');
   const { data: orders, isLoading, isError, refetch, isRefetching } = useOrders({
     branchId: activeBranchId,
   });
 
   const filtered = useMemo(() => {
-    const current = TABS.find((t) => t.key === tab);
-    if (!current?.statuses) return orders ?? [];
-    return (orders ?? []).filter((o) =>
-      (current.statuses as readonly OrderStatus[]).includes(o.status as OrderStatus),
-    );
+    return (orders ?? []).filter((o) => matchesTab(o, tab));
   }, [orders, tab]);
 
   if (isLoading) {
@@ -94,13 +108,19 @@ export default function CashierOrdersScreen() {
 }
 
 function OrderRow({ order }: { order: OrderDto }) {
+  const badgeLabel = isAwaitingPayment(order)
+    ? 'Chờ thanh toán'
+    : isAwaitingDelivery(order)
+      ? 'Chờ giao'
+      : ORDER_STATUS_LABELS[order.status];
+
   return (
-    <Pressable onPress={() => router.push(`/(cashier)/order/${order.id}` as never)}>
+    <Pressable onPress={() => router.push(opStack(`/order/${order.id}`))}>
       <Card style={styles.rowCard}>
         <View style={styles.rowHeader}>
           <Text style={styles.orderNumber}>#{order.orderNumber}</Text>
           <View style={styles.badge}>
-            <Text style={styles.badgeText}>{ORDER_STATUS_LABELS[order.status]}</Text>
+            <Text style={styles.badgeText}>{badgeLabel}</Text>
           </View>
         </View>
         <Text style={styles.rowMeta}>

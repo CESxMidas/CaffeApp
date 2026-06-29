@@ -5,11 +5,13 @@ import { Ionicons } from '@expo/vector-icons';
 import { colors, spacing, StaffRole } from '@caffeapp/shared';
 import { useBranches } from '@features/auth';
 import { Button, Card, ErrorScreen } from '@shared/components/ui';
+import { activateAndNavigate } from '@shared/lib/auth/sessionRouting';
 import { useSessionStore } from '@shared/stores/session';
 
 /** Chỉ chủ quán chọn chi nhánh làm việc trong phiên — nhân viên dùng CN đã được duyệt. */
 export default function BranchScreen() {
   const staffRole = useSessionStore((s) => s.staffRole);
+  const employeeName = useSessionStore((s) => s.employeeName);
   const { data: branches, isLoading, isError, refetch } = useBranches();
   const setBranch = useSessionStore((s) => s.setBranch);
   const accessToken = useSessionStore((s) => s.accessToken);
@@ -21,16 +23,26 @@ export default function BranchScreen() {
       return;
     }
     if (staffRole !== StaffRole.OWNER) {
-      router.replace('/(auth)/role');
+      router.replace('/');
     }
   }, [accessToken, staffRole]);
 
+  const continueWithBranch = async (branchId: string, branchName: string) => {
+    if (!staffRole || !employeeName) return;
+    setBranch(branchId, branchName);
+    await activateAndNavigate({
+      branchId,
+      branchName,
+      staffRole,
+      employeeName,
+    });
+  };
+
   useEffect(() => {
-    if (branches?.length === 1) {
-      setBranch(branches[0].id, branches[0].name);
-      router.replace('/(auth)/role');
+    if (branches?.length === 1 && staffRole && employeeName) {
+      void continueWithBranch(branches[0].id, branches[0].name);
     }
-  }, [branches, setBranch]);
+  }, [branches, employeeName, staffRole]);
 
   if (isLoading) {
     return (
@@ -83,8 +95,7 @@ export default function BranchScreen() {
         onPress={() => {
           const branch = branches.find((b) => b.id === activeSelection);
           if (!branch) return;
-          setBranch(branch.id, branch.name);
-          router.push('/(auth)/role');
+          void continueWithBranch(branch.id, branch.name);
         }}
       />
     </View>

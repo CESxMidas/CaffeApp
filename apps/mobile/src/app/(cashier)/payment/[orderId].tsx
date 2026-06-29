@@ -8,10 +8,13 @@ import {
   formatCurrency,
   spacing,
   borderRadius,
+  StaffRole,
 } from '@caffeapp/shared';
 import { useCreatePayment, useOrder } from '@features/orders';
+import { useStaffActor } from '@features/staff';
 import { Button, Card, ErrorScreen, Input } from '@shared/components/ui';
 import { showMessage } from '@shared/lib/ui/confirm';
+import { opFrontTab } from '@shared/lib/navigation/operationalRoutes';
 
 const METHODS = [
   PaymentMethod.CASH,
@@ -24,6 +27,7 @@ export default function CashierPaymentScreen() {
   const { orderId } = useLocalSearchParams<{ orderId: string }>();
   const { data: order, isError, refetch } = useOrder(orderId ?? null);
   const createPayment = useCreatePayment();
+  const { runWithActor, pickerModal } = useStaffActor({ operatorRoles: [StaffRole.CASHIER] });
   const [method, setMethod] = useState<PaymentMethod>(PaymentMethod.CASH);
   const [cashReceived, setCashReceived] = useState('');
 
@@ -50,32 +54,37 @@ export default function CashierPaymentScreen() {
     );
   }
 
+  const pretaxAmount = order.subtotal - order.taxAmount;
+
   const handlePay = () => {
     const amount =
       method === PaymentMethod.CASH
         ? Number(cashReceived.replace(/\D/g, '')) || 0
         : order.total;
 
-    createPayment.mutate(
-      {
-        orderId: order.id,
-        method,
-        amount,
-        ...(method === PaymentMethod.CASH ? { changeAmount } : {}),
-      },
-      {
-        onSuccess: () => {
-          showMessage('Thành công', `Đã thanh toán đơn #${order.orderNumber}`, 'success');
-          router.replace('/(cashier)/(tabs)/orders');
+    runWithActor((actedByStaffId) => {
+      createPayment.mutate(
+        {
+          orderId: order.id,
+          method,
+          amount,
+          actedByStaffId,
+          ...(method === PaymentMethod.CASH ? { changeAmount } : {}),
         },
-        onError: (err: unknown) => {
-          const msg =
-            (err as { response?: { data?: { message?: string } } })?.response?.data?.message ??
-            'Thanh toán thất bại';
-          showMessage('Lỗi', msg, 'error');
+        {
+          onSuccess: () => {
+            showMessage('Thành công', `Đã thanh toán đơn #${order.orderNumber}`, 'success');
+            router.replace(opFrontTab('orders'));
+          },
+          onError: (err: unknown) => {
+            const msg =
+              (err as { response?: { data?: { message?: string } } })?.response?.data?.message ??
+              'Thanh toán thất bại';
+            showMessage('Lỗi', msg, 'error');
+          },
         },
-      },
-    );
+      );
+    });
   };
 
   return (
@@ -83,6 +92,16 @@ export default function CashierPaymentScreen() {
       <Card>
         <Text style={styles.label}>Tổng thanh toán</Text>
         <Text style={styles.total}>{formatCurrency(order.total)}</Text>
+        <View style={styles.breakdown}>
+          <View style={styles.breakdownRow}>
+            <Text style={styles.breakdownLabel}>Tiền hàng (chưa thuế)</Text>
+            <Text style={styles.breakdownValue}>{formatCurrency(pretaxAmount)}</Text>
+          </View>
+          <View style={styles.breakdownRow}>
+            <Text style={styles.breakdownLabel}>VAT 8%</Text>
+            <Text style={styles.breakdownValue}>{formatCurrency(order.taxAmount)}</Text>
+          </View>
+        </View>
       </Card>
 
       <Text style={styles.sectionTitle}>Phương thức</Text>
@@ -128,6 +147,7 @@ export default function CashierPaymentScreen() {
         onPress={handlePay}
         style={{ marginTop: spacing.lg }}
       />
+      {pickerModal}
     </ScrollView>
   );
 }
@@ -137,6 +157,10 @@ const styles = StyleSheet.create({
   content: { padding: spacing.base, paddingBottom: spacing.xl },
   label: { fontSize: 14, color: colors.textSecondary },
   total: { fontSize: 28, fontWeight: '700', color: colors.primary, marginTop: spacing.xs },
+  breakdown: { marginTop: spacing.md, paddingTop: spacing.md, borderTopWidth: 1, borderTopColor: colors.border },
+  breakdownRow: { flexDirection: 'row', justifyContent: 'space-between', marginBottom: spacing.xs },
+  breakdownLabel: { fontSize: 14, color: colors.textSecondary },
+  breakdownValue: { fontSize: 14, color: colors.text, fontWeight: '500' },
   sectionTitle: { fontSize: 16, fontWeight: '600', color: colors.text, marginTop: spacing.lg, marginBottom: spacing.sm },
   methodGrid: { gap: spacing.sm },
   methodBtn: {},

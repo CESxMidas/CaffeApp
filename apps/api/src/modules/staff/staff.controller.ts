@@ -1,5 +1,5 @@
-import { Body, Controller, Get, Param, Post } from '@nestjs/common';
-import type { StaffDto, StaffListItemDto } from '@caffeapp/shared';
+import { Body, Controller, Get, Param, Post, Query } from '@nestjs/common';
+import type { StaffDto, StaffListItemDto, BranchOperatorDto } from '@caffeapp/shared';
 import { StaffRole } from '@prisma/client';
 import { CurrentUser } from '@common/decorators/current-user.decorator';
 import { Roles } from '@common/decorators/roles.decorator';
@@ -15,6 +15,19 @@ export class StaffController {
   @Roles(StaffRole.MANAGER, StaffRole.OWNER)
   list(@CurrentUser() user: JwtPayload): Promise<{ data: StaffListItemDto[] }> {
     return this.staffService.listStaff(user);
+  }
+
+  @Get('branch-operators')
+  @Roles(StaffRole.CASHIER, StaffRole.BARISTA, StaffRole.MANAGER, StaffRole.OWNER)
+  listBranchOperators(
+    @CurrentUser() user: JwtPayload,
+    @Query('role') role?: string,
+  ): Promise<{ data: BranchOperatorDto[] }> {
+    const roles = role
+      ?.split(',')
+      .map((r) => r.trim())
+      .filter((r): r is StaffRole => Object.values(StaffRole).includes(r as StaffRole));
+    return this.staffService.listBranchOperators(user, roles?.length ? roles : undefined);
   }
 
   @Get('branch-assignments/pending')

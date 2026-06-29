@@ -18,6 +18,7 @@
     "db:generate": "npm run db:generate --workspace=@caffeapp/api",
     "db:migrate": "npm run db:migrate --workspace=@caffeapp/api",
     "db:seed": "npm run db:seed --workspace=@caffeapp/api",
+    "db:seed:staging": "npm run db:seed:staging --workspace=@caffeapp/api",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
     "format": "prettier --write \"**/*.{ts,tsx,js,cjs,json,md,yml,yaml}\"",

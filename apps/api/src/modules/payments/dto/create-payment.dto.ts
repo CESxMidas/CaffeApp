@@ -22,4 +22,8 @@ export class CreatePaymentDto {
   @IsString()
   @MaxLength(100)
   reference?: string;
+
+  @IsOptional()
+  @IsEntityId()
+  actedByStaffId?: string;
 }

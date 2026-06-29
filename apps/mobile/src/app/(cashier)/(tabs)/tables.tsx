@@ -4,6 +4,7 @@ import { router, useFocusEffect } from 'expo-router';
 import { OrderType, colors } from '@caffeapp/shared';
 import { useSessionStore } from '@shared/stores/session';
 import { useCartStore } from '@shared/stores/cart';
+import { opStack } from '@shared/lib/navigation/operationalRoutes';
 
 /** Tab "Bàn" — mở sơ đồ bàn full-screen (design bottom nav) */
 export default function CashierTablesTabScreen() {
@@ -15,7 +16,7 @@ export default function CashierTablesTabScreen() {
       if (activeBranchId) {
         startOrder({ branchId: activeBranchId, orderType: OrderType.DINE_IN });
       }
-      router.push('/(cashier)/tables');
+      router.push(opStack('/tables'));
     }, [activeBranchId, startOrder]),
   );
 

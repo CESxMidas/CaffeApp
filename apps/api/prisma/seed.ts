@@ -115,6 +115,24 @@ const USERS: DemoUser[] = [
     branchAssignmentStatus: BranchAssignmentStatus.NONE,
     phone: '0909999001',
   },
+  {
+    id: 'b0000000-0000-0000-0000-000000000010',
+    email: 'station@caffe.app',
+    fullName: 'Trạm thu ngân Q1',
+    role: StaffRole.CASHIER,
+    staffId: 'c0000000-0000-0000-0000-000000000010',
+    branchId: BRANCH_Q1,
+    branchAssignmentStatus: BranchAssignmentStatus.APPROVED,
+  },
+  {
+    id: 'b0000000-0000-0000-0000-000000000011',
+    email: 'station.q3@caffe.app',
+    fullName: 'Trạm thu ngân Q3',
+    role: StaffRole.CASHIER,
+    staffId: 'c0000000-0000-0000-0000-000000000011',
+    branchId: BRANCH_Q3,
+    branchAssignmentStatus: BranchAssignmentStatus.APPROVED,
+  },
 ];
 
 const MENU_CATEGORIES = [

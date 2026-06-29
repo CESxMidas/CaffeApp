@@ -135,6 +135,7 @@ erDiagram
         timestamp created_at
         timestamp updated_at
         timestamp paid_at
+        timestamp delivered_at
     }
 
     order_items {
@@ -193,11 +194,14 @@ erDiagram
 | ----------- | -------------------------- |
 | `PENDING`   | Đã gửi bếp, chờ pha        |
 | `MAKING`    | Barista đang pha           |
-| `READY`     | Sẵn sàng giao / thanh toán |
+| `READY`     | Barista hoàn thành pha — sẵn sàng giao |
 | `PAID`      | Đã thanh toán              |
 | `CANCELLED` | Đã hủy                     |
 
 Flow: `PENDING → MAKING → READY → PAID` (hoặc `CANCELLED` trước `PAID`).
+
+**Đã giao món:** field `delivered_at` (không dùng enum `SERVING` — F-12).  
+**Legacy:** migration `SERVING` sẽ được gỡ; code refactor theo `delivered_at`.
 
 ### `OrderType`
 

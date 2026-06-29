@@ -49,4 +49,8 @@ export class CreateOrderDto {
   @ValidateNested({ each: true })
   @Type(() => CreateOrderItemBodyDto)
   items!: CreateOrderItemBodyDto[];
+
+  @IsOptional()
+  @IsEntityId()
+  actedByStaffId?: string;
 }

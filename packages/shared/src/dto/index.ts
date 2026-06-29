@@ -48,12 +48,21 @@ export interface StaffDto {
   fullName: string;
   isActive: boolean;
   branchAssignmentStatus: BranchAssignmentStatus;
+  /** True for shared tablet station login (A-09). */
+  isStationAccount?: boolean;
 }
 
 /** Staff row for manager/owner lists (includes email + branch name). */
 export interface StaffListItemDto extends StaffDto {
   email: string;
   branchName: string | null;
+}
+
+/** Active branch staff for station tablet picker (excludes station accounts). */
+export interface BranchOperatorDto {
+  id: string;
+  fullName: string;
+  role: StaffRole;
 }
 
 export interface BranchDto {
@@ -123,6 +132,8 @@ export interface OrderDto {
   items: OrderItemDto[];
   createdAt: string;
   updatedAt: string;
+  deliveredAt: string | null;
+  paidAt: string | null;
 }
 
 export interface CreateOrderDto {
@@ -130,6 +141,7 @@ export interface CreateOrderDto {
   orderType: OrderType;
   tableId?: string;
   notes?: string;
+  actedByStaffId?: string;
   items: CreateOrderItemDto[];
 }
 
@@ -143,6 +155,11 @@ export interface CreateOrderItemDto {
 
 export interface UpdateOrderStatusDto {
   status: OrderStatus;
+  actedByStaffId?: string;
+}
+
+export interface DeliverOrderRequestDto {
+  actedByStaffId?: string;
 }
 
 export interface CreatePaymentDto {
@@ -151,6 +168,7 @@ export interface CreatePaymentDto {
   amount: number;
   changeAmount?: number;
   reference?: string;
+  actedByStaffId?: string;
 }
 
 export interface PaymentDto {

@@ -5,6 +5,7 @@ import { OrderType, colors, spacing, borderRadius } from '@caffeapp/shared';
 import { Card } from '@shared/components/ui';
 import { useSessionStore } from '@shared/stores/session';
 import { useCartStore } from '@shared/stores/cart';
+import { opStack } from '@shared/lib/navigation/operationalRoutes';
 
 export default function OrderTypeScreen() {
   const activeBranchId = useSessionStore((s) => s.activeBranchId);
@@ -14,10 +15,10 @@ export default function OrderTypeScreen() {
     if (!activeBranchId) return;
     startOrder({ branchId: activeBranchId, orderType });
     if (orderType === OrderType.DINE_IN) {
-      router.push('/(cashier)/tables');
+      router.push(opStack('/tables'));
       return;
     }
-    router.push('/(cashier)/menu');
+    router.push(opStack('/menu'));
   };
 
   return (

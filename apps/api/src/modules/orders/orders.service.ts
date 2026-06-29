@@ -6,24 +6,28 @@ import {
 } from '@nestjs/common';
 import type { OrderDto } from '@caffeapp/shared';
 import { calculateOrderTotal, isValidProductUnitPrice } from '@caffeapp/shared';
-import { OrderStatus, OrderType, StaffRole, TableStatus, NotificationType } from '@prisma/client';
+import { BranchAssignmentStatus, OrderStatus, OrderType, StaffRole, TableStatus, NotificationType } from '@prisma/client';
 import { PrismaService } from '@common/prisma/prisma.service';
 import { AuditService } from '@common/audit/audit.service';
+import { ActorResolverService } from '@common/audit/actor-resolver.service';
 import { assertBranchAccess, resolveBranchScope } from '@common/utils/branch-scope.util';
 import { syncTableEmptyIfIdle } from '@common/utils/table-status.util';
 import type { JwtPayload } from '@common/types/jwt-payload.types';
 import { NotificationsService } from '@modules/notifications/notifications.service';
+import type { CancelOrderDto } from './dto/cancel-order.dto';
 import type { CreateOrderDto as CreateOrderBodyDto } from './dto/create-order.dto';
+import type { DeliverOrderDto } from './dto/deliver-order.dto';
 import type { UpdateOrderStatusDto } from './dto/update-order-status.dto';
 
 const STATUS_TRANSITIONS: Record<OrderStatus, OrderStatus[]> = {
   [OrderStatus.PENDING]: [OrderStatus.MAKING, OrderStatus.CANCELLED],
   [OrderStatus.MAKING]: [OrderStatus.READY, OrderStatus.CANCELLED],
-  [OrderStatus.READY]: [OrderStatus.SERVING, OrderStatus.CANCELLED],
-  [OrderStatus.SERVING]: [OrderStatus.CANCELLED],
+  [OrderStatus.READY]: [OrderStatus.CANCELLED],
   [OrderStatus.PAID]: [],
   [OrderStatus.CANCELLED]: [],
 };
+
+export type DeliveryStateFilter = 'awaiting_delivery' | 'awaiting_payment';
 
 @Injectable()
 export class OrdersService {
@@ -31,6 +35,7 @@ export class OrdersService {
     private readonly prisma: PrismaService,
     private readonly notifications: NotificationsService,
     private readonly audit: AuditService,
+    private readonly actorResolver: ActorResolverService,
   ) {}
 
   async listForBranch(
@@ -38,6 +43,7 @@ export class OrdersService {
     branchId?: string,
     statusFilter?: string,
     tableId?: string,
+    deliveryState?: DeliveryStateFilter,
   ): Promise<OrderDto[]> {
     const scopedBranchId = resolveBranchScope(payload, branchId);
 
@@ -53,6 +59,12 @@ export class OrdersService {
         branchId: scopedBranchId,
         ...(tableId ? { tableId } : {}),
         ...(statuses?.length ? { status: { in: statuses } } : {}),
+        ...(deliveryState === 'awaiting_delivery'
+          ? { status: OrderStatus.READY, deliveredAt: null }
+          : {}),
+        ...(deliveryState === 'awaiting_payment'
+          ? { status: OrderStatus.READY, deliveredAt: { not: null } }
+          : {}),
       },
       include: { items: true },
       orderBy: {
@@ -116,6 +128,11 @@ export class OrdersService {
     const subtotal = lineItems.reduce((sum, i) => sum + i.lineTotal, 0);
     const { tax_amount, total } = calculateOrderTotal(subtotal);
     const orderNumber = await this.nextOrderNumber(branchId);
+    const actorUserId = await this.actorResolver.resolveActorUserId(
+      payload,
+      dto.actedByStaffId,
+      branchId,
+    );
 
     const order = await this.prisma.$transaction(async (tx) => {
       if (dto.tableId) {
@@ -163,7 +180,7 @@ export class OrdersService {
 
     void this.audit.log({
       branchId,
-      actorId: payload.sub,
+      actorId: actorUserId,
       entityType: 'order',
       entityId: order.id,
       action: 'order.created',
@@ -174,6 +191,9 @@ export class OrdersService {
         total: order.total,
         itemCount: order.items.length,
       },
+      metadata: dto.actedByStaffId
+        ? ({ actedByStaffId: dto.actedByStaffId } as import('@prisma/client').Prisma.InputJsonValue)
+        : undefined,
     });
 
     void this.notifications.notifyBranchRoles({
@@ -220,7 +240,18 @@ export class OrdersService {
       throw new ConflictException(`Không thể chuyển từ ${order.status} sang ${dto.status}`);
     }
 
-    this.assertStatusRole(payload, order.status, dto.status);
+    const effectiveRole = await this.resolveEffectiveStaffRole(
+      payload,
+      dto.actedByStaffId,
+      order.branchId,
+    );
+    this.assertStatusRole(effectiveRole, order.status, dto.status);
+
+    const actorUserId = await this.actorResolver.resolveActorUserId(
+      payload,
+      dto.actedByStaffId,
+      order.branchId,
+    );
 
     const updated = await this.prisma.$transaction(async (tx) => {
       const result = await tx.order.update({
@@ -238,13 +269,16 @@ export class OrdersService {
 
     void this.audit.log({
       branchId: order.branchId,
-      actorId: payload.sub,
+      actorId: actorUserId,
       entityType: 'order',
       entityId: order.id,
       action: `order.status.${dto.status.toLowerCase()}`,
       beforeData: { status: order.status },
       afterData: { status: dto.status },
-      metadata: (auditMetadata ?? undefined) as import('@prisma/client').Prisma.InputJsonValue | undefined,
+      metadata: {
+        ...(auditMetadata ?? {}),
+        ...(dto.actedByStaffId ? { actedByStaffId: dto.actedByStaffId } : {}),
+      } as import('@prisma/client').Prisma.InputJsonValue,
     });
 
     if (dto.status === OrderStatus.READY) {
@@ -261,24 +295,82 @@ export class OrdersService {
     return this.toOrderDto(updated);
   }
 
-  async cancel(payload: JwtPayload, orderId: string, reason: string): Promise<OrderDto> {
+  async deliver(
+    payload: JwtPayload,
+    orderId: string,
+    dto: DeliverOrderDto,
+  ): Promise<OrderDto> {
+    const order = await this.prisma.order.findUnique({
+      where: { id: orderId },
+      include: { items: true },
+    });
+    if (!order) {
+      throw new NotFoundException('Đơn không tồn tại');
+    }
+    assertBranchAccess(payload, order.branchId);
+
+    if (order.status !== OrderStatus.READY) {
+      throw new ConflictException('Chỉ đánh dấu đã giao khi đơn ở trạng thái READY');
+    }
+    if (order.deliveredAt) {
+      throw new ConflictException('Đơn đã được đánh dấu giao');
+    }
+
+    if (
+      payload.role !== StaffRole.CASHIER &&
+      payload.role !== StaffRole.BARISTA &&
+      payload.role !== StaffRole.MANAGER &&
+      payload.role !== StaffRole.OWNER
+    ) {
+      throw new BadRequestException('Không có quyền xác nhận đã giao món');
+    }
+
+    const deliveredAt = new Date();
+    const actorUserId = await this.actorResolver.resolveActorUserId(
+      payload,
+      dto.actedByStaffId,
+      order.branchId,
+    );
+
+    const updated = await this.prisma.order.update({
+      where: { id: orderId },
+      data: { deliveredAt },
+      include: { items: true },
+    });
+
+    void this.audit.log({
+      branchId: order.branchId,
+      actorId: actorUserId,
+      entityType: 'order',
+      entityId: order.id,
+      action: 'order.delivered',
+      beforeData: { deliveredAt: null },
+      afterData: { deliveredAt: deliveredAt.toISOString() },
+      metadata: dto.actedByStaffId
+        ? ({ actedByStaffId: dto.actedByStaffId } as import('@prisma/client').Prisma.InputJsonValue)
+        : undefined,
+    });
+
+    return this.toOrderDto(updated);
+  }
+
+  async cancel(payload: JwtPayload, orderId: string, dto: CancelOrderDto): Promise<OrderDto> {
     return this.updateStatus(
       payload,
       orderId,
-      { status: OrderStatus.CANCELLED },
-      { reason },
+      { status: OrderStatus.CANCELLED, actedByStaffId: dto.actedByStaffId },
+      { reason: dto.reason },
     );
   }
 
   private assertStatusRole(
-    payload: JwtPayload,
+    role: StaffRole,
     from: OrderStatus,
     to: OrderStatus,
   ): void {
-    const role = payload.role;
 
     if (to === OrderStatus.CANCELLED) {
-      if (from === OrderStatus.READY || from === OrderStatus.SERVING) {
+      if (from === OrderStatus.READY) {
         if (role !== StaffRole.MANAGER && role !== StaffRole.OWNER) {
           throw new BadRequestException('Chỉ quản lý mới hủy đơn đã sẵn sàng');
         }
@@ -299,17 +391,32 @@ export class OrdersService {
         throw new BadRequestException('Chỉ barista mới đánh dấu hoàn thành pha');
       }
     }
+  }
 
-    if (to === OrderStatus.SERVING) {
-      if (
-        role !== StaffRole.CASHIER &&
-        role !== StaffRole.BARISTA &&
-        role !== StaffRole.MANAGER &&
-        role !== StaffRole.OWNER
-      ) {
-        throw new BadRequestException('Chỉ nhân viên quầy mới xác nhận đã giao nước');
-      }
+  /** Station tablet: permission follows actedByStaffId NV, not shared station JWT role. */
+  private async resolveEffectiveStaffRole(
+    payload: JwtPayload,
+    actedByStaffId: string | undefined,
+    branchId: string,
+  ): Promise<StaffRole> {
+    if (!actedByStaffId) {
+      return payload.role;
     }
+
+    const actorStaff = await this.prisma.staff.findFirst({
+      where: {
+        id: actedByStaffId,
+        branchId,
+        isActive: true,
+        branchAssignmentStatus: BranchAssignmentStatus.APPROVED,
+      },
+    });
+
+    if (!actorStaff) {
+      return payload.role;
+    }
+
+    return actorStaff.role;
   }
 
   private async nextOrderNumber(branchId: string): Promise<string> {
@@ -335,6 +442,8 @@ export class OrdersService {
     notes: string | null;
     createdAt: Date;
     updatedAt: Date;
+    deliveredAt?: Date | null;
+    paidAt?: Date | null;
     items: Array<{
       id: string;
       productId: string;
@@ -358,6 +467,8 @@ export class OrdersService {
       notes: o.notes,
       createdAt: o.createdAt.toISOString(),
       updatedAt: o.updatedAt.toISOString(),
+      deliveredAt: o.deliveredAt?.toISOString() ?? null,
+      paidAt: o.paidAt?.toISOString() ?? null,
       items: o.items.map((item) => ({
         id: item.id,
         productId: item.productId,

@@ -1,12 +1,5 @@
 import { useMemo, useState } from 'react';
-import {
-  Modal,
-  Pressable,
-  ScrollView,
-  StyleSheet,
-  Text,
-  View,
-} from 'react-native';
+import { Modal, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
 import { router } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import type { ProductDto, DrinkSize } from '@caffeapp/shared';
@@ -14,6 +7,7 @@ import { colors, spacing, borderRadius, formatCurrency, priceForSize } from '@ca
 import { useProducts } from '@features/orders';
 import { Button, Card, ErrorScreen, SkeletonList } from '@shared/components/ui';
 import { useSessionStore } from '@shared/stores/session';
+import { opStack } from '@shared/lib/navigation/operationalRoutes';
 import { useCartStore } from '@shared/stores/cart';
 
 const SIZES = ['S', 'M', 'L'] as const;
@@ -33,6 +27,7 @@ export default function MenuScreen() {
   const [sugar, setSugar] = useState<(typeof SUGAR)[number]>('Vừa');
   const [ice, setIce] = useState<(typeof ICE)[number]>('Vừa');
   const [qty, setQty] = useState(1);
+  const [customNote, setCustomNote] = useState('');
 
   const categories = useMemo(() => {
     if (!products) return [];
@@ -60,11 +55,14 @@ export default function MenuScreen() {
     setSugar('Vừa');
     setIce('Vừa');
     setQty(1);
+    setCustomNote('');
   };
 
   const confirmAdd = () => {
     if (!customProduct) return;
-    const notes = `Size ${size}, Đường ${sugar}, Đá ${ice}`;
+    const notes = [`Size ${size}`, `Đường ${sugar}`, `Đá ${ice}`, customNote.trim()]
+      .filter(Boolean)
+      .join(', ');
     addItem({
       productId: customProduct.id,
       productName: customProduct.name,
@@ -128,7 +126,7 @@ export default function MenuScreen() {
         ))}
       </ScrollView>
 
-      <Pressable style={styles.cartFab} onPress={() => router.push('/(cashier)/cart')}>
+      <Pressable style={styles.cartFab} onPress={() => router.push(opStack('/cart'))}>
         <Ionicons name="cart-outline" size={24} color={colors.white} />
         <Text style={styles.cartFabText}>Giỏ ({itemCount})</Text>
       </Pressable>
@@ -150,6 +148,15 @@ export default function MenuScreen() {
             <OptionRow options={SUGAR} value={sugar} onChange={setSugar} />
             <Text style={styles.optionLabel}>Đá</Text>
             <OptionRow options={ICE} value={ice} onChange={setIce} />
+            <Text style={styles.optionLabel}>Ghi chú</Text>
+            <TextInput
+              value={customNote}
+              onChangeText={setCustomNote}
+              placeholder="Nhập ghi chú cho món"
+              placeholderTextColor={colors.textMuted}
+              style={styles.noteInput}
+              maxLength={120}
+            />
 
             <View style={styles.qtyRow}>
               <Pressable onPress={() => setQty((q) => Math.max(1, q - 1))}>
@@ -263,7 +270,12 @@ const styles = StyleSheet.create({
   modalTitle: { fontSize: 18, fontWeight: '700', color: colors.text },
   modalPrice: { fontSize: 16, color: colors.primary, fontWeight: '600', marginTop: 4 },
   modalUnitPrice: { fontSize: 13, color: colors.textSecondary, marginTop: 2 },
-  optionLabel: { fontSize: 13, color: colors.textSecondary, marginTop: spacing.md, marginBottom: spacing.xs },
+  optionLabel: {
+    fontSize: 13,
+    color: colors.textSecondary,
+    marginTop: spacing.md,
+    marginBottom: spacing.xs,
+  },
   optionRow: { flexDirection: 'row', flexWrap: 'wrap', gap: spacing.sm },
   optionChip: {
     paddingHorizontal: spacing.md,
@@ -275,6 +287,17 @@ const styles = StyleSheet.create({
   optionChipActive: { borderColor: colors.primary, backgroundColor: colors.primaryLight },
   optionText: { fontSize: 13, color: colors.textSecondary },
   optionTextActive: { color: colors.primary, fontWeight: '600' },
+  noteInput: {
+    minHeight: 48,
+    borderWidth: 1,
+    borderColor: colors.border,
+    borderRadius: borderRadius.sm,
+    paddingHorizontal: spacing.base,
+    paddingVertical: spacing.sm,
+    color: colors.text,
+    fontSize: 14,
+    backgroundColor: colors.surface,
+  },
   qtyRow: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -282,5 +305,11 @@ const styles = StyleSheet.create({
     gap: spacing.lg,
     marginVertical: spacing.lg,
   },
-  qtyText: { fontSize: 20, fontWeight: '700', color: colors.text, minWidth: 32, textAlign: 'center' },
+  qtyText: {
+    fontSize: 20,
+    fontWeight: '700',
+    color: colors.text,
+    minWidth: 32,
+    textAlign: 'center',
+  },
 });

@@ -21,6 +21,7 @@ export default function RootLayout() {
           <Stack.Screen name="index" options={{ headerShown: false }} />
           <Stack.Screen name="(auth)" options={{ headerShown: false }} />
           <Stack.Screen name="(cashier)" options={{ headerShown: false }} />
+          <Stack.Screen name="(station)" options={{ headerShown: false }} />
           <Stack.Screen name="(barista)" options={{ headerShown: false }} />
           <Stack.Screen name="(manager)" options={{ headerShown: false }} />
         </Stack>

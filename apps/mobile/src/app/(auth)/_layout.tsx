@@ -10,9 +10,10 @@ export default function AuthLayout() {
         options={{ title: 'Chọn chi nhánh', headerLeft: () => <HeaderBackButton /> }}
       />
       <Stack.Screen
-        name="role"
-        options={{ title: 'Chọn vai trò', headerLeft: () => <HeaderBackButton /> }}
+        name="pending-branch"
+        options={{ title: 'Chờ gán chi nhánh', headerShown: false }}
       />
+      <Stack.Screen name="role" options={{ headerShown: false }} />
     </Stack>
   );
 }

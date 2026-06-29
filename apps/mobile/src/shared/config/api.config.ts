@@ -47,6 +47,7 @@ export const API_ENDPOINTS = {
   notifications: '/api/v1/notifications',
   staff: {
     list: '/api/v1/staff',
+    branchOperators: '/api/v1/staff/branch-operators',
     pendingAssignments: '/api/v1/staff/branch-assignments/pending',
     propose: (staffId: string) => `/api/v1/staff/${staffId}/branch-assignment`,
     approve: (staffId: string) => `/api/v1/staff/${staffId}/branch-assignment/approve`,

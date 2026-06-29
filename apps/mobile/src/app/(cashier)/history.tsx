@@ -16,6 +16,7 @@ import {
   spacing,
 } from '@caffeapp/shared';
 import { useOrders } from '@features/orders';
+import { opStack } from '@shared/lib/navigation/operationalRoutes';
 import { Card, EmptyState, ErrorScreen } from '@shared/components/ui';
 import { useSessionStore } from '@shared/stores/session';
 
@@ -58,7 +59,7 @@ export default function CashierHistoryScreen() {
           refreshControl={<RefreshControl refreshing={isRefetching} onRefresh={() => refetch()} />}
         >
           {sorted.map((order) => (
-            <Pressable key={order.id} onPress={() => router.push(`/(cashier)/order/${order.id}` as never)}>
+            <Pressable key={order.id} onPress={() => router.push(opStack(`/order/${order.id}`))}>
               <Card style={styles.row}>
                 <Text style={styles.orderNumber}>#{order.orderNumber}</Text>
                 <Text style={styles.meta}>

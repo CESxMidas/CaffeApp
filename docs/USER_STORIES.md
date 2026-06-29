@@ -1,11 +1,13 @@
 # CaffeApp — User Stories & Acceptance Criteria
 
 **Format:** `US-{group}{seq}` — Given/When/Then  
-**Estimation:** Story Points (Fibonacci)
+**Estimation:** Story Points (Fibonacci)  
+**Nguồn nghiệp vụ:** [STAKEHOLDER_QUESTIONNAIRE.md](STAKEHOLDER_QUESTIONNAIRE.md) (MVP v2)
 
 **Quy ước API:** Base URL `/api/v1` — ví dụ `POST /api/v1/auth/login`.  
 **Quy ước role:** `StaffRole` = `OWNER | MANAGER | CASHIER | BARISTA` (Prisma/API).  
-**Quy ước enum đơn:** `OrderStatus` = `PENDING | MAKING | READY | PAID | CANCELLED`; `OrderType` = `DINE_IN | TAKE_AWAY`.
+**Quy ước enum đơn:** `OrderStatus` = `PENDING | MAKING | READY | PAID | CANCELLED`; `deliveredAt` = đã giao món (B-33).  
+**Quy ước routing:** Không màn chọn vai trò — điều hướng theo `StaffRole` (C-11).
 
 ---
 
@@ -19,7 +21,8 @@
 
 - Given màn hình đăng nhập
 - When nhập đúng credentials và nhấn "Đăng nhập"
-- Then chuyển tới màn chọn chi nhánh (nếu >1) hoặc chọn vai trò
+- Then OWNER (nếu cần) → màn chọn chi nhánh phiên → dashboard chủ quán
+- And CASHIER/BARISTA/MANAGER → vào khu vận hành / quản lý theo CN đã gán (không chọn CN)
 - And lưu JWT + refresh token securely (SecureStore)
 
 - Given credentials sai
@@ -33,42 +36,52 @@
 
 ---
 
-### US-A02: Chọn chi nhánh
+### US-A02: Chọn chi nhánh (chỉ Owner)
 
-**Là** nhân viên đa chi nhánh, **tôi muốn** chọn chi nhánh làm việc, **để** chỉ thấy dữ liệu đúng quán.
+**Là** chủ quán, **tôi muốn** chọn chi nhánh làm việc trong phiên, **để** xem báo cáo đúng quán.
 
 **Acceptance Criteria:**
 
-- Given user có quyền >= 1 chi nhánh
+- Given user có `StaffRole = OWNER`
 - When chọn 1 chi nhánh và nhấn "Tiếp tục"
-- Then lưu `branch_id` vào session
-- And chuyển màn chọn vai trò
+- Then lưu `branch_id` phiên vào session
+- And chuyển dashboard / owner tools
 
-- Given user chỉ có 1 chi nhánh
-- When đăng nhập thành công
-- Then auto-select và skip màn này
+- Given user có `StaffRole` ≠ OWNER
+- When đăng nhập thành công với `branch_assignment = APPROVED`
+- Then **không** hiện màn chọn chi nhánh — dùng CN từ DB
 
-**Design:** `design/screens/02-chon-chi-nhanh.png`  
+- Given `branch_assignment = PENDING_OWNER`
+- When đăng nhập
+- Then chặn với message chờ chủ quán duyệt
+
+**Design:** `design/screens/02-chon-chi-nhanh.png` (Owner only)  
 **API:** `GET /api/v1/branches`  
 **Points:** 2
 
 ---
 
-### US-A03: Chọn vai trò
+### US-A03: Điều hướng sau đăng nhập
 
-**Là** nhân viên, **tôi muốn** chọn vai trò trong ca (thu ngân/barista/quản lý), **để** vào đúng workflow.
+**Là** nhân viên, **tôi muốn** vào đúng khu làm việc ngay sau login, **để** không phải chọn vai trò thủ công.
 
 **Acceptance Criteria:**
 
-- Given user có role `cashier`
-- When vào màn chọn vai trò
-- Then chỉ hiện card Thu ngân (enabled); các role khác disabled hoặc ẩn
+- Given `StaffRole = CASHIER` hoặc `BARISTA`
+- When đăng nhập thành công
+- Then vào **tablet trạm**: tab Thu ngân + Bếp (không màn `03-chon-vai-tro`)
+- And tab **Bếp** có queue + "Bắt đầu pha" / "Hoàn thành đơn" (READY) **giống** ĐT barista (B-09, TASK-P2-03b)
+- And mỗi thao tác nhạy cảm hiện bước chọn tên NV (B-15)
 
-- Given chọn Thu ngân
-- When tap card
-- Then navigate tới Cashier home stack
+- Given `StaffRole = MANAGER`
+- Then vào dashboard quản lý CN đã gán
 
-**Design:** `design/screens/03-chon-vai-tro.png`  
+- Given `StaffRole = OWNER` đã chọn CN phiên
+- Then vào dashboard chuỗi / owner tools
+
+> **Deprecated:** Màn chọn card Thu ngân/Barista/Quản lý — thay bằng routing cố định (C-11).
+
+**Design:** `design/screens/03-chon-vai-tro.png` (deprecated UI — giữ file tham chiếu)  
 **Points:** 2
 
 ---
@@ -79,8 +92,8 @@
 
 **Acceptance Criteria:**
 
-- Given đã chọn role cashier
-- When vào trang chủ
+- Given đã đăng nhập với quyền vận hành trạm
+- When vào trang chủ Thu ngân
 - Then hiện greeting + tên user + chi nhánh
 - And grid 6 actions: Tạo đơn, Danh sách đơn, Lịch sử, Sơ đồ bàn, Thông báo, Món đã xong
 - And bottom tab navigation hoạt động
@@ -219,25 +232,29 @@
 
 **Là** thu ngân, **tôi muốn** ghi nhận thanh toán thẻ, **để** đối soát cuối ngày.
 
+**Priority pilot:** Could — ghi nhận thủ công sau khi quẹt POS riêng (E-08).
+
 **Acceptance Criteria:**
 
 - Given chọn Thẻ
-- When nhấn "Thanh toán thẻ"
+- When nhấn "Thanh toán thẻ" (sau khi quẹt máy POS ngoài app)
 - Then order PAID với `payment_method=CARD`
 
 **Design:** `12-thanh-toan-the.png` | **Points:** 2
 
 ---
 
-### US-B09: Thanh toán ví điện tử
+### US-B09: Thanh toán ví / cổng (VNPay Sandbox)
 
-**Là** thu ngân, **tôi muốn** chọn MoMo/ZaloPay, **để** linh hoạt phương thức.
+**Là** thu ngân, **tôi muốn** ghi nhận thanh toán ví/cổng, **để** linh hoạt phương thức.
+
+**Priority pilot:** Could — **VNPay Sandbox** cho dev/UAT; pilot quán thật dùng TM + CK (E-09).
 
 **Acceptance Criteria:**
 
-- Given chọn ví MoMo
-- When xác nhận thanh toán
-- Then PAID với `payment_method=E_WALLET`, `e_wallet_provider=MOMO`
+- Given môi trường Sandbox
+- When khách thanh toán qua VNPay test + IPN xác nhận
+- Then PAID với `payment_method=E_WALLET` (hoặc ghi nhận thủ công MVP v2)
 
 **Design:** `13-thanh-toan-vi-dien-tu.png` | **Points:** 3
 
@@ -279,6 +296,11 @@
 **Là** barista, **tôi muốn** thấy hàng đợi đơn real-time, **để** biết làm gì tiếp theo.
 
 **Acceptance Criteria:**
+
+- Given tablet trạm (`isStationDevice`)
+- When mở tab **Bếp**
+- Then thấy queue PENDING / MAKING / READY và thao tác pha **giống** US-C01–C04 trên ĐT barista
+- And mỗi cập nhật trạng thái bếp hiện **StaffPicker** (B-15)
 
 - Given có đơn PENDING
 - When mở app barista

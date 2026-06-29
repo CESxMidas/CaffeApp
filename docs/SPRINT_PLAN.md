@@ -1,6 +1,7 @@
 # CaffeApp — Sprint Plan
 
-**Total estimated:** 112 story points | **Velocity:** ~20 pts/sprint | **Duration:** 6 sprints + Sprint 0
+**Total estimated:** 112 story points | **Velocity:** ~20 pts/sprint | **Duration:** 6 sprints + Sprint 0  
+**Nguồn nghiệp vụ:** [STAKEHOLDER_QUESTIONNAIRE.md](STAKEHOLDER_QUESTIONNAIRE.md) (MVP v2)
 
 ---
 
@@ -18,7 +19,7 @@
 | CI workflow (typecheck)                 | Done   |
 | Documentation (PRD, ADR, API, ERD)      | Done   |
 
-**Deliverable:** App chạy được, navigate login → role → home screens
+**Deliverable:** App chạy được, navigate login → khu vận hành / QL / Owner (không màn chọn role)
 
 ---
 
@@ -60,26 +61,19 @@
 
 ---
 
-## Sprint 1: Auth Flow (10 pts) — ✅ Done
+## Sprint 1: Auth Flow (10 pts) — 🔄 Code done; E2E thiết bị thật pending (C-15)
 
 **Stories:** US-A01 → US-A04  
-**Screens:** 01–04  
-**Backend:** NestJS Auth module + JWT + Prisma users/staff
+**Screens:** 01–04 (`03-chon-vai-tro` deprecated — routing theo StaffRole)
 
 | Story                        | Points | FE                                | BE                        | Status  |
 | ---------------------------- | ------ | --------------------------------- | ------------------------- | ------- |
 | US-A01 Đăng nhập (API + JWT) | 3      | `authService.login` + SecureStore | `POST /api/v1/auth/login` | ✅ Done |
-| US-A02 Chọn chi nhánh        | 2      | `useBranches` query               | `GET /api/v1/branches`    | ✅ Done |
-| US-A03 Chọn vai trò          | 2      | Session store + staff role        | `GET /api/v1/auth/me`     | ✅ Done |
-| US-A04 Trang chủ Thu ngân    | 3      | Wire home screen                  | Shift context API         | ✅ Done |
+| US-A02 Chọn chi nhánh (Owner)| 2      | `useBranches` query               | `GET /api/v1/branches`    | ✅ Done |
+| US-A03 Điều hướng sau login  | 2      | Routing theo StaffRole            | `GET /api/v1/auth/me`     | ⚠️ Refactor (bỏ role screen) |
+| US-A04 Trang chủ trạm        | 3      | Wire home + tablet tabs           | —                         | ✅ Done |
 
-**Demo accounts** (password: `password123`):
-
-- `cashier@caffe.app` — CASHIER
-- `barista@caffe.app` — BARISTA
-- `manager@caffe.app` — MANAGER
-
-**DoD:** Login E2E qua NestJS API, session persist SecureStore, mobile không gọi DB trực tiếp
+**DoD:** Login E2E **thiết bị thật** + SecureStore sau kill app (C-15); đồng bộ DEVICE_POLICY v2
 
 ---
 
@@ -101,21 +95,25 @@
 ## Sprint 3: Payment (13 pts)
 
 **Stories:** US-B06 → US-B11  
-**Screens:** 10–15
+**Screens:** 10–15  
+**Payment pilot (Must):** Tiền mặt + Chuyển khoản VietQR · Thẻ/Ví → Could (VNPay Sandbox dev)
 
-| Story               | Points |
-| ------------------- | ------ |
-| US-B06 Tiền mặt     | 5      |
-| US-B07 Chuyển khoản | 3      |
-| US-B08 Thẻ          | 2      |
-| US-B09 Ví điện tử   | 3      |
+| Story               | Points | Priority pilot |
+| ------------------- | ------ | -------------- |
+| US-B06 Tiền mặt     | 5      | Must           |
+| US-B07 Chuyển khoản | 3      | Must           |
+| US-B08 Thẻ          | 2      | Could          |
+| US-B09 Ví / VNPay   | 3      | Could (Sandbox)|
+| US-B10 Danh sách đơn| —      | Must           |
+| US-B11 Lịch sử đơn  | —      | Should         |
 
 ---
 
 ## Sprint 4: Barista Real-time (19 pts)
 
 **Stories:** US-C01 → US-C04  
-**Screens:** 16–19
+**Screens:** 16–19  
+**Transport:** WebSocket primary; polling 10s fallback (F-01, F-16)
 
 | Story                   | Points |
 | ----------------------- | ------ |
@@ -129,7 +127,8 @@
 ## Sprint 5: Manager (29 pts)
 
 **Stories:** US-D01 → US-D06, US-E01  
-**Screens:** 20–26
+**Screens:** 20–26  
+**Shift module:** bật bắt buộc `shift_id` (B-05, GAP-06)
 
 ---
 

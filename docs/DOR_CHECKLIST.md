@@ -46,7 +46,7 @@ Checklist cho toàn dự án trước khi bắt đầu code feature:
 
 ## Sprint 1 DoR Review — Auth Flow (US-A01 → US-A04)
 
-**Sprint 1 status:** 🔄 **IN PROGRESS** (scaffold done; auth API + SecureStore pending)
+**Sprint 1 status:** 🔄 **IN PROGRESS** — API + UI scaffold done; refactor bỏ màn chọn role; E2E thiết bị thật (C-15) pending
 
 ### US-A01: Đăng nhập
 
@@ -65,37 +65,37 @@ Checklist cho toàn dự án trước khi bắt đầu code feature:
 
 ---
 
-### US-A02: Chọn chi nhánh
+### US-A02: Chọn chi nhánh (Owner only)
 
 | DoR Item            | Status | Notes                            |
 | ------------------- | ------ | -------------------------------- |
-| User story clear    | ✅     |                                  |
-| Acceptance criteria | ✅     | Auto-skip if 1 branch            |
-| Design mockup       | ✅     | `02-chon-chi-nhanh.png`          |
+| User story clear    | ✅     | Staff không chọn CN — questionnaire C-08 |
+| Acceptance criteria | ✅     | Owner only; staff auto branch    |
+| Design mockup       | ✅     | `02-chon-chi-nhanh.png` (Owner)  |
 | API contract        | ✅     | `GET /api/v1/branches`           |
 | Dependencies        | ⚠️     | US-A01 (auth token)              |
 | Estimate            | ✅     | 2 points                         |
 | Open questions      | ✅     | None                             |
-| Test scenarios      | ✅     | Multi branch, single branch skip |
+| Test scenarios      | ✅     | Owner multi-CN; staff skip screen |
 
 **Verdict:** ✅ Ready
 
 ---
 
-### US-A03: Chọn vai trò
+### US-A03: Điều hướng sau đăng nhập
 
 | DoR Item            | Status | Notes                          |
 | ------------------- | ------ | ------------------------------ |
-| User story clear    | ✅     |                                |
-| Acceptance criteria | ✅     | RBAC filter roles              |
-| Design mockup       | ✅     | `03-chon-vai-tro.png`          |
+| User story clear    | ✅     | Supersedes "chọn vai trò" C-11 |
+| Acceptance criteria | ✅     | Route by StaffRole             |
+| Design mockup       | ⚠️     | `03-chon-vai-tro.png` deprecated |
 | API contract        | ✅     | Roles in login response        |
-| Dependencies        | ⚠️     | US-A02                         |
+| Dependencies        | ⚠️     | US-A01, BRANCH_ASSIGNMENT      |
 | Estimate            | ✅     | 2 points                       |
-| Open questions      | ✅     | None                           |
-| Test scenarios      | ✅     | CASHIER only sees cashier card |
+| Open questions      | ✅     | Tablet trạm tab layout         |
+| Test scenarios      | ✅     | CASHIER→ops; MANAGER→dashboard |
 
-**Verdict:** ✅ Ready
+**Verdict:** ✅ Ready (refactor FE pending)
 
 ---
 

@@ -65,9 +65,10 @@ npm run test --workspace=@caffeapp/mobile
 
 **Critical paths:**
 
-1. Login → branch → role → cashier home
-2. Create order → send kitchen → barista queue
-3. Payment → order PAID
+1. Login → (Owner: branch) → khu vận hành / dashboard
+2. Create order → send kitchen → barista queue (polling Sprint 2)
+3. READY → Đã giao → payment TM/CK → order PAID
+4. UAT: 15 kịch bản (H-09) — gộp bàn, hủy đơn, kết ca
 
 **When:** Sprint 2–4
 

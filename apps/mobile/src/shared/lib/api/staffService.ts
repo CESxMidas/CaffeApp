@@ -1,8 +1,18 @@
-import type { ApiDataResponse, StaffDto, StaffListItemDto } from '@caffeapp/shared';
+import type { ApiDataResponse, BranchOperatorDto, StaffDto, StaffListItemDto, StaffRole } from '@caffeapp/shared';
 import { API_ENDPOINTS } from '@shared/config/api.config';
 import { apiClient } from './apiClient';
 
 export const staffService = {
+  async listBranchOperators(roles?: StaffRole[]): Promise<BranchOperatorDto[]> {
+    const { data } = await apiClient.get<ApiDataResponse<BranchOperatorDto[]>>(
+      API_ENDPOINTS.staff.branchOperators,
+      {
+        params: roles?.length ? { role: roles.join(',') } : undefined,
+      },
+    );
+    return data.data;
+  },
+
   async list(): Promise<StaffListItemDto[]> {
     const { data } = await apiClient.get<ApiDataResponse<StaffListItemDto[]>>(
       API_ENDPOINTS.staff.list,
