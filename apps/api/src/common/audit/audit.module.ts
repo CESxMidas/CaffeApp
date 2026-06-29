@@ -1,8 +1,9 @@
-import { Module } from '@nestjs/common';
+import { Global, Module } from '@nestjs/common';
+import { AuditService } from './audit.service';
 
-/**
- * Audit trail infrastructure — Sprint 2+.
- * Business mutations must emit audit events through this module.
- */
-@Module({})
+@Global()
+@Module({
+  providers: [AuditService],
+  exports: [AuditService],
+})
 export class AuditModule {}

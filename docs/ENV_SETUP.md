@@ -100,7 +100,60 @@ Sau khi sửa `.env`, **restart Expo** (`npm run mobile`).
 
 ---
 
-## 3. Kiểm tra
+## 3. Android SDK (`ANDROID_HOME` + `local.properties`)
+
+> **Không commit** `apps/mobile/android/local.properties` — file này theo từng máy, đã gitignore cùng thư mục `android/`.
+
+### Biến môi trường (cài trên máy)
+
+| Biến | Mô tả | Giá trị mẫu (Windows) |
+| ---- | ----- | ----------------------- |
+| `ANDROID_HOME` | Thư mục Android SDK | `C:\Users\<user>\AppData\Local\Android\Sdk` |
+| `Path` (thêm) | Công cụ adb / platform-tools | `%ANDROID_HOME%\platform-tools` |
+
+**Windows — Environment Variables (User):**
+
+1. `ANDROID_HOME` = `C:\Users\<user>\AppData\Local\Android\Sdk`
+2. Thêm `%ANDROID_HOME%\platform-tools` vào `Path`
+3. Đóng và mở lại terminal
+
+**Kiểm tra:**
+
+```powershell
+echo $env:ANDROID_HOME
+where.exe adb
+adb version
+```
+
+> **Lưu ý:** Không đặt `adb.exe` trong `C:\Windows\`. Chỉ dùng bản từ Android SDK (`platform-tools`).
+
+### `local.properties` (sau `expo prebuild`)
+
+Gradle cần biết SDK location. Tạo file **local** (không commit):
+
+**Windows** — `apps/mobile/android/local.properties`:
+
+```properties
+sdk.dir=C\:\\Users\\<user>\\AppData\\Local\\Android\\Sdk
+```
+
+**macOS / Linux:**
+
+```properties
+sdk.dir=/Users/<user>/Library/Android/sdk
+```
+
+Thay `<user>` bằng username máy bạn. Android Studio thường tự tạo file này khi mở project native lần đầu.
+
+**Khi nào cần:** `npm run mobile:android` (`expo run:android`) báo `SDK location not found`.
+
+**Không cần** khi chỉ chạy Expo Go: `npm run mobile:android:go`.
+
+Chi tiết JDK + Gradle: [ANDROID_JDK.md](ANDROID_JDK.md).
+
+---
+
+## 4. Kiểm tra
 
 ```bash
 # API — phải start không lỗi env validation
@@ -112,7 +165,7 @@ curl http://localhost:3000/api/v1/health
 
 ---
 
-## 4. Troubleshooting
+## 5. Troubleshooting
 
 | Lỗi                                 | Nguyên nhân                            | Cách xử lý                                |
 | ----------------------------------- | -------------------------------------- | ----------------------------------------- |
@@ -120,10 +173,14 @@ curl http://localhost:3000/api/v1/health
 | Mobile không gọi được API           | Sai `EXPO_PUBLIC_API_URL`              | Dùng `10.0.2.2` cho Android emulator      |
 | `Can't reach database`              | PostgreSQL chưa chạy                   | Xem [infra/README.md](../infra/README.md) |
 | Expo không đọc env mới              | Cache                                  | Stop Expo, chạy lại `npm run mobile`      |
+| `SDK location not found`            | Thiếu `local.properties` hoặc `ANDROID_HOME` | Xem mục 3 — tạo `local.properties`, set `ANDROID_HOME` |
+| `adb` not found / lỗi emulator      | PATH sai hoặc adb cũ trong `C:\Windows` | Xóa adb cũ; thêm `platform-tools` vào PATH |
 
 ---
 
-## 5. Liên quan
+## 6. Liên quan
+
+- [ANDROID_JDK.md](ANDROID_JDK.md) — JDK 17, `gradle.properties`, script helper
 
 - [infra/README.md](../infra/README.md) — PostgreSQL Docker
 - [database/README.md](../database/README.md) — Prisma migrate/seed

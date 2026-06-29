@@ -64,6 +64,19 @@ function occupiedMinutes(table: TableDto): number | null {
   return Math.max(1, Math.floor(elapsedMs / 60_000));
 }
 
+function handleOccupiedTable(table: TableDto) {
+  const buttons: Array<{ text: string; style?: 'cancel' | 'default'; onPress?: () => void }> = [
+    { text: 'Đóng', style: 'cancel' },
+  ];
+  if (table.activeOrderId) {
+    buttons.unshift({
+      text: 'Xem đơn hiện tại',
+      onPress: () => router.push(`/(cashier)/order/${table.activeOrderId}`),
+    });
+  }
+  Alert.alert(`Bàn ${table.code}`, 'Bàn đang phục vụ khách', buttons);
+}
+
 export default function TablesScreen() {
   const activeBranchId = useSessionStore((s) => s.activeBranchId);
   const accessToken = useSessionStore((s) => s.accessToken);
@@ -73,6 +86,10 @@ export default function TablesScreen() {
   const { data: tables, isPending, isError, refetch, error } = useTables(activeBranchId);
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [activeFloor, setActiveFloor] = useState<(typeof FLOORS)[number]>('Tầng 1');
+
+  const retryLoad = useCallback(() => {
+    void refetch();
+  }, [refetch]);
 
   useFocusEffect(
     useCallback(() => {
@@ -91,7 +108,7 @@ export default function TablesScreen() {
     const branchId = activeBranchId ?? tables?.[0]?.branchId ?? null;
     if (!selected || !branchId || !orderType) return;
     if (selected.status === TableStatus.OCCUPIED) {
-      Alert.alert('Bàn đang có khách', 'Vui lòng chọn bàn trống');
+      handleOccupiedTable(selected);
       return;
     }
     if (selected.status === TableStatus.MAINTENANCE) {
@@ -148,16 +165,8 @@ export default function TablesScreen() {
       <View style={styles.container}>
         <ErrorScreen
           message={apiMessage ?? 'Không tải được sơ đồ bàn'}
-          onRetry={() => refetch()}
+          onRetry={retryLoad}
         />
-      </View>
-    );
-  }
-
-  if (!tables) {
-    return (
-      <View style={styles.container}>
-        <ErrorScreen message="Không tải được sơ đồ bàn" onRetry={() => refetch()} />
       </View>
     );
   }
@@ -201,7 +210,7 @@ export default function TablesScreen() {
                   selected={selectedId === item.id}
                   onPress={() => {
                     if (item.status === TableStatus.OCCUPIED) {
-                      Alert.alert('Bàn có khách', `Bàn ${item.code} đang phục vụ`);
+                      handleOccupiedTable(item);
                       return;
                     }
                     if (item.status === TableStatus.MAINTENANCE) {

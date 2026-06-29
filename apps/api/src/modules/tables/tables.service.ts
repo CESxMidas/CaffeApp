@@ -20,29 +20,25 @@ export class TablesService {
       orderBy: [{ floor: 'asc' }, { code: 'asc' }],
     });
 
-    const activeByTable = await this.prisma.order.groupBy({
-      by: ['tableId'],
+    const activeOrders = await this.prisma.order.findMany({
       where: {
         branchId: scopedBranchId,
         tableId: { not: null },
         status: { notIn: [OrderStatus.PAID, OrderStatus.CANCELLED] },
       },
-      _count: { id: true },
-      _min: { createdAt: true },
+      select: { id: true, tableId: true, createdAt: true },
+      orderBy: { createdAt: 'asc' },
     });
 
-    const activeMap = new Map(
-      activeByTable
-        .filter((row) => row.tableId)
-        .map((row) => [
-          row.tableId!,
-          { count: row._count.id, since: row._min.createdAt },
-        ]),
-    );
+    const activeMap = new Map<string, { orderId: string; since: Date }>();
+    for (const order of activeOrders) {
+      if (!order.tableId || activeMap.has(order.tableId)) continue;
+      activeMap.set(order.tableId, { orderId: order.id, since: order.createdAt });
+    }
 
     return tables.map((t) => {
       const active = activeMap.get(t.id);
-      const status = effectiveTableStatus(t.status, active?.count ?? 0);
+      const status = effectiveTableStatus(t.status, active ? 1 : 0);
 
       return {
         id: t.id,
@@ -55,6 +51,8 @@ export class TablesService {
           status === TableStatus.OCCUPIED && active?.since
             ? active.since.toISOString()
             : null,
+        activeOrderId:
+          status === TableStatus.OCCUPIED && active?.orderId ? active.orderId : null,
       };
     });
   }

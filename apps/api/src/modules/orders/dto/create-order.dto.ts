@@ -20,6 +20,10 @@ class CreateOrderItemBodyDto {
   @Min(1)
   quantity!: number;
 
+  @IsInt()
+  @Min(0)
+  unitPrice!: number;
+
   @IsOptional()
   @IsString()
   notes?: string;

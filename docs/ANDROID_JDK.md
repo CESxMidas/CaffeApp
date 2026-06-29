@@ -8,20 +8,33 @@ CaffeApp mobile dùng **Expo SDK 54** (tương thích **Expo Go** trên App Stor
 |------------|-----------|
 | Expo SDK | **54** |
 | JDK (Android build) | **17** |
+| Android SDK | API **35** khuyến nghị (emulator 4 KB, không 16 KB) |
 | Node.js | **≥ 20.19** |
 | Expo Go (iPhone) | Supported SDK **54** ✓ |
 
+## Android SDK
+
+SDK cài **trên máy** qua Android Studio — không nằm trong repo.
+
+| File / biến | Vị trí | Commit? |
+|-------------|--------|---------|
+| `ANDROID_HOME` | Biến môi trường máy | Không |
+| `local.properties` | `apps/mobile/android/local.properties` | **Không** (gitignore) |
+| `android/` folder | Sinh bởi `expo prebuild` | **Không** (gitignore) |
+
+Chi tiết `ANDROID_HOME`, `local.properties`, PATH: [ENV_SETUP.md §3](ENV_SETUP.md#3-android-sdk-android_home--localproperties).
+
 ## Cài JDK 17 (Windows)
 
+Một trong hai:
+
 ```powershell
+winget install EclipseAdoptium.Temurin.17.JDK
+# hoặc
 winget install Microsoft.OpenJDK.17
 ```
 
-Đường dẫn mặc định:
-
-```
-C:\Program Files\Microsoft\jdk-17.0.19.10-hotspot
-```
+Script `scripts/set-java-17.ps1` tự tìm Temurin hoặc Microsoft JDK 17 đã cài trên máy.
 
 ## Dùng JDK 17 trong terminal hiện tại
 
@@ -35,21 +48,25 @@ java -version
 
 ## Build Android native (sau `expo prebuild`)
 
-Gradle trong `apps/mobile/android/gradle.properties` đã cấu hình:
-
-```properties
-org.gradle.java.home=C\:\\Program Files\\Microsoft\\jdk-17.0.19.10-hotspot
-```
-
-Nếu chạy lại `npx expo prebuild`, thêm lại dòng trên vào `gradle.properties` (thư mục `android/` không commit — xem `.gitignore`):
+1. Tạo `apps/mobile/android/local.properties` (xem [ENV_SETUP.md](ENV_SETUP.md)) nếu Gradle báo thiếu SDK.
+2. Ghi JDK vào `gradle.properties` (file local, không commit):
 
 ```powershell
 .\scripts\patch-android-jdk.ps1
 ```
 
+Script tự phát hiện JDK 17 (Temurin / Microsoft) và ghi dòng tương tự:
+
+```properties
+org.gradle.java.home=C\:\\Program Files\\Eclipse Adoptium\\jdk-17.0.19.10-hotspot
+```
+
+Nếu chạy lại `npx expo prebuild`, chạy lại `patch-android-jdk.ps1` (thư mục `android/` không commit).
+
 ```powershell
 cd apps\mobile
 npx expo prebuild --platform android
+..\..\scripts\patch-android-jdk.ps1
 npm run android
 ```
 

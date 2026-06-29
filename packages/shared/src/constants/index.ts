@@ -24,6 +24,13 @@ export function priceForSize(basePrice: number, size: DrinkSize): number {
   return Math.max(0, basePrice + SIZE_PRICE_DELTA[size]);
 }
 
+/** Giá đơn vị hợp lệ: giá gốc hoặc một trong các size S/M/L. */
+export function isValidProductUnitPrice(basePrice: number, unitPrice: number): boolean {
+  if (unitPrice === basePrice) return true;
+  const sizes: DrinkSize[] = ['S', 'M', 'L'];
+  return sizes.some((size) => priceForSize(basePrice, size) === unitPrice);
+}
+
 export const ROLE_LABELS: Record<string, string> = {
   cashier: 'Phục vụ bàn',
   barista: 'Barista',

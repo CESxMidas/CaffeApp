@@ -27,8 +27,9 @@ export class OrdersController {
     @CurrentUser() user: JwtPayload,
     @Query('branchId') branchId?: string,
     @Query('status') status?: string,
+    @Query('tableId') tableId?: string,
   ): Promise<{ data: OrderDto[] }> {
-    const data = await this.ordersService.listForBranch(user, branchId, status);
+    const data = await this.ordersService.listForBranch(user, branchId, status, tableId);
     return { data };
   }
 

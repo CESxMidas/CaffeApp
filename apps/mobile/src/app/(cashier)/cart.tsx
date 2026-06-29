@@ -1,5 +1,6 @@
 import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { router } from 'expo-router';
+import { useQueryClient } from '@tanstack/react-query';
 import { Ionicons } from '@expo/vector-icons';
 import { colors, spacing, borderRadius, formatCurrency, calculateOrderTotal } from '@caffeapp/shared';
 import { useCreateOrder } from '@features/orders';
@@ -17,6 +18,7 @@ export default function CartScreen() {
   const clearCart = useCartStore((s) => s.clearCart);
   const subtotal = useCartStore((s) => s.subtotal());
   const createOrder = useCreateOrder();
+  const queryClient = useQueryClient();
 
   const { tax_amount, total } = calculateOrderTotal(subtotal);
 
@@ -34,6 +36,7 @@ export default function CartScreen() {
         items: items.map((i) => ({
           productId: i.productId,
           quantity: i.quantity,
+          unitPrice: i.unitPrice,
           notes: i.notes ?? undefined,
         })),
       },
@@ -47,7 +50,16 @@ export default function CartScreen() {
           const msg =
             (err as { response?: { data?: { message?: string } } })?.response?.data?.message ??
             'Không gửi được đơn';
-          showMessage('Lỗi', msg, 'error');
+          const isTableConflict =
+            msg.includes('Bàn đã được chọn') || msg.includes('đang có khách');
+          showMessage(
+            isTableConflict ? 'Bàn không khả dụng' : 'Lỗi',
+            msg,
+            'error',
+          );
+          if (isTableConflict) {
+            void queryClient.invalidateQueries({ queryKey: ['tables'] });
+          }
         },
       },
     );

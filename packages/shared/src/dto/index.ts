@@ -73,6 +73,8 @@ export interface TableDto {
   status: TableStatus;
   /** ISO timestamp — đơn active sớm nhất trên bàn (để hiển thị thời gian phục vụ). */
   occupiedSince?: string | null;
+  /** Đơn đang active trên bàn (US-B02 — xem đơn hiện tại). */
+  activeOrderId?: string | null;
 }
 
 export interface ProductCategoryDto {
@@ -134,6 +136,8 @@ export interface CreateOrderDto {
 export interface CreateOrderItemDto {
   productId: string;
   quantity: number;
+  /** Giá sau size/modifier — BE validate với giá sản phẩm gốc. */
+  unitPrice: number;
   notes?: string;
 }
 
