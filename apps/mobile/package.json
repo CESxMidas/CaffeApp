@@ -11,6 +11,9 @@
     "android:go": "expo start --android",
     "ios": "expo run:ios",
     "web": "expo start --web",
+    "eas": "eas",
+    "eas:build:preview:android": "eas build --platform android --profile preview",
+    "eas:build:production:android": "eas build --platform android --profile production",
     "typegen": "expo customize tsconfig.json",
     "typecheck": "tsc --noEmit",
     "pretypecheck": "npm run typegen",
@@ -51,6 +54,7 @@
   },
   "devDependencies": {
     "@types/react": "~19.1.10",
+    "eas-cli": "^20.5.0",
     "typescript": "~5.9.2"
   },
   "private": true

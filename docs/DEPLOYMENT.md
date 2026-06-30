@@ -124,9 +124,12 @@ TLS termination tại proxy. Health check: `GET /api/v1/health`
 Dùng **Expo Application Services (EAS)**:
 
 ```bash
-# Cần cấu hình eas.json (Sprint 4+)
-eas build --platform android --profile preview
-eas build --platform ios --profile preview
+cd apps/mobile
+export EXPO_PUBLIC_API_URL="https://<staging-api-domain>"
+npm run eas:build:preview:android
+
+export EXPO_PUBLIC_API_URL="https://<prod-api-domain>"
+npm run eas:build:production:android
 ```
 
 | Profile       | `EXPO_PUBLIC_API_URL` | Distribution      |
@@ -136,6 +139,13 @@ eas build --platform ios --profile preview
 | `production`  | Production API        | Pilot store / MDM |
 
 OTA updates (post-MVP): Expo EAS Update cho JS bundle — không thay native modules.
+
+Kiểm trước build từ repo root:
+
+```bash
+EXPO_PUBLIC_API_URL="https://<staging-api-domain>" npm run phase4:release-ready -- --profile preview
+EXPO_PUBLIC_API_URL="https://<prod-api-domain>" npm run phase4:release-ready -- --profile production
+```
 
 ---
 
@@ -158,6 +168,14 @@ Connection: `postgresql://postgres:postgres@localhost:5432/caffeapp`
 | Connection | Pool via Prisma (default)                       |
 | Migrations | CI/CD step: `db:migrate:deploy`                 |
 | Secrets    | Vault / cloud secret manager — không trong repo |
+
+Manual backup helper trước deploy:
+
+```bash
+DATABASE_URL="postgresql://..." PG_BACKUP_LABEL="pre-prod-v1.0.0" npm run db:backup:pg
+```
+
+Runbook: [PRODUCTION_BACKUP_RUNBOOK.md](PRODUCTION_BACKUP_RUNBOOK.md)
 
 ---
 
@@ -194,12 +212,14 @@ Connection: `postgresql://postgres:postgres@localhost:5432/caffeapp`
 - [ ] `JWT_SECRET` rotated from dev default
 - [ ] CORS origins restricted
 - [ ] Database backup verified
+- [ ] `phase4:release-ready` pass cho profile build
 
 ### Post-deploy
 
 - [ ] `GET /api/v1/health` → `{ "status": "ok" }`
 - [ ] Mobile app connects to correct API URL
 - [ ] Logs accessible (stdout / aggregator)
+- [ ] `phase8:smoke` read-only pass
 - [ ] Rollback plan documented ([RELEASE.md](RELEASE.md))
 
 ---

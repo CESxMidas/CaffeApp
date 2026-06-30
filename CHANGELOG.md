@@ -15,6 +15,10 @@ Versioning: [Semantic Versioning](docs/VERSIONING.md)
 - Documentation audit & repair (ERD sync Prisma, ADR superseded markers, API contract status)
 - **Doc Freeze Memo** (`docs/DOC_FREEZE_MEMO.md`) — tag `docs-v2.0-mvp`, ngày 2026-06-29
 - **API/ERD refactor checklist** (`docs/API_ERD_REFACTOR_CHECKLIST.md`) — xác nhận scope Phase 2
+- **Phase 3 internal demo pack** — demo script, minutes template, staging data checklist, NFR spot-check guide, copy review checklist
+- **Phase 3 tooling** — `phase3:verify-staging-data` and `phase3:nfr` scripts
+- **Phase 4–9 go-live pack** — UAT, RC, pilot, training, SOP, go-live, weekly stability, post-mortem, roadmap templates
+- **Release/go-live tooling** — EAS profiles, release readiness checker, production smoke checker, PostgreSQL backup helper
 
 ### Changed
 

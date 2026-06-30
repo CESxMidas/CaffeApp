@@ -10,191 +10,191 @@
 
 ## Master Index
 
-| ID                       | P   | Sprint | Loại  | Giao cho       | Map         | Status |
-| ------------------------ | --- | ------ | ----- | -------------- | ----------- | ------ |
-| [A-01](#task-q-a-01)     | P0  | 0      | seed  | Backend/TPM    | TASK-P2-06  | ⏳     |
-| [A-02](#task-q-a-02)     | P0  | 2      | code  | Backend        | —           | ⏳     |
-| [A-03](#task-q-a-03)     | P0  | 2      | seed  | Backend        | TASK-P2-06  | ⏳     |
-| [A-04](#task-q-a-04)     | P1  | 5      | code  | Backend        | —           | ⏳     |
-| [A-05](#task-q-a-05)     | P1  | 6      | ops   | TPM            | —           | ⏳     |
-| [A-06](#task-q-a-06)     | P0  | 2      | seed  | Backend        | TASK-P2-06  | ⏳     |
-| [A-07](#task-q-a-07)     | P1  | —      | defer | —              | —           | ⏳     |
-| [A-08](#task-q-a-08)     | P2  | —      | defer | —              | —           | ⏳     |
-| [A-09](#task-q-a-09)     | P0  | 2      | code  | Mobile         | TASK-P2-03  | ✅     |
-| [A-10](#task-q-a-10)     | P1  | 2      | code  | Mobile         | —           | ⏳     |
-| [A-11](#task-q-a-11)     | P0  | —      | ops   | TPM            | —           | ⏳     |
-| [A-12](#task-q-a-12)     | P1  | —      | doc   | Designer       | GAP-08      | ⏳     |
-| [A-13](#task-q-a-13)     | P1  | —      | ops   | TPM            | —           | ⏳     |
-| [B-01](#task-q-b-01)     | P0  | 5      | code  | Backend+Mobile | —           | ⏳     |
-| [B-02](#task-q-b-02)     | P0  | 5      | code  | Backend        | —           | ⏳     |
-| [B-03](#task-q-b-03)     | P1  | 5      | code  | Full-stack     | —           | ⏳     |
-| [B-04](#task-q-b-04)     | P0  | 5      | code  | Backend        | —           | ⏳     |
-| [B-05](#task-q-b-05)     | P0  | 5      | code  | Backend        | GAP-06      | ⏳     |
-| [B-06](#task-q-b-06)     | P0  | 5      | code  | Backend        | —           | ⏳     |
-| [B-07](#task-q-b-07)     | P1  | 5      | code  | Backend        | —           | ⏳     |
-| [B-08](#task-q-b-08)     | P1  | 5      | code  | Mobile         | —           | ⏳     |
-| [B-09](#task-q-b-09)     | P2  | 2      | code  | Mobile         | TASK-P2-03b | ✅     |
-| [B-10](#task-q-b-10)     | P2  | —      | defer | —              | —           | ⏳     |
-| [B-11](#task-q-b-11)     | P0  | 5      | code  | Mobile         | —           | ⏳     |
-| [B-12](#task-q-b-12)     | P2  | —      | defer | —              | —           | ⏳     |
-| [B-13](#task-q-b-13)     | P0  | —      | ops   | TPM            | —           | ⏳     |
-| [B-14](#task-q-b-14)     | P0  | 2      | code  | Full-stack     | —           | ⏳     |
-| [B-15](#task-q-b-15)     | P1  | 2      | code  | Mobile+API     | TASK-P2-03  | ✅     |
-| [B-16](#task-q-b-16)     | P1  | 2      | code  | Backend        | TASK-P2-01  | ✅     |
-| [B-17](#task-q-b-17)     | P2  | 5      | code  | Backend        | —           | ⏳     |
-| [B-18](#task-q-b-18)     | P0  | 2      | code  | Mobile         | —           | ⏳     |
-| [B-19](#task-q-b-19)     | P1  | —      | code  | Mobile         | —           | ⏳     |
-| [B-20](#task-q-b-20)     | P2  | —      | defer | —              | —           | ⏳     |
-| [B-21](#task-q-b-21)     | P1  | 4      | code  | Mobile         | TASK-P2-11  | ⏳     |
-| [B-22](#task-q-b-22)     | P1  | 5      | code  | Backend        | —           | ⏳     |
-| [B-23](#task-q-b-23)     | P2  | 5      | code  | Mobile         | —           | ⏳     |
-| [B-24](#task-q-b-24)     | P1  | 3      | code  | Full-stack     | TASK-P2-10  | ⏳     |
-| [B-25](#task-q-b-25)     | P0  | 2      | code  | Mobile         | —           | ⏳     |
-| [B-26](#task-q-b-26)     | P0  | 2      | code  | Backend        | —           | ⏳     |
-| [B-27](#task-q-b-27)     | P1  | 6      | code  | Full-stack     | —           | ⏳     |
-| [B-28](#task-q-b-28)     | P1  | 2      | code  | Full-stack     | —           | ⏳     |
-| [B-29](#task-q-b-29)     | P0  | 3      | code  | Full-stack     | —           | ⏳     |
-| [B-30](#task-q-b-30)     | P2  | 6      | code  | Full-stack     | —           | ⏳     |
-| [B-31](#task-q-b-31)     | P2  | 6      | code  | Full-stack     | —           | ⏳     |
-| [B-32](#task-q-b-32)     | P1  | 2      | code  | Full-stack     | —           | ⏳     |
-| [B-33](#task-q-b-33)     | P1  | 2      | code  | Full-stack     | TASK-P2-02  | ✅     |
-| [C-01](#task-q-c-01)     | P0  | 1      | code  | Full-stack     | —           | ⏳     |
-| [C-02](#task-q-c-02)     | P1  | 5      | code  | Full-stack     | —           | ⏳     |
-| [C-03](#task-q-c-03)     | P2  | 5      | code  | Backend        | —           | ⏳     |
-| [C-04](#task-q-c-04)     | P0  | 1      | code  | Full-stack     | —           | ⏳     |
-| [C-05](#task-q-c-05)     | P0  | 1      | code  | Backend        | —           | ⏳     |
-| [C-06](#task-q-c-06)     | P2  | 6      | code  | Backend        | —           | ⏳     |
-| [C-07](#task-q-c-07)     | P2  | 6      | code  | Mobile         | —           | ⏳     |
-| [C-08](#task-q-c-08)     | P0  | 1      | code  | Mobile         | TASK-P2-01  | ✅     |
-| [C-09](#task-q-c-09)     | P1  | 1      | code  | Mobile         | —           | ⏳     |
-| [C-10](#task-q-c-10)     | P1  | 5      | code  | Full-stack     | —           | ⏳     |
-| [C-11](#task-q-c-11)     | P0  | 1      | code  | Mobile         | TASK-P2-01  | ✅     |
-| [C-12](#task-q-c-12)     | P2  | —      | defer | —              | —           | ⏳     |
-| [C-13](#task-q-c-13)     | P1  | 1      | code  | Mobile         | —           | ⏳     |
-| [C-14](#task-q-c-14)     | P1  | 2      | code  | Mobile         | TASK-P2-02  | ✅     |
-| [C-15](#task-q-c-15)     | P0  | 2      | qa    | QA             | TASK-P2-05  | ⏳     |
-| [D-01](#task-q-d-01)     | P0  | 2      | code  | Mobile         | —           | ⏳     |
-| [D-02](#task-q-d-02)     | P1  | 2      | code  | Mobile         | —           | ⏳     |
-| [D-03](#task-q-d-03)     | P1  | 2      | code  | Mobile         | —           | ⏳     |
-| [D-04](#task-q-d-04)     | P2  | 2      | code  | Backend        | —           | ⏳     |
-| [D-05](#task-q-d-05)     | P0  | 2      | seed  | Backend        | TASK-P2-06  | ⏳     |
-| [D-06](#task-q-d-06)     | P0  | 2      | code  | Mobile         | —           | ⏳     |
-| [D-07](#task-q-d-07)     | P0  | 2      | code  | Mobile         | —           | ⏳     |
-| [D-08](#task-q-d-08)     | P0  | 2      | code  | Backend        | —           | ⏳     |
-| [D-09](#task-q-d-09)     | P1  | 2      | code  | Mobile         | TASK-P2-09  | ⏳     |
-| [D-10](#task-q-d-10)     | P1  | 2      | code  | Mobile         | —           | ⏳     |
-| [D-11](#task-q-d-11)     | P2  | —      | defer | —              | —           | ⏳     |
-| [D-12](#task-q-d-12)     | P1  | 2      | code  | Full-stack     | —           | ⏳     |
-| [D-13](#task-q-d-13)     | P0  | 2      | seed  | Backend        | TASK-P2-06  | ⏳     |
-| [D-14](#task-q-d-14)     | P1  | 2      | code  | Mobile         | —           | ⏳     |
-| [D-15](#task-q-d-15)     | P1  | 2      | code  | Mobile         | —           | ⏳     |
-| [D-16](#task-q-d-16)     | P0  | 2      | code  | Full-stack     | —           | ⏳     |
-| [D-17](#task-q-d-17)     | P0  | 2      | code  | Full-stack     | TASK-P2-04  | ✅     |
-| [D-18](#task-q-d-18)     | P2  | —      | defer | —              | —           | ⏳     |
-| [D-19](#task-q-d-19)     | P1  | 2      | seed  | Backend        | —           | ⏳     |
-| [D-20](#task-q-d-20)     | P2  | —      | defer | —              | —           | ⏳     |
-| [D-21](#task-q-d-21)     | P0  | 2      | code  | Full-stack     | —           | ⏳     |
-| [D-22](#task-q-d-22)     | P0  | 2      | code  | Backend        | —           | ⏳     |
-| [D-23](#task-q-d-23)     | P1  | 2      | code  | Full-stack     | —           | ⏳     |
-| [D-24](#task-q-d-24)     | P1  | 2      | code  | Mobile         | —           | ⏳     |
-| [D-25](#task-q-d-25)     | P1  | 2      | code  | Full-stack     | —           | ⏳     |
-| [D-26](#task-q-d-26)     | P1  | 2      | code  | Mobile         | —           | ⏳     |
-| [D-27](#task-q-d-27)     | P0  | 2      | code  | Backend        | —           | ⏳     |
-| [D-28](#task-q-d-28)     | P0  | 2      | code  | Full-stack     | —           | ⏳     |
-| [D-29](#task-q-d-29)     | P1  | 2      | code  | Mobile         | —           | ⏳     |
-| [D-30](#task-q-d-30)     | P1  | 2      | code  | Mobile         | —           | ⏳     |
-| [D-31](#task-q-d-31)     | P1  | 2      | code  | Mobile         | —           | ⏳     |
-| [D-32](#task-q-d-32)     | P1  | 2      | code  | Full-stack     | —           | ⏳     |
-| [D-33](#task-q-d-33)     | P1  | 2      | code  | Mobile         | TASK-P2-03b | ✅     |
-| [E-01](#task-q-e-01)     | P0  | 3      | code  | Full-stack     | TASK-P2-10  | ⏳     |
-| [E-02](#task-q-e-02)     | P1  | 3      | code  | Mobile         | —           | ⏳     |
-| [E-03](#task-q-e-03)     | P2  | 3      | code  | Mobile         | —           | ⏳     |
-| [E-04](#task-q-e-04)     | P0  | 3      | seed  | Backend        | —           | ⏳     |
-| [E-05](#task-q-e-05)     | P0  | 3      | code  | Full-stack     | —           | ✅     |
-| [E-06](#task-q-e-06)     | P1  | 3      | code  | Mobile         | —           | ⏳     |
-| [E-07](#task-q-e-07)     | P1  | —      | ops   | Ops            | —           | ⏳     |
-| [E-08](#task-q-e-08)     | P1  | 6      | defer | Mobile         | —           | ⏳     |
-| [E-09](#task-q-e-09)     | P1  | 3      | code  | Full-stack     | —           | ⏳     |
-| [E-10](#task-q-e-10)     | P0  | 3      | code  | Backend        | —           | ⏳     |
-| [E-11](#task-q-e-11)     | P2  | 6      | code  | Backend        | —           | ⏳     |
-| [E-12](#task-q-e-12)     | P0  | 3      | code  | Mobile         | —           | ⏳     |
-| [E-13](#task-q-e-13)     | P0  | 3      | code  | Mobile         | —           | ⏳     |
-| [E-14](#task-q-e-14)     | P1  | 3      | code  | Mobile         | —           | ⏳     |
-| [E-15](#task-q-e-15)     | P1  | 3      | code  | Mobile         | —           | ⏳     |
-| [E-16](#task-q-e-16)     | P0  | 3      | code  | Mobile         | —           | ⏳     |
-| [E-17](#task-q-e-17)     | P1  | 3      | code  | Mobile         | —           | ⏳     |
-| [E-18](#task-q-e-18)     | P2  | 6      | defer | Mobile         | —           | ⏳     |
-| [F-01](#task-q-f-01)     | P0  | 4      | code  | Full-stack     | TASK-P2-11  | ⏳     |
-| [F-02](#task-q-f-02)     | P0  | 4      | code  | Backend        | —           | ⏳     |
-| [F-03](#task-q-f-03)     | P0  | 4      | code  | Mobile         | —           | ⏳     |
-| [F-04](#task-q-f-04)     | P1  | 4      | code  | Mobile         | —           | ⏳     |
-| [F-05](#task-q-f-05)     | P1  | 4      | code  | Mobile         | —           | ⏳     |
-| [F-06](#task-q-f-06)     | P1  | 2      | code  | Mobile         | TASK-P2-03b | ✅     |
-| [F-07](#task-q-f-07)     | P1  | 4      | code  | Mobile         | —           | ⏳     |
-| [F-08](#task-q-f-08)     | P1  | 4      | code  | Mobile         | —           | ⏳     |
-| [F-09](#task-q-f-09)     | P0  | 4      | code  | Backend        | —           | ⏳     |
-| [F-10](#task-q-f-10)     | P1  | 4      | code  | Mobile         | —           | ⏳     |
-| [F-11](#task-q-f-11)     | P1  | 4      | code  | Mobile         | —           | ⏳     |
-| [F-12](#task-q-f-12)     | P0  | 2      | code  | Full-stack     | TASK-P2-02  | ✅     |
-| [F-13](#task-q-f-13)     | P0  | 6      | code  | Mobile         | —           | ⏳     |
-| [F-14](#task-q-f-14)     | P1  | 6      | code  | Full-stack     | —           | ⏳     |
-| [F-15](#task-q-f-15)     | P1  | 4      | code  | Backend        | —           | ⏳     |
-| [F-16](#task-q-f-16)     | P0  | 4      | code  | Mobile         | —           | ⏳     |
-| [F-17](#task-q-f-17)     | P1  | —      | defer | —              | —           | ⏳     |
-| [G-01](#task-q-g-01)     | P0  | 5      | code  | Full-stack     | —           | ⏳     |
-| [G-02](#task-q-g-02)     | P1  | 5      | code  | Backend        | —           | ⏳     |
-| [G-03](#task-q-g-03)     | P1  | 5      | code  | Backend        | —           | ⏳     |
-| [G-04](#task-q-g-04)     | P1  | 5      | code  | Mobile         | —           | ⏳     |
-| [G-05](#task-q-g-05)     | P1  | 5      | code  | Mobile         | —           | ⏳     |
-| [G-06](#task-q-g-06)     | P0  | 5      | code  | Backend        | —           | ⏳     |
-| [G-07](#task-q-g-07)     | P1  | 5      | code  | Mobile         | —           | ⏳     |
-| [G-08](#task-q-g-08)     | P1  | 5      | code  | Mobile         | —           | ⏳     |
-| [G-09](#task-q-g-09)     | P0  | 5      | code  | Full-stack     | —           | ⏳     |
-| [G-10](#task-q-g-10)     | P1  | 5      | code  | Backend        | —           | ⏳     |
-| [G-11](#task-q-g-11)     | P2  | —      | defer | —              | —           | ⏳     |
-| [G-12](#task-q-g-12)     | P2  | —      | defer | —              | —           | ⏳     |
-| [G-13](#task-q-g-13)     | P1  | 5      | code  | Backend        | —           | ⏳     |
-| [G-14](#task-q-g-14)     | P1  | 5      | code  | Full-stack     | —           | ⏳     |
-| [G-15](#task-q-g-15)     | P0  | 5      | code  | Full-stack     | —           | ⏳     |
-| [G-16](#task-q-g-16)     | P1  | 6      | code  | Full-stack     | —           | ⏳     |
-| [G-17](#task-q-g-17)     | P2  | —      | defer | —              | —           | ⏳     |
-| [G-18](#task-q-g-18)     | P1  | 5      | code  | Mobile         | —           | ⏳     |
-| [G-19](#task-q-g-19)     | P1  | 5      | code  | Backend        | —           | ⏳     |
-| [G-20](#task-q-g-20)     | P0  | 5      | code  | Backend        | —           | ⏳     |
-| [G-21](#task-q-g-21)     | P1  | —      | doc   | TPM            | —           | ⏳     |
-| [H-01](#task-q-h-01)     | P0  | 6      | code  | Full-stack     | —           | ⏳     |
-| [H-02](#task-q-h-02)     | P1  | 6      | code  | Mobile         | —           | ⏳     |
-| [H-03](#task-q-h-03)     | P1  | 6      | ops   | DevOps         | —           | ⏳     |
-| [H-04](#task-q-h-04)     | P1  | 6      | code  | Full-stack     | —           | ⏳     |
-| [H-05](#task-q-h-05)     | P2  | 6      | code  | Mobile         | —           | ⏳     |
-| [H-06](#task-q-h-06)     | P2  | 6      | code  | Mobile         | —           | ⏳     |
-| [H-07](#task-q-h-07)     | P2  | 6      | code  | Mobile         | —           | ⏳     |
-| [H-08](#task-q-h-08)     | P0  | —      | ops   | PO/TPM         | —           | ⏳     |
-| [H-09](#task-q-h-09)     | P0  | 6      | qa    | QA             | TASK-P4-03  | ⏳     |
-| [H-10](#task-q-h-10)     | P1  | —      | ops   | Dev on-call    | —           | ⏳     |
-| [H-11](#task-q-h-11)     | P1  | —      | ops   | Owner          | —           | ⏳     |
-| [H-12](#task-q-h-12)     | P1  | —      | qa    | QA             | TASK-P3-04  | ⏳     |
-| [H-13](#task-q-h-13)     | P1  | —      | doc   | Dev            | TASK-P4-06  | ⏳     |
-| [I-01](#task-q-i-01)     | P0  | 3      | ops   | DevOps         | TASK-P2-08  | ⏳     |
-| [I-02](#task-q-i-02)     | P0  | 5      | ops   | Mobile/DevOps  | —           | ⏳     |
-| [I-03](#task-q-i-03)     | P1  | 2      | seed  | Backend        | TASK-P2-06  | ✅     |
-| [I-04](#task-q-i-04)     | P2  | 3      | code  | Tech Lead      | GAP-07      | ⏳     |
-| [I-05](#task-q-i-05)     | P1  | —      | doc   | Designer       | GAP-08      | ⏳     |
-| [I-06](#task-q-i-06)     | P1  | —      | code  | Mobile         | —           | ⏳     |
-| [I-07](#task-q-i-07)     | P2  | —      | defer | —              | —           | ⏳     |
-| [I-08](#task-q-i-08)     | P2  | —      | code  | Mobile         | —           | ⏳     |
-| [I-09](#task-q-i-09)     | P2  | 5      | ops   | DevOps         | TASK-P8-02  | ⏳     |
-| [GAP-01](#task-q-gap-01) | P0  | —      | doc   | Tech Lead      | —           | ✅     |
-| [GAP-02](#task-q-gap-02) | P0  | —      | doc   | —              | —           | ✅     |
-| [GAP-03](#task-q-gap-03) | P0  | —      | doc   | —              | TASK-P2-04  | ✅     |
-| [GAP-04](#task-q-gap-04) | P2  | 6      | code  | Full-stack     | —           | ⏳     |
-| [GAP-05](#task-q-gap-05) | P0  | —      | code  | Full-stack     | TASK-P2-02  | ✅     |
-| [GAP-06](#task-q-gap-06) | P0  | 5      | code  | Backend        | —           | ⏳     |
-| [GAP-07](#task-q-gap-07) | P2  | —      | code  | Tech Lead      | I-04        | ⏳     |
-| [GAP-08](#task-q-gap-08) | P1  | —      | doc   | Designer       | —           | ⏳     |
-| [GAP-09](#task-q-gap-09) | P0  | —      | doc   | —              | —           | ✅     |
-| [GAP-10](#task-q-gap-10) | P1  | —      | doc   | —              | —           | ✅     |
-| [GAP-11](#task-q-gap-11) | P0  | —      | code  | Mobile         | TASK-P2-03b | ✅     |
+| ID                       | P   | Sprint | Loại  | Giao cho       | Map         | Status      |
+| ------------------------ | --- | ------ | ----- | -------------- | ----------- | ----------- |
+| [A-01](#task-q-a-01)     | P0  | 0      | seed  | Backend/TPM    | TASK-P2-06  | ⏳          |
+| [A-02](#task-q-a-02)     | P0  | 2      | code  | Backend        | —           | ⏳          |
+| [A-03](#task-q-a-03)     | P0  | 2      | seed  | Backend        | TASK-P2-06  | ⏳          |
+| [A-04](#task-q-a-04)     | P1  | 5      | code  | Backend        | —           | ⏳          |
+| [A-05](#task-q-a-05)     | P1  | 6      | ops   | TPM            | —           | ⏳          |
+| [A-06](#task-q-a-06)     | P0  | 2      | seed  | Backend        | TASK-P2-06  | ⏳          |
+| [A-07](#task-q-a-07)     | P1  | —      | defer | —              | —           | ⏳          |
+| [A-08](#task-q-a-08)     | P2  | —      | defer | —              | —           | ⏳          |
+| [A-09](#task-q-a-09)     | P0  | 2      | code  | Mobile         | TASK-P2-03  | ✅          |
+| [A-10](#task-q-a-10)     | P1  | 2      | code  | Mobile         | —           | ⏳          |
+| [A-11](#task-q-a-11)     | P0  | —      | ops   | TPM            | —           | ⏳          |
+| [A-12](#task-q-a-12)     | P1  | —      | doc   | Designer       | GAP-08      | ⏳          |
+| [A-13](#task-q-a-13)     | P1  | —      | ops   | TPM            | —           | ⏳          |
+| [B-01](#task-q-b-01)     | P0  | 5      | code  | Backend+Mobile | —           | ⏳          |
+| [B-02](#task-q-b-02)     | P0  | 5      | code  | Backend        | —           | ⏳          |
+| [B-03](#task-q-b-03)     | P1  | 5      | code  | Full-stack     | —           | ⏳          |
+| [B-04](#task-q-b-04)     | P0  | 5      | code  | Backend        | —           | ⏳          |
+| [B-05](#task-q-b-05)     | P0  | 5      | code  | Backend        | GAP-06      | ⏳          |
+| [B-06](#task-q-b-06)     | P0  | 5      | code  | Backend        | —           | ⏳          |
+| [B-07](#task-q-b-07)     | P1  | 5      | code  | Backend        | —           | ⏳          |
+| [B-08](#task-q-b-08)     | P1  | 5      | code  | Mobile         | —           | ⏳          |
+| [B-09](#task-q-b-09)     | P2  | 2      | code  | Mobile         | TASK-P2-03b | ✅          |
+| [B-10](#task-q-b-10)     | P2  | —      | defer | —              | —           | ⏳          |
+| [B-11](#task-q-b-11)     | P0  | 5      | code  | Mobile         | —           | ⏳          |
+| [B-12](#task-q-b-12)     | P2  | —      | defer | —              | —           | ⏳          |
+| [B-13](#task-q-b-13)     | P0  | —      | ops   | TPM            | —           | ⏳          |
+| [B-14](#task-q-b-14)     | P0  | 2      | code  | Full-stack     | —           | ⏳          |
+| [B-15](#task-q-b-15)     | P1  | 2      | code  | Mobile+API     | TASK-P2-03  | ✅          |
+| [B-16](#task-q-b-16)     | P1  | 2      | code  | Backend        | TASK-P2-01  | ✅          |
+| [B-17](#task-q-b-17)     | P2  | 5      | code  | Backend        | —           | ⏳          |
+| [B-18](#task-q-b-18)     | P0  | 2      | code  | Mobile         | —           | ⏳          |
+| [B-19](#task-q-b-19)     | P1  | —      | code  | Mobile         | —           | ⏳          |
+| [B-20](#task-q-b-20)     | P2  | —      | defer | —              | —           | ⏳          |
+| [B-21](#task-q-b-21)     | P1  | 4      | code  | Mobile         | TASK-P2-11  | ⏳          |
+| [B-22](#task-q-b-22)     | P1  | 5      | code  | Backend        | —           | ⏳          |
+| [B-23](#task-q-b-23)     | P2  | 5      | code  | Mobile         | —           | ⏳          |
+| [B-24](#task-q-b-24)     | P1  | 3      | code  | Full-stack     | TASK-P2-10  | ⏳          |
+| [B-25](#task-q-b-25)     | P0  | 2      | code  | Mobile         | —           | ⏳          |
+| [B-26](#task-q-b-26)     | P0  | 2      | code  | Backend        | —           | ⏳          |
+| [B-27](#task-q-b-27)     | P1  | 6      | code  | Full-stack     | —           | ⏳          |
+| [B-28](#task-q-b-28)     | P1  | 2      | code  | Full-stack     | —           | ⏳          |
+| [B-29](#task-q-b-29)     | P0  | 3      | code  | Full-stack     | —           | ⏳          |
+| [B-30](#task-q-b-30)     | P2  | 6      | code  | Full-stack     | —           | ⏳          |
+| [B-31](#task-q-b-31)     | P2  | 6      | code  | Full-stack     | —           | ⏳          |
+| [B-32](#task-q-b-32)     | P1  | 2      | code  | Full-stack     | —           | ⏳          |
+| [B-33](#task-q-b-33)     | P1  | 2      | code  | Full-stack     | TASK-P2-02  | ✅          |
+| [C-01](#task-q-c-01)     | P0  | 1      | code  | Full-stack     | —           | ⏳          |
+| [C-02](#task-q-c-02)     | P1  | 5      | code  | Full-stack     | —           | ⏳          |
+| [C-03](#task-q-c-03)     | P2  | 5      | code  | Backend        | —           | ⏳          |
+| [C-04](#task-q-c-04)     | P0  | 1      | code  | Full-stack     | —           | ⏳          |
+| [C-05](#task-q-c-05)     | P0  | 1      | code  | Backend        | —           | ⏳          |
+| [C-06](#task-q-c-06)     | P2  | 6      | code  | Backend        | —           | ⏳          |
+| [C-07](#task-q-c-07)     | P2  | 6      | code  | Mobile         | —           | ⏳          |
+| [C-08](#task-q-c-08)     | P0  | 1      | code  | Mobile         | TASK-P2-01  | ✅          |
+| [C-09](#task-q-c-09)     | P1  | 1      | code  | Mobile         | —           | ⏳          |
+| [C-10](#task-q-c-10)     | P1  | 5      | code  | Full-stack     | —           | ⏳          |
+| [C-11](#task-q-c-11)     | P0  | 1      | code  | Mobile         | TASK-P2-01  | ✅          |
+| [C-12](#task-q-c-12)     | P2  | —      | defer | —              | —           | ⏳          |
+| [C-13](#task-q-c-13)     | P1  | 1      | code  | Mobile         | —           | ⏳          |
+| [C-14](#task-q-c-14)     | P1  | 2      | code  | Mobile         | TASK-P2-02  | ✅          |
+| [C-15](#task-q-c-15)     | P0  | 2      | qa    | QA             | TASK-P2-05  | ⏳          |
+| [D-01](#task-q-d-01)     | P0  | 2      | code  | Mobile         | —           | ⏳          |
+| [D-02](#task-q-d-02)     | P1  | 2      | code  | Mobile         | —           | ⏳          |
+| [D-03](#task-q-d-03)     | P1  | 2      | code  | Mobile         | —           | ⏳          |
+| [D-04](#task-q-d-04)     | P2  | 2      | code  | Backend        | —           | ⏳          |
+| [D-05](#task-q-d-05)     | P0  | 2      | seed  | Backend        | TASK-P2-06  | ⏳          |
+| [D-06](#task-q-d-06)     | P0  | 2      | code  | Mobile         | —           | ⏳          |
+| [D-07](#task-q-d-07)     | P0  | 2      | code  | Mobile         | —           | ⏳          |
+| [D-08](#task-q-d-08)     | P0  | 2      | code  | Backend        | —           | ⏳          |
+| [D-09](#task-q-d-09)     | P1  | 2      | code  | Mobile         | TASK-P2-09  | ⏳          |
+| [D-10](#task-q-d-10)     | P1  | 2      | code  | Mobile         | —           | ⏳          |
+| [D-11](#task-q-d-11)     | P2  | —      | defer | —              | —           | ⏳          |
+| [D-12](#task-q-d-12)     | P1  | 2      | code  | Full-stack     | —           | ⏳          |
+| [D-13](#task-q-d-13)     | P0  | 2      | seed  | Backend        | TASK-P2-06  | ⏳          |
+| [D-14](#task-q-d-14)     | P1  | 2      | code  | Mobile         | —           | ⏳          |
+| [D-15](#task-q-d-15)     | P1  | 2      | code  | Mobile         | —           | ⏳          |
+| [D-16](#task-q-d-16)     | P0  | 2      | code  | Full-stack     | —           | ⏳          |
+| [D-17](#task-q-d-17)     | P0  | 2      | code  | Full-stack     | TASK-P2-04  | ✅          |
+| [D-18](#task-q-d-18)     | P2  | —      | defer | —              | —           | ⏳          |
+| [D-19](#task-q-d-19)     | P1  | 2      | seed  | Backend        | —           | ⏳          |
+| [D-20](#task-q-d-20)     | P2  | —      | defer | —              | —           | ⏳          |
+| [D-21](#task-q-d-21)     | P0  | 2      | code  | Full-stack     | —           | ⏳          |
+| [D-22](#task-q-d-22)     | P0  | 2      | code  | Backend        | —           | ⏳          |
+| [D-23](#task-q-d-23)     | P1  | 2      | code  | Full-stack     | —           | ⏳          |
+| [D-24](#task-q-d-24)     | P1  | 2      | code  | Mobile         | —           | ⏳          |
+| [D-25](#task-q-d-25)     | P1  | 2      | code  | Full-stack     | —           | ⏳          |
+| [D-26](#task-q-d-26)     | P1  | 2      | code  | Mobile         | —           | ⏳          |
+| [D-27](#task-q-d-27)     | P0  | 2      | code  | Backend        | —           | ⏳          |
+| [D-28](#task-q-d-28)     | P0  | 2      | code  | Full-stack     | —           | ⏳          |
+| [D-29](#task-q-d-29)     | P1  | 2      | code  | Mobile         | —           | ⏳          |
+| [D-30](#task-q-d-30)     | P1  | 2      | code  | Mobile         | —           | ⏳          |
+| [D-31](#task-q-d-31)     | P1  | 2      | code  | Mobile         | —           | ⏳          |
+| [D-32](#task-q-d-32)     | P1  | 2      | code  | Full-stack     | —           | ⏳          |
+| [D-33](#task-q-d-33)     | P1  | 2      | code  | Mobile         | TASK-P2-03b | ✅          |
+| [E-01](#task-q-e-01)     | P0  | 3      | code  | Full-stack     | TASK-P2-10  | ⏳          |
+| [E-02](#task-q-e-02)     | P1  | 3      | code  | Mobile         | —           | ⏳          |
+| [E-03](#task-q-e-03)     | P2  | 3      | code  | Mobile         | —           | ⏳          |
+| [E-04](#task-q-e-04)     | P0  | 3      | seed  | Backend        | —           | ⏳          |
+| [E-05](#task-q-e-05)     | P0  | 3      | code  | Full-stack     | —           | ✅          |
+| [E-06](#task-q-e-06)     | P1  | 3      | code  | Mobile         | —           | ⏳          |
+| [E-07](#task-q-e-07)     | P1  | —      | ops   | Ops            | —           | ⏳          |
+| [E-08](#task-q-e-08)     | P1  | 6      | defer | Mobile         | —           | ⏳          |
+| [E-09](#task-q-e-09)     | P1  | 3      | code  | Full-stack     | —           | ⏳          |
+| [E-10](#task-q-e-10)     | P0  | 3      | code  | Backend        | —           | ⏳          |
+| [E-11](#task-q-e-11)     | P2  | 6      | code  | Backend        | —           | ⏳          |
+| [E-12](#task-q-e-12)     | P0  | 3      | code  | Mobile         | —           | ⏳          |
+| [E-13](#task-q-e-13)     | P0  | 3      | code  | Mobile         | —           | ⏳          |
+| [E-14](#task-q-e-14)     | P1  | 3      | code  | Mobile         | —           | ⏳          |
+| [E-15](#task-q-e-15)     | P1  | 3      | code  | Mobile         | —           | ⏳          |
+| [E-16](#task-q-e-16)     | P0  | 3      | code  | Mobile         | —           | ⏳          |
+| [E-17](#task-q-e-17)     | P1  | 3      | code  | Mobile         | —           | ⏳          |
+| [E-18](#task-q-e-18)     | P2  | 6      | defer | Mobile         | —           | ⏳          |
+| [F-01](#task-q-f-01)     | P0  | 4      | code  | Full-stack     | TASK-P2-11  | ⏳          |
+| [F-02](#task-q-f-02)     | P0  | 4      | code  | Backend        | —           | ⏳          |
+| [F-03](#task-q-f-03)     | P0  | 4      | code  | Mobile         | —           | ⏳          |
+| [F-04](#task-q-f-04)     | P1  | 4      | code  | Mobile         | —           | ⏳          |
+| [F-05](#task-q-f-05)     | P1  | 4      | code  | Mobile         | —           | ⏳          |
+| [F-06](#task-q-f-06)     | P1  | 2      | code  | Mobile         | TASK-P2-03b | ✅          |
+| [F-07](#task-q-f-07)     | P1  | 4      | code  | Mobile         | —           | ⏳          |
+| [F-08](#task-q-f-08)     | P1  | 4      | code  | Mobile         | —           | ⏳          |
+| [F-09](#task-q-f-09)     | P0  | 4      | code  | Backend        | —           | ⏳          |
+| [F-10](#task-q-f-10)     | P1  | 4      | code  | Mobile         | —           | ⏳          |
+| [F-11](#task-q-f-11)     | P1  | 4      | code  | Mobile         | —           | ⏳          |
+| [F-12](#task-q-f-12)     | P0  | 2      | code  | Full-stack     | TASK-P2-02  | ✅          |
+| [F-13](#task-q-f-13)     | P0  | 6      | code  | Mobile         | —           | ⏳          |
+| [F-14](#task-q-f-14)     | P1  | 6      | code  | Full-stack     | —           | ⏳          |
+| [F-15](#task-q-f-15)     | P1  | 4      | code  | Backend        | —           | ⏳          |
+| [F-16](#task-q-f-16)     | P0  | 4      | code  | Mobile         | —           | ⏳          |
+| [F-17](#task-q-f-17)     | P1  | —      | defer | —              | —           | ⏳          |
+| [G-01](#task-q-g-01)     | P0  | 5      | code  | Full-stack     | —           | ⏳          |
+| [G-02](#task-q-g-02)     | P1  | 5      | code  | Backend        | —           | ⏳          |
+| [G-03](#task-q-g-03)     | P1  | 5      | code  | Backend        | —           | ⏳          |
+| [G-04](#task-q-g-04)     | P1  | 5      | code  | Mobile         | —           | ⏳          |
+| [G-05](#task-q-g-05)     | P1  | 5      | code  | Mobile         | —           | ⏳          |
+| [G-06](#task-q-g-06)     | P0  | 5      | code  | Backend        | —           | ⏳          |
+| [G-07](#task-q-g-07)     | P1  | 5      | code  | Mobile         | —           | ⏳          |
+| [G-08](#task-q-g-08)     | P1  | 5      | code  | Mobile         | —           | ⏳          |
+| [G-09](#task-q-g-09)     | P0  | 5      | code  | Full-stack     | —           | ⏳          |
+| [G-10](#task-q-g-10)     | P1  | 5      | code  | Backend        | —           | ⏳          |
+| [G-11](#task-q-g-11)     | P2  | —      | defer | —              | —           | ⏳          |
+| [G-12](#task-q-g-12)     | P2  | —      | defer | —              | —           | ⏳          |
+| [G-13](#task-q-g-13)     | P1  | 5      | code  | Backend        | —           | ⏳          |
+| [G-14](#task-q-g-14)     | P1  | 5      | code  | Full-stack     | —           | ⏳          |
+| [G-15](#task-q-g-15)     | P0  | 5      | code  | Full-stack     | —           | ⏳          |
+| [G-16](#task-q-g-16)     | P1  | 6      | code  | Full-stack     | —           | ⏳          |
+| [G-17](#task-q-g-17)     | P2  | —      | defer | —              | —           | ⏳          |
+| [G-18](#task-q-g-18)     | P1  | 5      | code  | Mobile         | —           | ⏳          |
+| [G-19](#task-q-g-19)     | P1  | 5      | code  | Backend        | —           | ⏳          |
+| [G-20](#task-q-g-20)     | P0  | 5      | code  | Backend        | —           | ⏳          |
+| [G-21](#task-q-g-21)     | P1  | —      | doc   | TPM            | —           | ⏳          |
+| [H-01](#task-q-h-01)     | P0  | 6      | code  | Full-stack     | —           | ⏳          |
+| [H-02](#task-q-h-02)     | P1  | 6      | code  | Mobile         | —           | ⏳          |
+| [H-03](#task-q-h-03)     | P1  | 6      | ops   | DevOps         | —           | ⏳          |
+| [H-04](#task-q-h-04)     | P1  | 6      | code  | Full-stack     | —           | ⏳          |
+| [H-05](#task-q-h-05)     | P2  | 6      | code  | Mobile         | —           | ⏳          |
+| [H-06](#task-q-h-06)     | P2  | 6      | code  | Mobile         | —           | ⏳          |
+| [H-07](#task-q-h-07)     | P2  | 6      | code  | Mobile         | —           | ⏳          |
+| [H-08](#task-q-h-08)     | P0  | —      | ops   | PO/TPM         | —           | ⏳          |
+| [H-09](#task-q-h-09)     | P0  | 6      | qa    | QA             | TASK-P4-03  | ✅ template |
+| [H-10](#task-q-h-10)     | P1  | —      | ops   | Dev on-call    | —           | ✅ template |
+| [H-11](#task-q-h-11)     | P1  | —      | ops   | Owner          | —           | ✅ template |
+| [H-12](#task-q-h-12)     | P1  | —      | qa    | QA             | TASK-P3-04  | ✅ tooling  |
+| [H-13](#task-q-h-13)     | P1  | —      | doc   | Dev            | TASK-P4-06  | ✅ draft    |
+| [I-01](#task-q-i-01)     | P0  | 3      | ops   | DevOps         | TASK-P2-08  | ⏳          |
+| [I-02](#task-q-i-02)     | P0  | 5      | ops   | Mobile/DevOps  | —           | ✅ tooling  |
+| [I-03](#task-q-i-03)     | P1  | 2      | seed  | Backend        | TASK-P2-06  | ✅          |
+| [I-04](#task-q-i-04)     | P2  | 3      | code  | Tech Lead      | GAP-07      | ⏳          |
+| [I-05](#task-q-i-05)     | P1  | —      | doc   | Designer       | GAP-08      | ⏳          |
+| [I-06](#task-q-i-06)     | P1  | —      | code  | Mobile         | —           | ⏳          |
+| [I-07](#task-q-i-07)     | P2  | —      | defer | —              | —           | ⏳          |
+| [I-08](#task-q-i-08)     | P2  | —      | code  | Mobile         | —           | ⏳          |
+| [I-09](#task-q-i-09)     | P2  | 5      | ops   | DevOps         | TASK-P8-02  | ✅ config   |
+| [GAP-01](#task-q-gap-01) | P0  | —      | doc   | Tech Lead      | —           | ✅          |
+| [GAP-02](#task-q-gap-02) | P0  | —      | doc   | —              | —           | ✅          |
+| [GAP-03](#task-q-gap-03) | P0  | —      | doc   | —              | TASK-P2-04  | ✅          |
+| [GAP-04](#task-q-gap-04) | P2  | 6      | code  | Full-stack     | —           | ⏳          |
+| [GAP-05](#task-q-gap-05) | P0  | —      | code  | Full-stack     | TASK-P2-02  | ✅          |
+| [GAP-06](#task-q-gap-06) | P0  | 5      | code  | Backend        | —           | ⏳          |
+| [GAP-07](#task-q-gap-07) | P2  | —      | code  | Tech Lead      | I-04        | ⏳          |
+| [GAP-08](#task-q-gap-08) | P1  | —      | doc   | Designer       | —           | ⏳          |
+| [GAP-09](#task-q-gap-09) | P0  | —      | doc   | —              | —           | ✅          |
+| [GAP-10](#task-q-gap-10) | P1  | —      | doc   | —              | —           | ✅          |
+| [GAP-11](#task-q-gap-11) | P0  | —      | code  | Mobile         | TASK-P2-03b | ✅          |
 
 ---
 
@@ -5383,13 +5383,14 @@ OUTPUT: PR title "[H-08] Ngày G pilot" + mô tả file đã sửa.
 
 ### TASK-Q-H-09 {#task-q-h-09}
 
-|              |            |
-| ------------ | ---------- |
-| **Giao cho** | QA         |
-| **Ưu tiên**  | P0         |
-| **Sprint**   | 6          |
-| **Loại**     | qa         |
-| **Map**      | TASK-P4-03 |
+|                |             |
+| -------------- | ----------- |
+| **Giao cho**   | QA          |
+| **Ưu tiên**    | P0          |
+| **Sprint**     | 6           |
+| **Loại**       | qa          |
+| **Map**        | TASK-P4-03  |
+| **Trạng thái** | ✅ template |
 
 ```text
 Bạn là dev/QA/ops CaffeApp — đọc STAKEHOLDER_QUESTIONNAIRE.md H-09.
@@ -5413,16 +5414,19 @@ KIỂM TRA: npm run typecheck; test liên quan; manual theo TESTING.md nếu UI.
 OUTPUT: PR title "[H-09] UAT 15 kịch bản" + mô tả file đã sửa.
 ```
 
+**Trạng thái:** ✅ Template ready 2026-06-30 · `docs/UAT_SIGNOFF_SHEET.md`, `docs/UAT_REPORT_TEMPLATE.md`. Owner/QL UAT execution pending.
+
 ---
 
 ### TASK-Q-H-10 {#task-q-h-10}
 
-|              |             |
-| ------------ | ----------- |
-| **Giao cho** | Dev on-call |
-| **Ưu tiên**  | P1          |
-| **Sprint**   | —           |
-| **Loại**     | ops         |
+|                |             |
+| -------------- | ----------- |
+| **Giao cho**   | Dev on-call |
+| **Ưu tiên**    | P1          |
+| **Sprint**     | —           |
+| **Loại**       | ops         |
+| **Trạng thái** | ✅ template |
 
 ```text
 Bạn là dev/QA/ops CaffeApp — đọc STAKEHOLDER_QUESTIONNAIRE.md H-10.
@@ -5445,16 +5449,19 @@ KIỂM TRA: npm run typecheck; test liên quan; manual theo TESTING.md nếu UI.
 OUTPUT: PR title "[H-10] SLA S1 4h" + mô tả file đã sửa.
 ```
 
+**Trạng thái:** ✅ Template ready 2026-06-30 · `docs/ON_CALL_ROSTER_TEMPLATE.md`, `docs/PILOT_DAILY_LOG_TEMPLATE.md`. Real incident response pending pilot/go-live.
+
 ---
 
 ### TASK-Q-H-11 {#task-q-h-11}
 
-|              |       |
-| ------------ | ----- |
-| **Giao cho** | Owner |
-| **Ưu tiên**  | P1    |
-| **Sprint**   | —     |
-| **Loại**     | ops   |
+|                |             |
+| -------------- | ----------- |
+| **Giao cho**   | Owner       |
+| **Ưu tiên**    | P1          |
+| **Sprint**     | —           |
+| **Loại**       | ops         |
+| **Trạng thái** | ✅ template |
 
 ```text
 Bạn là dev/QA/ops CaffeApp — đọc STAKEHOLDER_QUESTIONNAIRE.md H-11.
@@ -5477,17 +5484,20 @@ KIỂM TRA: npm run typecheck; test liên quan; manual theo TESTING.md nếu UI.
 OUTPUT: PR title "[H-11] Go CN2 gate 7 ngày" + mô tả file đã sửa.
 ```
 
+**Trạng thái:** ✅ Template ready 2026-06-30 · `docs/GO_NO_GO_MEMO_TEMPLATE.md`. Owner go/no-go pending after 7 stable pilot days.
+
 ---
 
 ### TASK-Q-H-12 {#task-q-h-12}
 
-|              |            |
-| ------------ | ---------- |
-| **Giao cho** | QA         |
-| **Ưu tiên**  | P1         |
-| **Sprint**   | —          |
-| **Loại**     | qa         |
-| **Map**      | TASK-P3-04 |
+|                |            |
+| -------------- | ---------- |
+| **Giao cho**   | QA         |
+| **Ưu tiên**    | P1         |
+| **Sprint**     | —          |
+| **Loại**       | qa         |
+| **Map**        | TASK-P3-04 |
+| **Trạng thái** | ✅ tooling |
 
 ```text
 Bạn là dev/QA/ops CaffeApp — đọc STAKEHOLDER_QUESTIONNAIRE.md H-12.
@@ -5511,17 +5521,20 @@ KIỂM TRA: npm run typecheck; test liên quan; manual theo TESTING.md nếu UI.
 OUTPUT: PR title "[H-12] NFR WiFi p95" + mô tả file đã sửa.
 ```
 
+**Trạng thái:** ✅ Tooling ready 2026-06-30 · `scripts/nfr-spot-check.mjs`, npm script `phase3:nfr`, `docs/NFR_SPOT_CHECK.md`. Actual WiFi/staging p95 evidence pending.
+
 ---
 
 ### TASK-Q-H-13 {#task-q-h-13}
 
-|              |            |
-| ------------ | ---------- |
-| **Giao cho** | Dev        |
-| **Ưu tiên**  | P1         |
-| **Sprint**   | —          |
-| **Loại**     | doc        |
-| **Map**      | TASK-P4-06 |
+|                |            |
+| -------------- | ---------- |
+| **Giao cho**   | Dev        |
+| **Ưu tiên**    | P1         |
+| **Sprint**     | —          |
+| **Loại**       | doc        |
+| **Map**        | TASK-P4-06 |
+| **Trạng thái** | ✅ draft   |
 
 ```text
 Bạn là dev/QA/ops CaffeApp — đọc STAKEHOLDER_QUESTIONNAIRE.md H-13.
@@ -5544,6 +5557,8 @@ ACCEPTANCE CRITERIA:
 KIỂM TRA: npm run typecheck; test liên quan; manual theo TESTING.md nếu UI.
 OUTPUT: PR title "[H-13] Review copy VN" + mô tả file đã sửa.
 ```
+
+**Trạng thái:** ✅ Draft checklist 2026-06-30 · `docs/COPY_REVIEW_PHASE3.md`. PO/QL device review pending.
 
 ---
 
@@ -5583,12 +5598,13 @@ OUTPUT: PR title "[I-01] VPS + SSL" + mô tả file đã sửa.
 
 ### TASK-Q-I-02 {#task-q-i-02}
 
-|              |               |
-| ------------ | ------------- |
-| **Giao cho** | Mobile/DevOps |
-| **Ưu tiên**  | P0            |
-| **Sprint**   | 5             |
-| **Loại**     | ops           |
+|                |               |
+| -------------- | ------------- |
+| **Giao cho**   | Mobile/DevOps |
+| **Ưu tiên**    | P0            |
+| **Sprint**     | 5             |
+| **Loại**       | ops           |
+| **Trạng thái** | ✅ tooling    |
 
 ```text
 Bạn là dev/QA/ops CaffeApp — đọc STAKEHOLDER_QUESTIONNAIRE.md I-02.
@@ -5610,6 +5626,8 @@ ACCEPTANCE CRITERIA:
 KIỂM TRA: npm run typecheck; test liên quan; manual theo TESTING.md nếu UI.
 OUTPUT: PR title "[I-02] EXPO_PUBLIC_API_URL" + mô tả file đã sửa.
 ```
+
+**Trạng thái:** ✅ Tooling ready 2026-06-30 · EAS profiles + local `eas-cli` + `phase4:release-ready` validate `EXPO_PUBLIC_API_URL`. Actual staging/prod URL secrets pending DevOps.
 
 ---
 
@@ -5810,13 +5828,14 @@ OUTPUT: PR title "[I-08] No dark mode" + mô tả file đã sửa.
 
 ### TASK-Q-I-09 {#task-q-i-09}
 
-|              |            |
-| ------------ | ---------- |
-| **Giao cho** | DevOps     |
-| **Ưu tiên**  | P2         |
-| **Sprint**   | 5          |
-| **Loại**     | ops        |
-| **Map**      | TASK-P8-02 |
+|                |            |
+| -------------- | ---------- |
+| **Giao cho**   | DevOps     |
+| **Ưu tiên**    | P2         |
+| **Sprint**     | 5          |
+| **Loại**       | ops        |
+| **Map**        | TASK-P8-02 |
+| **Trạng thái** | ✅ config  |
 
 ```text
 Bạn là dev/QA/ops CaffeApp — đọc STAKEHOLDER_QUESTIONNAIRE.md I-09.
@@ -5839,6 +5858,8 @@ ACCEPTANCE CRITERIA:
 KIỂM TRA: npm run typecheck; test liên quan; manual theo TESTING.md nếu UI.
 OUTPUT: PR title "[I-09] Google Play internal" + mô tả file đã sửa.
 ```
+
+**Trạng thái:** ✅ Config ready 2026-06-30 · `apps/mobile/eas.json` preview/production profiles + local `eas-cli` npm scripts. Actual EAS build/upload pending account + store access.
 
 ---
 

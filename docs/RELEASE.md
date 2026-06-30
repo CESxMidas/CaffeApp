@@ -61,6 +61,12 @@ git checkout -b release/0.2.0
 | Mobile    | EAS build `preview` profile → internal testers |
 | Smoke     | Health check + critical path manual            |
 
+Pre-build check:
+
+```bash
+EXPO_PUBLIC_API_URL="https://<staging-api-domain>" npm run phase4:release-ready -- --profile preview
+```
+
 ### Step 3 — Production release
 
 ```bash
@@ -80,6 +86,14 @@ git push origin develop
 | DB        | `db:migrate:deploy` (backup trước)     |
 | Mobile    | EAS production build                   |
 | Changelog | Update [CHANGELOG.md](../CHANGELOG.md) |
+
+Production readiness + smoke:
+
+```bash
+EXPO_PUBLIC_API_URL="https://<prod-api-domain>" npm run phase4:release-ready -- --profile production
+DATABASE_URL="postgresql://..." PG_BACKUP_LABEL="pre-prod-v1.0.0" npm run db:backup:pg
+API_BASE_URL="https://<prod-api-domain>" API_EMAIL="manager.q1@caffe.app" API_PASSWORD="***" npm run phase8:smoke
+```
 
 ### Step 4 — Post-release
 
@@ -137,6 +151,7 @@ Deploy hotfix **trực tiếp production** — skip staging nếu critical.
 - [ ] Version bumped ([VERSIONING.md](VERSIONING.md))
 - [ ] QA sign-off
 - [ ] Staging smoke pass
+- [ ] `phase4:release-ready` pass for target profile
 - [ ] DB migration reviewed
 - [ ] Secrets rotated if needed
 
@@ -145,6 +160,7 @@ Deploy hotfix **trực tiếp production** — skip staging nếu critical.
 - [ ] DB backup confirmed
 - [ ] `db:migrate:deploy` success
 - [ ] API health OK
+- [ ] `phase8:smoke` read-only pass
 - [ ] Mobile build distributed
 - [ ] Rollback artifact identified
 
