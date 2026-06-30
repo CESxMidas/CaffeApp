@@ -12,10 +12,7 @@ export class ReportsController {
 
   @Get('revenue')
   @Roles(StaffRole.MANAGER, StaffRole.OWNER)
-  async revenue(
-    @CurrentUser() user: JwtPayload,
-    @Query() query: RevenueReportQueryDto,
-  ) {
+  async revenue(@CurrentUser() user: JwtPayload, @Query() query: RevenueReportQueryDto) {
     const data = await this.reportsService.getRevenue(user, query);
     return { data };
   }

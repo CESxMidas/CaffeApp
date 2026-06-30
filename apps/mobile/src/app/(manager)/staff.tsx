@@ -323,7 +323,11 @@ const styles = StyleSheet.create({
     borderColor: colors.border,
     backgroundColor: colors.surface,
   },
-  branchCardSelected: { borderColor: colors.primary, borderWidth: 2, backgroundColor: colors.primaryLight },
+  branchCardSelected: {
+    borderColor: colors.primary,
+    borderWidth: 2,
+    backgroundColor: colors.primaryLight,
+  },
   branchCardContent: { flex: 1 },
   branchCardTitle: { fontSize: 15, fontWeight: '600', color: colors.text },
   branchCardTitleSelected: { color: colors.primary },

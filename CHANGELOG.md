@@ -26,6 +26,8 @@ Versioning: [Semantic Versioning](docs/VERSIONING.md)
 - **feat(station):** Tab Bếp tablet trạm (TASK-P2-03b) — `(station)/` shell, `BaristaQueueView`, `operationalRoutes`
 - **fix(vat):** VAT 8% inclusive pricing (TASK-P2-04) — `calculateOrderTotal`, bill breakdown cart/payment
 - **chore(seed):** Staging seed menu thật D-13 (TASK-P2-06) — `db:seed:staging`, 3 CN, 50 bàn/CN
+- **fix(payment):** khóa pilot payment chỉ TM + CK — mobile ẩn Thẻ/Ví, API từ chối `CARD`/`E_WALLET`; thêm `BranchDto.bankInfo` + VietQR động theo số tiền
+- **chore(ci):** Phase 2 code-side CI green local — format/lint/typecheck/test pass; ignore Android build artefacts in Prettier
 
 ### Doc Freeze 2026-06-29 — Thông báo nội bộ team (trước Phase 2 refactor)
 
@@ -33,11 +35,11 @@ Versioning: [Semantic Versioning](docs/VERSIONING.md)
 
 **3 gap code ↔ docs (ưu tiên P0):**
 
-| # | Gap | File / vùng ảnh hưởng |
-| - | --- | --------------------- |
-| 1 | Màn chọn role sau login (đã bỏ theo C-11) | ~~`role.tsx`~~ ✅ P2-01 — route theo `StaffRole` |
-| 2 | Enum `SERVING` còn trong code (docs dùng `deliveredAt`) | ~~`packages/shared`~~ ✅ P2-02 — `deliveredAt` + deliver endpoint |
-| 3 | `activeRole` (user chọn) vs `StaffRole` cố định từ JWT | ~~`session.ts`~~ ✅ P2-01 — `activateSession` + `useMobileRole` |
+| #   | Gap                                                     | File / vùng ảnh hưởng                                             |
+| --- | ------------------------------------------------------- | ----------------------------------------------------------------- |
+| 1   | Màn chọn role sau login (đã bỏ theo C-11)               | ~~`role.tsx`~~ ✅ P2-01 — route theo `StaffRole`                  |
+| 2   | Enum `SERVING` còn trong code (docs dùng `deliveredAt`) | ~~`packages/shared`~~ ✅ P2-02 — `deliveredAt` + deliver endpoint |
+| 3   | `activeRole` (user chọn) vs `StaffRole` cố định từ JWT  | ~~`session.ts`~~ ✅ P2-01 — `activateSession` + `useMobileRole`   |
 
 **Thứ tự PR refactor (không đổi):**
 

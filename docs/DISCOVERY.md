@@ -50,12 +50,12 @@ flowchart TB
 
 ## 3. Competitive Analysis
 
-| Sản phẩm         | Điểm mạnh                               | Điểm yếu vs CaffeApp                  |
-| ---------------- | --------------------------------------- | ------------------------------------- |
-| KiotViet F&B     | Đầy đủ tính năng, in hóa đơn            | Phức tạp, chi phí cao cho quán nhỏ    |
-| Sapo             | POS + kho                               | Không tối ưu workflow barista         |
-| iPOS / Misa      | Phổ biến VN                             | UI cũ, không mobile-first             |
-| **CaffeApp MVP** | Mobile-first, tablet trạm + real-time barista | Chưa in hóa đơn; pilot **3 CN** |
+| Sản phẩm         | Điểm mạnh                                     | Điểm yếu vs CaffeApp               |
+| ---------------- | --------------------------------------------- | ---------------------------------- |
+| KiotViet F&B     | Đầy đủ tính năng, in hóa đơn                  | Phức tạp, chi phí cao cho quán nhỏ |
+| Sapo             | POS + kho                                     | Không tối ưu workflow barista      |
+| iPOS / Misa      | Phổ biến VN                                   | UI cũ, không mobile-first          |
+| **CaffeApp MVP** | Mobile-first, tablet trạm + real-time barista | Chưa in hóa đơn; pilot **3 CN**    |
 
 ---
 

@@ -49,9 +49,7 @@ export default function LoginScreen() {
     } catch (err) {
       if (isAxiosError(err)) {
         if (!err.response) {
-          setFormError(
-            'Không thể kết nối máy chủ. ',
-          );
+          setFormError('Không thể kết nối máy chủ. ');
           return;
         }
         const message = err.response.data?.message;
@@ -96,9 +94,7 @@ export default function LoginScreen() {
         <Pressable>
           <Text style={styles.forgot}>Quên mật khẩu?</Text>
         </Pressable>
-        {formError ? (
-          <ErrorBanner message={formError} onDismiss={() => setFormError('')} />
-        ) : null}
+        {formError ? <ErrorBanner message={formError} onDismiss={() => setFormError('')} /> : null}
         <Button title="Đăng nhập" onPress={handleLogin} loading={login.isPending} />
       </View>
 

@@ -3,6 +3,7 @@
   "compilerOptions": {
     "strict": true,
     "jsx": "react-jsx",
+    "moduleResolution": "bundler",
     "typeRoots": ["../../node_modules/@types", "./node_modules/@types"],
     "paths": {
       "@app/*": ["./src/app/*"],

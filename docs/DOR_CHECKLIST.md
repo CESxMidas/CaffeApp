@@ -67,16 +67,16 @@ Checklist cho toàn dự án trước khi bắt đầu code feature:
 
 ### US-A02: Chọn chi nhánh (Owner only)
 
-| DoR Item            | Status | Notes                            |
-| ------------------- | ------ | -------------------------------- |
+| DoR Item            | Status | Notes                                    |
+| ------------------- | ------ | ---------------------------------------- |
 | User story clear    | ✅     | Staff không chọn CN — questionnaire C-08 |
-| Acceptance criteria | ✅     | Owner only; staff auto branch    |
-| Design mockup       | ✅     | `02-chon-chi-nhanh.png` (Owner)  |
-| API contract        | ✅     | `GET /api/v1/branches`           |
-| Dependencies        | ⚠️     | US-A01 (auth token)              |
-| Estimate            | ✅     | 2 points                         |
-| Open questions      | ✅     | None                             |
-| Test scenarios      | ✅     | Owner multi-CN; staff skip screen |
+| Acceptance criteria | ✅     | Owner only; staff auto branch            |
+| Design mockup       | ✅     | `02-chon-chi-nhanh.png` (Owner)          |
+| API contract        | ✅     | `GET /api/v1/branches`                   |
+| Dependencies        | ⚠️     | US-A01 (auth token)                      |
+| Estimate            | ✅     | 2 points                                 |
+| Open questions      | ✅     | None                                     |
+| Test scenarios      | ✅     | Owner multi-CN; staff skip screen        |
 
 **Verdict:** ✅ Ready
 
@@ -84,16 +84,16 @@ Checklist cho toàn dự án trước khi bắt đầu code feature:
 
 ### US-A03: Điều hướng sau đăng nhập
 
-| DoR Item            | Status | Notes                          |
-| ------------------- | ------ | ------------------------------ |
-| User story clear    | ✅     | Supersedes "chọn vai trò" C-11 |
-| Acceptance criteria | ✅     | Route by StaffRole             |
+| DoR Item            | Status | Notes                            |
+| ------------------- | ------ | -------------------------------- |
+| User story clear    | ✅     | Supersedes "chọn vai trò" C-11   |
+| Acceptance criteria | ✅     | Route by StaffRole               |
 | Design mockup       | ⚠️     | `03-chon-vai-tro.png` deprecated |
-| API contract        | ✅     | Roles in login response        |
-| Dependencies        | ⚠️     | US-A01, BRANCH_ASSIGNMENT      |
-| Estimate            | ✅     | 2 points                       |
-| Open questions      | ✅     | Tablet trạm tab layout         |
-| Test scenarios      | ✅     | CASHIER→ops; MANAGER→dashboard |
+| API contract        | ✅     | Roles in login response          |
+| Dependencies        | ⚠️     | US-A01, BRANCH_ASSIGNMENT        |
+| Estimate            | ✅     | 2 points                         |
+| Open questions      | ✅     | Tablet trạm tab layout           |
+| Test scenarios      | ✅     | CASHIER→ops; MANAGER→dashboard   |
 
 **Verdict:** ✅ Ready (refactor FE pending)
 

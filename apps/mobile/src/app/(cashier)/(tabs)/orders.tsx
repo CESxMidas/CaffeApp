@@ -55,7 +55,13 @@ function matchesTab(order: OrderDto, tab: TabKey): boolean {
 export default function CashierOrdersScreen() {
   const activeBranchId = useSessionStore((s) => s.activeBranchId);
   const [tab, setTab] = useState<TabKey>('all');
-  const { data: orders, isLoading, isError, refetch, isRefetching } = useOrders({
+  const {
+    data: orders,
+    isLoading,
+    isError,
+    refetch,
+    isRefetching,
+  } = useOrders({
     branchId: activeBranchId,
   });
 

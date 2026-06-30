@@ -10,11 +10,11 @@
 
 CaffeApp dùng **một codebase** cho mọi thiết bị. Phân luồng bằng **`StaffRole`** (JWT) + thiết bị vật lý.
 
-| Thiết bị | Số lượng/CN | Tài khoản | Sau login |
-| -------- | ----------- | --------- | --------- |
-| **Tablet trạm** (quầy + bếp chung khu) | 1 | Tài khoản **trạm** (shared) | Tab Thu ngân + Bếp; chọn **tên NV** mỗi thao tác |
-| **ĐT cá nhân** NV vận hành | 1–2 | Login **cá nhân** | Thông báo, Món đã xong, hỗ trợ quầy |
-| **ĐT cá nhân** QL / Chủ | 1+ | Login **cá nhân** | Dashboard / Owner tools |
+| Thiết bị                               | Số lượng/CN | Tài khoản                   | Sau login                                        |
+| -------------------------------------- | ----------- | --------------------------- | ------------------------------------------------ |
+| **Tablet trạm** (quầy + bếp chung khu) | 1           | Tài khoản **trạm** (shared) | Tab Thu ngân + Bếp; chọn **tên NV** mỗi thao tác |
+| **ĐT cá nhân** NV vận hành             | 1–2         | Login **cá nhân**           | Thông báo, Món đã xong, hỗ trợ quầy              |
+| **ĐT cá nhân** QL / Chủ                | 1+          | Login **cá nhân**           | Dashboard / Owner tools                          |
 
 **Pilot (A-09):** Android ưu tiên; WiFi ổn định — **không offline-first** (B-18).
 
@@ -24,37 +24,37 @@ CaffeApp dùng **một codebase** cho mọi thiết bị. Phân luồng bằng *
 
 ### Tablet trạm: tài khoản chung + chọn tên NV
 
-| | |
-| --- | --- |
-| **Chọn** | 1 tài khoản trạm/CN; NV chọn tên mình khi order / thanh toán / hủy đơn |
-| **Lý do** | 2 NV vừa pha vừa thu ngân; giảm login đầu ca; audit qua `actorId` từ bước xác nhận NV |
-| **Trade-off** | Phụ thuộc NV chọn đúng tên — training + audit |
+|               |                                                                                       |
+| ------------- | ------------------------------------------------------------------------------------- |
+| **Chọn**      | 1 tài khoản trạm/CN; NV chọn tên mình khi order / thanh toán / hủy đơn                |
+| **Lý do**     | 2 NV vừa pha vừa thu ngân; giảm login đầu ca; audit qua `actorId` từ bước xác nhận NV |
+| **Trade-off** | Phụ thuộc NV chọn đúng tên — training + audit                                         |
 
 ### Tablet trạm: Tab Thu ngân + Tab Bếp (B-09, FR-A04)
 
-| | |
-| --- | --- |
-| **Chọn** | Cùng 1 tablet: **Tab Thu ngân** (order, thanh toán) + **Tab Bếp** (queue pha chế, hoàn thành món → READY) |
-| **Lý do** | Quầy + bếp chung khu; NV không đổi máy giữa gửi bếp và đánh dấu pha xong |
-| **Implementation** | `isStationDevice` → shell trạm; Tab Bếp **reuse** màn barista (`queue`, `order/[id]`); picker NV trên thao tác bếp (P2-03) |
-| **Khác ĐT barista** | ĐT `barista@` cá nhân: vẫn `/(barista)/` riêng; không Tab Thu ngân |
+|                     |                                                                                                                            |
+| ------------------- | -------------------------------------------------------------------------------------------------------------------------- |
+| **Chọn**            | Cùng 1 tablet: **Tab Thu ngân** (order, thanh toán) + **Tab Bếp** (queue pha chế, hoàn thành món → READY)                  |
+| **Lý do**           | Quầy + bếp chung khu; NV không đổi máy giữa gửi bếp và đánh dấu pha xong                                                   |
+| **Implementation**  | `isStationDevice` → shell trạm; Tab Bếp **reuse** màn barista (`queue`, `order/[id]`); picker NV trên thao tác bếp (P2-03) |
+| **Khác ĐT barista** | ĐT `barista@` cá nhân: vẫn `/(barista)/` riêng; không Tab Thu ngân                                                         |
 
 > **GAP-11 / TASK-P2-03b:** ✅ Implemented 2026-06-29 — `(station)/` shell + Tab Bếp.
 
 ### ĐT cá nhân: login cá nhân
 
-| | |
-| --- | --- |
-| **Chọn** | Mỗi NV có tài khoản riêng trên điện thoại |
+|           |                                                              |
+| --------- | ------------------------------------------------------------ |
+| **Chọn**  | Mỗi NV có tài khoản riêng trên điện thoại                    |
 | **Lý do** | Push notification, phiên cá nhân, auto logout cuối ca (B-11) |
 
 ### Không dùng trong MVP
 
-| Phương án | Lý do |
-| --------- | ----- |
+| Phương án                                    | Lý do                                   |
+| -------------------------------------------- | --------------------------------------- |
 | Màn **chọn vai trò** (card Thu ngân/Barista) | Đã bỏ — routing theo `StaffRole` (C-11) |
-| Offline queue khi mất mạng | Vận hành thủ công (B-18) |
-| Kiosk PIN thay login | Post-MVP |
+| Offline queue khi mất mạng                   | Vận hành thủ công (B-18)                |
+| Kiosk PIN thay login                         | Post-MVP                                |
 
 ---
 
@@ -89,11 +89,11 @@ CaffeApp dùng **một codebase** cho mọi thiết bị. Phân luồng bằng *
 
 ## 5. Real-time & mạng
 
-| Giai đoạn | Cơ chế |
-| --------- | ------ |
-| Sprint 2–3 | Polling 3–5s (sơ đồ bàn, queue bếp) |
-| Sprint 4+ | WebSocket + polling 10s fallback (F-01, F-16) |
-| Mất mạng | App không dùng — quy trình giấy/tay tại quán |
+| Giai đoạn  | Cơ chế                                        |
+| ---------- | --------------------------------------------- |
+| Sprint 2–3 | Polling 3–5s (sơ đồ bàn, queue bếp)           |
+| Sprint 4+  | WebSocket + polling 10s fallback (F-01, F-16) |
+| Mất mạng   | App không dùng — quy trình giấy/tay tại quán  |
 
 ---
 

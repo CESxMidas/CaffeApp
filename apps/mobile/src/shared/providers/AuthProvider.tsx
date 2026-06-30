@@ -53,6 +53,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
                   name: persisted.activeBranchName,
                   address: null,
                   phone: null,
+                  bankInfo: null,
                   isActive: true,
                 }
               : null,

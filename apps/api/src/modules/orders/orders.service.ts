@@ -6,7 +6,14 @@ import {
 } from '@nestjs/common';
 import type { OrderDto } from '@caffeapp/shared';
 import { calculateOrderTotal, isValidProductUnitPrice } from '@caffeapp/shared';
-import { BranchAssignmentStatus, OrderStatus, OrderType, StaffRole, TableStatus, NotificationType } from '@prisma/client';
+import {
+  BranchAssignmentStatus,
+  OrderStatus,
+  OrderType,
+  StaffRole,
+  TableStatus,
+  NotificationType,
+} from '@prisma/client';
 import { PrismaService } from '@common/prisma/prisma.service';
 import { AuditService } from '@common/audit/audit.service';
 import { ActorResolverService } from '@common/audit/actor-resolver.service';
@@ -295,11 +302,7 @@ export class OrdersService {
     return this.toOrderDto(updated);
   }
 
-  async deliver(
-    payload: JwtPayload,
-    orderId: string,
-    dto: DeliverOrderDto,
-  ): Promise<OrderDto> {
+  async deliver(payload: JwtPayload, orderId: string, dto: DeliverOrderDto): Promise<OrderDto> {
     const order = await this.prisma.order.findUnique({
       where: { id: orderId },
       include: { items: true },
@@ -363,12 +366,7 @@ export class OrdersService {
     );
   }
 
-  private assertStatusRole(
-    role: StaffRole,
-    from: OrderStatus,
-    to: OrderStatus,
-  ): void {
-
+  private assertStatusRole(role: StaffRole, from: OrderStatus, to: OrderStatus): void {
     if (to === OrderStatus.CANCELLED) {
       if (from === OrderStatus.READY) {
         if (role !== StaffRole.MANAGER && role !== StaffRole.OWNER) {
@@ -383,11 +381,7 @@ export class OrdersService {
     }
 
     if (to === OrderStatus.READY) {
-      if (
-        role !== StaffRole.BARISTA &&
-        role !== StaffRole.MANAGER &&
-        role !== StaffRole.OWNER
-      ) {
+      if (role !== StaffRole.BARISTA && role !== StaffRole.MANAGER && role !== StaffRole.OWNER) {
         throw new BadRequestException('Chỉ barista mới đánh dấu hoàn thành pha');
       }
     }

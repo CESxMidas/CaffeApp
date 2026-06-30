@@ -10,13 +10,7 @@ import {
 } from 'react-native';
 import { router } from 'expo-router';
 import type { OrderDto } from '@caffeapp/shared';
-import {
-  OrderStatus,
-  ORDER_STATUS_LABELS,
-  OrderType,
-  colors,
-  spacing,
-} from '@caffeapp/shared';
+import { OrderStatus, ORDER_STATUS_LABELS, OrderType, colors, spacing } from '@caffeapp/shared';
 import { useBaristaQueue } from '../hooks';
 import { Card, EmptyState, ErrorScreen } from '@shared/components/ui';
 import { opKitchenOrder } from '@shared/lib/navigation/operationalRoutes';
@@ -132,7 +126,12 @@ const styles = StyleSheet.create({
   content: { padding: spacing.base, paddingBottom: spacing.xl },
   center: { flex: 1, alignItems: 'center', justifyContent: 'center' },
   section: { marginBottom: spacing.lg },
-  sectionHeader: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm, marginBottom: spacing.sm },
+  sectionHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.sm,
+    marginBottom: spacing.sm,
+  },
   statusDot: { width: 10, height: 10, borderRadius: 5 },
   sectionTitle: { fontSize: 16, fontWeight: '700', color: colors.text },
   orderCard: { marginBottom: spacing.sm },

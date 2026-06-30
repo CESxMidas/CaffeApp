@@ -66,12 +66,12 @@
 **Stories:** US-A01 → US-A04  
 **Screens:** 01–04 (`03-chon-vai-tro` deprecated — routing theo StaffRole)
 
-| Story                        | Points | FE                                | BE                        | Status  |
-| ---------------------------- | ------ | --------------------------------- | ------------------------- | ------- |
-| US-A01 Đăng nhập (API + JWT) | 3      | `authService.login` + SecureStore | `POST /api/v1/auth/login` | ✅ Done |
-| US-A02 Chọn chi nhánh (Owner)| 2      | `useBranches` query               | `GET /api/v1/branches`    | ✅ Done |
-| US-A03 Điều hướng sau login  | 2      | Routing theo StaffRole            | `GET /api/v1/auth/me`     | ⚠️ Refactor (bỏ role screen) |
-| US-A04 Trang chủ trạm        | 3      | Wire home + tablet tabs           | —                         | ✅ Done |
+| Story                         | Points | FE                                | BE                        | Status                       |
+| ----------------------------- | ------ | --------------------------------- | ------------------------- | ---------------------------- |
+| US-A01 Đăng nhập (API + JWT)  | 3      | `authService.login` + SecureStore | `POST /api/v1/auth/login` | ✅ Done                      |
+| US-A02 Chọn chi nhánh (Owner) | 2      | `useBranches` query               | `GET /api/v1/branches`    | ✅ Done                      |
+| US-A03 Điều hướng sau login   | 2      | Routing theo StaffRole            | `GET /api/v1/auth/me`     | ⚠️ Refactor (bỏ role screen) |
+| US-A04 Trang chủ trạm         | 3      | Wire home + tablet tabs           | —                         | ✅ Done                      |
 
 **DoD:** Login E2E **thiết bị thật** + SecureStore sau kill app (C-15); đồng bộ DEVICE_POLICY v2
 
@@ -98,14 +98,14 @@
 **Screens:** 10–15  
 **Payment pilot (Must):** Tiền mặt + Chuyển khoản VietQR · Thẻ/Ví → Could (VNPay Sandbox dev)
 
-| Story               | Points | Priority pilot |
-| ------------------- | ------ | -------------- |
-| US-B06 Tiền mặt     | 5      | Must           |
-| US-B07 Chuyển khoản | 3      | Must           |
-| US-B08 Thẻ          | 2      | Could          |
-| US-B09 Ví / VNPay   | 3      | Could (Sandbox)|
-| US-B10 Danh sách đơn| —      | Must           |
-| US-B11 Lịch sử đơn  | —      | Should         |
+| Story                | Points | Priority pilot  |
+| -------------------- | ------ | --------------- |
+| US-B06 Tiền mặt      | 5      | Must            |
+| US-B07 Chuyển khoản  | 3      | Must            |
+| US-B08 Thẻ           | 2      | Could           |
+| US-B09 Ví / VNPay    | 3      | Could (Sandbox) |
+| US-B10 Danh sách đơn | —      | Must            |
+| US-B11 Lịch sử đơn   | —      | Should          |
 
 ---
 

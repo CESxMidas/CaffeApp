@@ -2,7 +2,7 @@ import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { router } from 'expo-router';
 import { ActivityIndicator } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { colors, spacing, borderRadius, formatCurrency } from '@caffeapp/shared';
+import { colors, spacing, formatCurrency } from '@caffeapp/shared';
 import { Card } from '@shared/components/ui';
 import { useIsOwner, usePermission } from '@shared/hooks/usePermission';
 import { usePendingBranchAssignments } from '@features/staff';
@@ -39,12 +39,8 @@ export default function ManagerDashboardScreen() {
 
       <Card style={styles.revenueCard}>
         <Text style={styles.revenueLabel}>Doanh thu hôm nay</Text>
-        <Text style={styles.revenueValue}>
-          {formatCurrency(summary?.totalRevenue ?? 0)}
-        </Text>
-        <Text style={styles.revenueChange}>
-          {summary?.totalOrders ?? 0} đơn đã thanh toán
-        </Text>
+        <Text style={styles.revenueValue}>{formatCurrency(summary?.totalRevenue ?? 0)}</Text>
+        <Text style={styles.revenueChange}>{summary?.totalOrders ?? 0} đơn đã thanh toán</Text>
       </Card>
 
       <View style={styles.statsRow}>
@@ -93,9 +89,7 @@ export default function ManagerDashboardScreen() {
               </View>
               <View style={styles.linkCardContent}>
                 <Text style={styles.linkCardTitle}>Đề xuất gán chi nhánh</Text>
-                <Text style={styles.linkCardDesc}>
-                  Chọn CN muốn gán · Gửi chủ quán duyệt
-                </Text>
+                <Text style={styles.linkCardDesc}>Chọn CN muốn gán · Gửi chủ quán duyệt</Text>
               </View>
               <Ionicons name="chevron-forward" size={20} color={colors.textMuted} />
             </View>

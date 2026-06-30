@@ -103,7 +103,9 @@ export default function CashierOrderDetailScreen() {
       ) : null}
 
       {canMarkDelivered ? (
-        <Text style={styles.hint}>Pha xong — giao món cho khách (hoặc thu tiền trước nếu khách yêu cầu)</Text>
+        <Text style={styles.hint}>
+          Pha xong — giao món cho khách (hoặc thu tiền trước nếu khách yêu cầu)
+        </Text>
       ) : null}
       {pickerModal}
     </ScrollView>

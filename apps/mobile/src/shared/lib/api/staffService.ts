@@ -1,4 +1,10 @@
-import type { ApiDataResponse, BranchOperatorDto, StaffDto, StaffListItemDto, StaffRole } from '@caffeapp/shared';
+import type {
+  ApiDataResponse,
+  BranchOperatorDto,
+  StaffDto,
+  StaffListItemDto,
+  StaffRole,
+} from '@caffeapp/shared';
 import { API_ENDPOINTS } from '@shared/config/api.config';
 import { apiClient } from './apiClient';
 

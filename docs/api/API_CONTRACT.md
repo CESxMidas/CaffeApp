@@ -111,13 +111,13 @@ UI tab **Chờ giao** = `READY` + `deliveredAt IS NULL`; **Chờ thanh toán** =
 
 Tablet trạm dùng tài khoản chung (A-09, B-15). Mỗi mutation quan trọng có thể gửi **`actedByStaffId`** (UUID staff thực hiện):
 
-| Endpoint | Field trong body |
-| -------- | ---------------- |
-| `POST /orders` | `actedByStaffId` optional |
+| Endpoint                    | Field trong body          |
+| --------------------------- | ------------------------- |
+| `POST /orders`              | `actedByStaffId` optional |
 | `PATCH /orders/{id}/status` | `actedByStaffId` optional |
 | `POST /orders/{id}/deliver` | `actedByStaffId` optional |
-| `POST /orders/{id}/cancel` | `actedByStaffId` optional |
-| `POST /payments` | `actedByStaffId` optional |
+| `POST /orders/{id}/cancel`  | `actedByStaffId` optional |
+| `POST /payments`            | `actedByStaffId` optional |
 
 **Rules:**
 
@@ -130,10 +130,10 @@ Xem thêm [API_ERD_REFACTOR_CHECKLIST.md](../API_ERD_REFACTOR_CHECKLIST.md) §3.
 
 ### 1.7.3 OrderDto — fields lifecycle
 
-| Field | Type | Mô tả |
-| ----- | ---- | ----- |
+| Field         | Type                  | Mô tả                                                      |
+| ------------- | --------------------- | ---------------------------------------------------------- |
 | `deliveredAt` | ISO timestamp \| null | Set khi NV ấn "Đã giao"; `null` = chưa giao (tab Chờ giao) |
-| `paidAt` | ISO timestamp \| null | Set khi thanh toán thành công |
+| `paidAt`      | ISO timestamp \| null | Set khi thanh toán thành công                              |
 
 **List filter** (`GET /orders`): query `deliveryState` = `awaiting_delivery` \| `awaiting_payment` (C-14):
 
@@ -188,13 +188,21 @@ Xem thêm [API_ERD_REFACTOR_CHECKLIST.md](../API_ERD_REFACTOR_CHECKLIST.md) §3.
       "name": "CN Quận 1",
       "address": "123 Nguyễn Huệ, Q.1, TP.HCM",
       "phone": "0281234567",
+      "bankInfo": {
+        "bank": "Vietcombank",
+        "bankCode": "VCB",
+        "account": "1023456789",
+        "holder": "CTY TNHH CA PHE PILOT Q1"
+      },
       "isActive": true
     }
   ]
 }
 ```
 
-**Status:** 📋 Design only (Sprint 1 — US-A02)
+`bankInfo` dùng cho màn Chuyển khoản/VietQR; `null` nếu chi nhánh chưa cấu hình STK.
+
+**Status:** ✅ Implemented (Sprint 1 — US-A02; VietQR bankInfo added 2026-06-30)
 
 ---
 
@@ -629,11 +637,11 @@ Xem thêm [API_ERD_REFACTOR_CHECKLIST.md](../API_ERD_REFACTOR_CHECKLIST.md) §3.
 
 ### 4.1.1 Danh sách NV thao tác (tablet picker)
 
-|            |                                                     |
-| ---------- | --------------------------------------------------- |
-| **Method** | `GET`                                               |
-| **URL**    | `/staff/branch-operators`                           |
-| **DTO**    | — → `{ data: BranchOperatorDto[] }`               |
+|            |                                     |
+| ---------- | ----------------------------------- |
+| **Method** | `GET`                               |
+| **URL**    | `/staff/branch-operators`           |
+| **DTO**    | — → `{ data: BranchOperatorDto[] }` |
 
 **Response `200`:** Active staff `CASHIER` / `BARISTA` / `MANAGER` tại JWT branch (đã APPROVED), **loại trừ** tài khoản trạm (`station@*`).
 
@@ -1203,14 +1211,14 @@ Xem thêm [API_ERD_REFACTOR_CHECKLIST.md](../API_ERD_REFACTOR_CHECKLIST.md) §3.
 
 **Validation:**
 
-| Field               | Rules                                           |
-| ------------------- | ----------------------------------------------- |
-| `orderType`         | required, enum `OrderType`                      |
-| `tableId`           | required if `DINE_IN`, forbidden if `TAKE_AWAY` |
-| `items`             | required, min 1 item                            |
-| `items[].productId` | required, UUID, available                       |
-| `items[].quantity`  | required, integer 1–99                          |
-| `items[].notes`     | optional, max 200 chars                         |
+| Field               | Rules                                            |
+| ------------------- | ------------------------------------------------ |
+| `orderType`         | required, enum `OrderType`                       |
+| `tableId`           | required if `DINE_IN`, forbidden if `TAKE_AWAY`  |
+| `items`             | required, min 1 item                             |
+| `items[].productId` | required, UUID, available                        |
+| `items[].quantity`  | required, integer 1–99                           |
+| `items[].notes`     | optional, max 200 chars                          |
 | `actedByStaffId`    | optional UUID; **required** tablet trạm (§1.7.2) |
 
 **Authorization:** `CASHIER+`
@@ -1279,13 +1287,13 @@ Xem thêm [API_ERD_REFACTOR_CHECKLIST.md](../API_ERD_REFACTOR_CHECKLIST.md) §3.
 
 **Authorization:**
 
-| Transition       | Roles                         |
-| ---------------- | ----------------------------- |
-| PENDING → MAKING | BARISTA+, CASHIER+            |
-| MAKING → READY   | BARISTA+                      |
+| Transition        | Roles                                                     |
+| ----------------- | --------------------------------------------------------- |
+| PENDING → MAKING  | BARISTA+, CASHIER+                                        |
+| MAKING → READY    | BARISTA+                                                  |
 | READY → delivered | CASHIER+ — `POST /orders/{id}/deliver` sets `deliveredAt` |
-| READY → PAID     | CASHIER+ (Payment; mặc định sau `deliveredAt`, E-01) |
-| * → CANCELLED    | CASHIER+, MANAGER+            |
+| READY → PAID      | CASHIER+ (Payment; mặc định sau `deliveredAt`, E-01)      |
+| * → CANCELLED     | CASHIER+, MANAGER+                                        |
 
 **Business rules:**
 
@@ -1299,10 +1307,10 @@ Xem thêm [API_ERD_REFACTOR_CHECKLIST.md](../API_ERD_REFACTOR_CHECKLIST.md) §3.
 
 ### 8.6 Đánh dấu đã giao món
 
-|            |                                      |
-| ---------- | ------------------------------------ |
-| **Method** | `POST`                               |
-| **URL**    | `/orders/{orderId}/deliver`          |
+|            |                                       |
+| ---------- | ------------------------------------- |
+| **Method** | `POST`                                |
+| **URL**    | `/orders/{orderId}/deliver`           |
 | **DTO**    | `DeliverOrderRequestDto` → `OrderDto` |
 
 **Request:**
@@ -1317,8 +1325,8 @@ Xem thêm [API_ERD_REFACTOR_CHECKLIST.md](../API_ERD_REFACTOR_CHECKLIST.md) §3.
 
 **Validation:**
 
-| Field | Rules |
-| ----- | ----- |
+| Field            | Rules                                            |
+| ---------------- | ------------------------------------------------ |
 | `actedByStaffId` | optional UUID; **required** tablet trạm (§1.7.2) |
 
 **Authorization:** `CASHIER+`
@@ -1419,13 +1427,13 @@ Xem thêm [API_ERD_REFACTOR_CHECKLIST.md](../API_ERD_REFACTOR_CHECKLIST.md) §3.
 
 **Validation:**
 
-| Field          | Rules                                                              |
-| -------------- | ------------------------------------------------------------------ |
-| `orderId`      | required, UUID                                                     |
-| `method`       | required, enum `PaymentMethod`                                     |
-| `amount`       | required, integer > 0                                              |
-| `changeAmount` | optional, ≥ 0; required logic nếu CASH và amount > total           |
-| `reference`    | optional, max 100 chars (bắt buộc nếu BANK_TRANSFER/CARD/E_WALLET) |
+| Field          | Rules                                                    |
+| -------------- | -------------------------------------------------------- |
+| `orderId`      | required, UUID                                           |
+| `method`       | required, pilot chỉ nhận `CASH` hoặc `BANK_TRANSFER`     |
+| `amount`       | required, integer > 0                                    |
+| `changeAmount` | optional, ≥ 0; required logic nếu CASH và amount > total |
+| `reference`    | optional, max 100 chars                                  |
 
 **Authorization:** `CASHIER+`
 
@@ -1433,6 +1441,7 @@ Xem thêm [API_ERD_REFACTOR_CHECKLIST.md](../API_ERD_REFACTOR_CHECKLIST.md) §3.
 
 - Order phải `status = READY` và (`deliveredAt` set **hoặc** `allowEarlyPayment` / mang đi trả trước — E-01)
 - `amount` ≥ `order.total` (thiếu → `400`)
+- Pilot: API từ chối `CARD` / `E_WALLET`; thẻ/ví để sau pilot
 - CASH: `changeAmount = amount - total` (server validate)
 - Non-CASH: `changeAmount` phải null/0
 - Sau payment thành công: order → `PAID`, set `paidAt`, table → `EMPTY` nếu DINE_IN
@@ -1911,21 +1920,21 @@ Xem thêm [API_ERD_REFACTOR_CHECKLIST.md](../API_ERD_REFACTOR_CHECKLIST.md) §3.
 
 Các DTO cần bổ sung vào `@caffeapp/shared/contracts`:
 
-| DTO                                                                | Module                |
-| ------------------------------------------------------------------ | --------------------- |
-| `LoginRequestDto`, `LoginResponseDto`                              | Auth ✅               |
-| `RefreshTokenRequestDto`, `RefreshTokenResponseDto`                | Auth                  |
-| `ChangePasswordRequestDto`                                         | Auth                  |
-| `MeResponseDto`                                                    | Auth                  |
-| `CreateUserRequestDto`, `UpdateUserRequestDto`, `UserDetailDto`    | Users                 |
-| `CreateStaffRequestDto`, `UpdateStaffRequestDto`, `StaffDetailDto` | Staff                 |
-| `ProductCategoryDto`, `CreateCategoryRequestDto`                   | Categories ✅ partial |
-| `ProductDto`, `CreateProductRequestDto`                            | Products ✅ partial   |
-| `TableDto`, `CreateTableRequestDto`, `UpdateTableStatusRequestDto` | Tables ✅ partial     |
+| DTO                                                                            | Module                |
+| ------------------------------------------------------------------------------ | --------------------- |
+| `LoginRequestDto`, `LoginResponseDto`                                          | Auth ✅               |
+| `RefreshTokenRequestDto`, `RefreshTokenResponseDto`                            | Auth                  |
+| `ChangePasswordRequestDto`                                                     | Auth                  |
+| `MeResponseDto`                                                                | Auth                  |
+| `CreateUserRequestDto`, `UpdateUserRequestDto`, `UserDetailDto`                | Users                 |
+| `CreateStaffRequestDto`, `UpdateStaffRequestDto`, `StaffDetailDto`             | Staff                 |
+| `ProductCategoryDto`, `CreateCategoryRequestDto`                               | Categories ✅ partial |
+| `ProductDto`, `CreateProductRequestDto`                                        | Products ✅ partial   |
+| `TableDto`, `CreateTableRequestDto`, `UpdateTableStatusRequestDto`             | Tables ✅ partial     |
 | `OrderDto`, `CreateOrderDto`, `UpdateOrderStatusDto`, `DeliverOrderRequestDto` | Orders ✅             |
-| `PaymentDto`, `CreatePaymentDto`                                   | Payments ✅           |
-| `RevenueReportDto`, `TopProductsReportDto`, `ShiftReportDto`       | Reports               |
-| `InventoryItemDto`, `InventoryMovementDto`, movement requests      | Inventory             |
+| `PaymentDto`, `CreatePaymentDto`                                               | Payments ✅           |
+| `RevenueReportDto`, `TopProductsReportDto`, `ShiftReportDto`                   | Reports               |
+| `InventoryItemDto`, `InventoryMovementDto`, movement requests                  | Inventory             |
 
 ---
 

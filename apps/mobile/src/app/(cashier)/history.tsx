@@ -9,12 +9,7 @@ import {
   View,
 } from 'react-native';
 import { router } from 'expo-router';
-import {
-  OrderStatus,
-  colors,
-  formatCurrency,
-  spacing,
-} from '@caffeapp/shared';
+import { OrderStatus, colors, formatCurrency, spacing } from '@caffeapp/shared';
 import { useOrders } from '@features/orders';
 import { opStack } from '@shared/lib/navigation/operationalRoutes';
 import { Card, EmptyState, ErrorScreen } from '@shared/components/ui';
@@ -22,7 +17,13 @@ import { useSessionStore } from '@shared/stores/session';
 
 export default function CashierHistoryScreen() {
   const activeBranchId = useSessionStore((s) => s.activeBranchId);
-  const { data: orders, isLoading, isError, refetch, isRefetching } = useOrders({
+  const {
+    data: orders,
+    isLoading,
+    isError,
+    refetch,
+    isRefetching,
+  } = useOrders({
     branchId: activeBranchId,
     status: OrderStatus.PAID,
   });

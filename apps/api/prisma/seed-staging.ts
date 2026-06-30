@@ -170,7 +170,11 @@ async function seedBranchTables(branchId: string) {
       const code = `${zone.prefix}${String(n).padStart(2, '0')}`;
       await prisma.table.upsert({
         where: { branchId_code: { branchId, code } },
-        update: { floor: zone.floor, status: TableStatus.EMPTY, capacity: zone.prefix === 'S' ? 6 : 4 },
+        update: {
+          floor: zone.floor,
+          status: TableStatus.EMPTY,
+          capacity: zone.prefix === 'S' ? 6 : 4,
+        },
         create: {
           branchId,
           code,
@@ -287,7 +291,8 @@ async function verifyCounts(branchIds: string[]) {
 
   const perBranch = await Promise.all(
     branchIds.map(async (id) => {
-      const name = (await prisma.branch.findUnique({ where: { id }, select: { name: true } }))?.name;
+      const name = (await prisma.branch.findUnique({ where: { id }, select: { name: true } }))
+        ?.name;
       const tables = await prisma.table.count({ where: { branchId: id } });
       const products = await prisma.product.count({
         where: { branchId: id, isAvailable: true },
@@ -398,13 +403,17 @@ async function main() {
     await seedBranchTables(branch.id);
     await seedBranchMenu(branch.id, menu);
     await pruneBranchMenu(branch.id, menu);
-    console.log(`  → 50 bàn + menu (${menu.categories.length} category, ${menu.products.length} món)`);
+    console.log(
+      `  → 50 bàn + menu (${menu.categories.length} category, ${menu.products.length} món)`,
+    );
   }
 
   await verifyCounts(branches.map((b) => b.id));
 
   console.log(`\nMật khẩu staging: ${password}`);
-  console.log('Verify API (sau login): GET /api/v1/branches, /products?branchId=…, /tables?branchId=…');
+  console.log(
+    'Verify API (sau login): GET /api/v1/branches, /products?branchId=…, /tables?branchId=…',
+  );
 }
 
 main()

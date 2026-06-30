@@ -4,23 +4,23 @@ CaffeApp mobile dùng **Expo SDK 54** (tương thích **Expo Go** trên App Stor
 
 ## Yêu cầu
 
-| Thành phần | Phiên bản |
-|------------|-----------|
-| Expo SDK | **54** |
-| JDK (Android build) | **17** |
-| Android SDK | API **35** khuyến nghị (emulator 4 KB, không 16 KB) |
-| Node.js | **≥ 20.19** |
-| Expo Go (iPhone) | Supported SDK **54** ✓ |
+| Thành phần          | Phiên bản                                           |
+| ------------------- | --------------------------------------------------- |
+| Expo SDK            | **54**                                              |
+| JDK (Android build) | **17**                                              |
+| Android SDK         | API **35** khuyến nghị (emulator 4 KB, không 16 KB) |
+| Node.js             | **≥ 20.19**                                         |
+| Expo Go (iPhone)    | Supported SDK **54** ✓                              |
 
 ## Android SDK
 
 SDK cài **trên máy** qua Android Studio — không nằm trong repo.
 
-| File / biến | Vị trí | Commit? |
-|-------------|--------|---------|
-| `ANDROID_HOME` | Biến môi trường máy | Không |
+| File / biến        | Vị trí                                 | Commit?               |
+| ------------------ | -------------------------------------- | --------------------- |
+| `ANDROID_HOME`     | Biến môi trường máy                    | Không                 |
 | `local.properties` | `apps/mobile/android/local.properties` | **Không** (gitignore) |
-| `android/` folder | Sinh bởi `expo prebuild` | **Không** (gitignore) |
+| `android/` folder  | Sinh bởi `expo prebuild`               | **Không** (gitignore) |
 
 Chi tiết `ANDROID_HOME`, `local.properties`, PATH: [ENV_SETUP.md §3](ENV_SETUP.md#3-android-sdk-android_home--localproperties).
 
@@ -85,9 +85,9 @@ npm run mobile:tunnel    # terminal 2 — quét QR trên iPhone
 
 ## Script npm (Android)
 
-| Lệnh | Mô tả |
-|------|--------|
-| `npm run mobile` | Metro dev server (Expo Go / web) |
-| `npm run mobile:tunnel` | Dev server qua tunnel (iPhone khác mạng LAN) |
-| `npm run mobile:android:go` | Mở trên Android emulator qua Expo Go |
-| `npm run mobile:android` | Build & chạy native Android (`expo run:android`) |
+| Lệnh                        | Mô tả                                            |
+| --------------------------- | ------------------------------------------------ |
+| `npm run mobile`            | Metro dev server (Expo Go / web)                 |
+| `npm run mobile:tunnel`     | Dev server qua tunnel (iPhone khác mạng LAN)     |
+| `npm run mobile:android:go` | Mở trên Android emulator qua Expo Go             |
+| `npm run mobile:android`    | Build & chạy native Android (`expo run:android`) |

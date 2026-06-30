@@ -65,11 +65,19 @@ export interface BranchOperatorDto {
   role: StaffRole;
 }
 
+export interface BranchBankInfoDto {
+  bank: string;
+  bankCode: string | null;
+  account: string;
+  holder: string | null;
+}
+
 export interface BranchDto {
   id: string;
   name: string;
   address: string | null;
   phone: string | null;
+  bankInfo: BranchBankInfoDto | null;
   isActive: boolean;
 }
 

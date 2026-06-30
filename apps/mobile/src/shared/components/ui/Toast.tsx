@@ -1,13 +1,6 @@
 import { Ionicons } from '@expo/vector-icons';
 import { useCallback, useEffect, useRef, useState } from 'react';
-import {
-  Animated,
-  Pressable,
-  StyleSheet,
-  Text,
-  View,
-  type ViewStyle,
-} from 'react-native';
+import { Animated, Pressable, StyleSheet, Text, View, type ViewStyle } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { colors, borderRadius, spacing } from '@caffeapp/shared';
 
@@ -74,13 +67,7 @@ export function ToastHost() {
   );
 }
 
-function ToastItem({
-  toast,
-  onDismiss,
-}: {
-  toast: ToastMessage;
-  onDismiss: () => void;
-}) {
+function ToastItem({ toast, onDismiss }: { toast: ToastMessage; onDismiss: () => void }) {
   const slide = useRef(new Animated.Value(-24)).current;
   const opacity = useRef(new Animated.Value(0)).current;
   const config = VARIANT_CONFIG[toast.variant];

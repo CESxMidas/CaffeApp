@@ -21,8 +21,8 @@ export default function PendingBranchScreen() {
     <View style={styles.container}>
       <Text style={styles.title}>Chờ gán chi nhánh</Text>
       <Text style={styles.body}>
-        Tài khoản của bạn chưa được chủ quán duyệt gán chi nhánh. Vui lòng liên hệ quản lý hoặc
-        chủ quán để hoàn tất phân công trước khi sử dụng app.
+        Tài khoản của bạn chưa được chủ quán duyệt gán chi nhánh. Vui lòng liên hệ quản lý hoặc chủ
+        quán để hoàn tất phân công trước khi sử dụng app.
       </Text>
       <Button title="Đăng xuất" onPress={() => void handleLogout()} />
     </View>

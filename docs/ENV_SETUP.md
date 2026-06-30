@@ -106,10 +106,10 @@ Sau khi sửa `.env`, **restart Expo** (`npm run mobile`).
 
 ### Biến môi trường (cài trên máy)
 
-| Biến | Mô tả | Giá trị mẫu (Windows) |
-| ---- | ----- | ----------------------- |
-| `ANDROID_HOME` | Thư mục Android SDK | `C:\Users\<user>\AppData\Local\Android\Sdk` |
-| `Path` (thêm) | Công cụ adb / platform-tools | `%ANDROID_HOME%\platform-tools` |
+| Biến           | Mô tả                        | Giá trị mẫu (Windows)                       |
+| -------------- | ---------------------------- | ------------------------------------------- |
+| `ANDROID_HOME` | Thư mục Android SDK          | `C:\Users\<user>\AppData\Local\Android\Sdk` |
+| `Path` (thêm)  | Công cụ adb / platform-tools | `%ANDROID_HOME%\platform-tools`             |
 
 **Windows — Environment Variables (User):**
 
@@ -167,14 +167,14 @@ curl http://localhost:3000/api/v1/health
 
 ## 5. Troubleshooting
 
-| Lỗi                                 | Nguyên nhân                            | Cách xử lý                                |
-| ----------------------------------- | -------------------------------------- | ----------------------------------------- |
-| `Invalid environment configuration` | Thiếu `DATABASE_URL` hoặc `JWT_SECRET` | Kiểm tra `apps/api/.env`                  |
-| Mobile không gọi được API           | Sai `EXPO_PUBLIC_API_URL`              | Dùng `10.0.2.2` cho Android emulator      |
-| `Can't reach database`              | PostgreSQL chưa chạy                   | Xem [infra/README.md](../infra/README.md) |
-| Expo không đọc env mới              | Cache                                  | Stop Expo, chạy lại `npm run mobile`      |
+| Lỗi                                 | Nguyên nhân                                  | Cách xử lý                                             |
+| ----------------------------------- | -------------------------------------------- | ------------------------------------------------------ |
+| `Invalid environment configuration` | Thiếu `DATABASE_URL` hoặc `JWT_SECRET`       | Kiểm tra `apps/api/.env`                               |
+| Mobile không gọi được API           | Sai `EXPO_PUBLIC_API_URL`                    | Dùng `10.0.2.2` cho Android emulator                   |
+| `Can't reach database`              | PostgreSQL chưa chạy                         | Xem [infra/README.md](../infra/README.md)              |
+| Expo không đọc env mới              | Cache                                        | Stop Expo, chạy lại `npm run mobile`                   |
 | `SDK location not found`            | Thiếu `local.properties` hoặc `ANDROID_HOME` | Xem mục 3 — tạo `local.properties`, set `ANDROID_HOME` |
-| `adb` not found / lỗi emulator      | PATH sai hoặc adb cũ trong `C:\Windows` | Xóa adb cũ; thêm `platform-tools` vào PATH |
+| `adb` not found / lỗi emulator      | PATH sai hoặc adb cũ trong `C:\Windows`      | Xóa adb cũ; thêm `platform-tools` vào PATH             |
 
 ---
 

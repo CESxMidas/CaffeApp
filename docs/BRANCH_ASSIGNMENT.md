@@ -31,7 +31,7 @@ sequenceDiagram
 | 2    | Hệ thống      | `branchAssignmentStatus = PENDING_OWNER`                    |
 | 3    | **Chủ quán**  | Duyệt hoặc từ chối (in-app; push MVP v2 — C-10)             |
 | 4    | Hệ thống      | `APPROVED` → nhân viên login được · `REJECTED` → chặn login |
-| 5    | **Nhân viên** | Login → **không** chọn CN → vào UI theo `StaffRole` (C-11) |
+| 5    | **Nhân viên** | Login → **không** chọn CN → vào UI theo `StaffRole` (C-11)  |
 
 ---
 
@@ -62,10 +62,10 @@ Body đề xuất: `{ "branchId": "uuid" }`
 
 ## 4. Mobile
 
-| User                        | Sau login                                                          |
-| --------------------------- | ------------------------------------------------------------------ |
-| CASHIER / BARISTA / MANAGER | CN từ assignment đã duyệt → **khu vận hành / QL** (không chọn CN)   |
-| OWNER                       | **Chọn chi nhánh phiên** (xem báo cáo đa CN) — C-09                |
+| User                        | Sau login                                                         |
+| --------------------------- | ----------------------------------------------------------------- |
+| CASHIER / BARISTA / MANAGER | CN từ assignment đã duyệt → **khu vận hành / QL** (không chọn CN) |
+| OWNER                       | **Chọn chi nhánh phiên** (xem báo cáo đa CN) — C-09               |
 
 | Màn hình                | Ai             | Đường dẫn                     |
 | ----------------------- | -------------- | ----------------------------- |

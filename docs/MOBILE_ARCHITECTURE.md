@@ -5,16 +5,16 @@
 
 ### Trạng thái implementation (2026-06-29)
 
-| Area                         | Doc    | Code hiện tại                                              |
-| ---------------------------- | ------ | ---------------------------------------------------------- |
-| Route files (`src/app/`)     | §2, §3 | ✅ Routes cashier/barista/manager — ⏳ **station shell** (GAP-11, P2-03b) |
-| `QueryProvider`              | §2     | ✅ Mounted ở root `_layout.tsx`                            |
-| `AuthProvider`, guards       | §3     | ✅ Implemented — cần E2E thiết bị thật (C-15)              |
-| Station tablet tabs          | §3     | ✅ P2-03b — `(station)/` Thu ngân + Bếp                    |
-| Feature hooks / use-cases    | §4     | ⏳ In progress (Sprint 2+)                                 |
-| Services (`shared/lib/api/`) | §6     | ⚠️ Partial                                                 |
-| SecureStore                  | §6     | ✅ Wired — verify kill app (C-15)                          |
-| Routing                      | §3     | ✅ P2-01 route theo `StaffRole` — station cần shell `isStationDevice` |
+| Area                         | Doc    | Code hiện tại                                                         |
+| ---------------------------- | ------ | --------------------------------------------------------------------- |
+| Route files (`src/app/`)     | §2, §3 | ✅ Routes cashier/barista/manager + station shell (GAP-11, P2-03b)    |
+| `QueryProvider`              | §2     | ✅ Mounted ở root `_layout.tsx`                                       |
+| `AuthProvider`, guards       | §3     | ✅ Implemented — cần E2E thiết bị thật (C-15)                         |
+| Station tablet tabs          | §3     | ✅ P2-03b — `(station)/` Thu ngân + Bếp                               |
+| Feature hooks / use-cases    | §4     | ⏳ In progress (Sprint 2+)                                            |
+| Services (`shared/lib/api/`) | §6     | ⚠️ Partial                                                            |
+| SecureStore                  | §6     | ✅ Wired — verify kill app (C-15)                                     |
+| Routing                      | §3     | ✅ P2-01 route theo `StaffRole`; station shell theo `isStationDevice` |
 
 ---
 
@@ -286,14 +286,14 @@ flowchart TD
 
 ### Guard strategy (per layout) — Sprint 1 target
 
-| Layout                  | Guard                              | Hành vi                               | Status                         |
-| ----------------------- | ---------------------------------- | ------------------------------------- | ------------------------------ |
-| `app/_layout.tsx`       | —                                  | Mount `QueryProvider`, `AuthProvider` | Partial (`QueryProvider` only) |
-| `app/index.tsx`         | Session redirect                   | Redirect theo `StaffRole` (không `activeRole`) | ⚠️ Refactor C-11 |
-| `(auth)/_layout.tsx`    | Guest only                         | Authenticated → redirect `index`      | ⏳ Sprint 1                    |
-| `(cashier)/_layout.tsx` | `RoleGuard(['cashier','manager'])` | Sai role → `index`                    | ⏳ Sprint 1                    |
-| `(barista)/_layout.tsx` | `RoleGuard(['barista','manager'])` | Sai role → `index`                    | ⏳ Sprint 1                    |
-| `(manager)/_layout.tsx` | `RoleGuard(['manager'])`           | Sai role → `index`                    | ⏳ Sprint 1                    |
+| Layout                  | Guard                              | Hành vi                                        | Status                         |
+| ----------------------- | ---------------------------------- | ---------------------------------------------- | ------------------------------ |
+| `app/_layout.tsx`       | —                                  | Mount `QueryProvider`, `AuthProvider`          | Partial (`QueryProvider` only) |
+| `app/index.tsx`         | Session redirect                   | Redirect theo `StaffRole` (không `activeRole`) | ⚠️ Refactor C-11               |
+| `(auth)/_layout.tsx`    | Guest only                         | Authenticated → redirect `index`               | ⏳ Sprint 1                    |
+| `(cashier)/_layout.tsx` | `RoleGuard(['cashier','manager'])` | Sai role → `index`                             | ⏳ Sprint 1                    |
+| `(barista)/_layout.tsx` | `RoleGuard(['barista','manager'])` | Sai role → `index`                             | ⏳ Sprint 1                    |
+| `(manager)/_layout.tsx` | `RoleGuard(['manager'])`           | Sai role → `index`                             | ⏳ Sprint 1                    |
 
 > Mobile `Role` type: `'cashier' | 'barista' | 'manager'` (lowercase UX).  
 > API `StaffRole`: `OWNER | MANAGER | CASHIER | BARISTA`. Mapping: `@caffeapp/shared/domain`.
@@ -725,19 +725,19 @@ useLogout.mutate()
 
 ### Connectivity
 
-| Tier         | UX                                  |
-| ------------ | ----------------------------------- |
-| **Online**   | Normal                              |
+| Tier         | UX                                             |
+| ------------ | ---------------------------------------------- |
+| **Online**   | Normal                                         |
 | **Degraded** | Banner "Kết nối chậm"; polling fallback (F-16) |
-| **Offline**  | Thông báo lỗi; **không** queue đơn  |
+| **Offline**  | Thông báo lỗi; **không** queue đơn             |
 
 ### Phase rollout
 
-| Sprint | Capability                                       |
-| ------ | ------------------------------------------------ |
-| 1–3    | NetInfo banner; block mutations khi offline      |
-| 2      | Cache `products`, `tables` (read-only, online)   |
-| 4+     | WS reconnect; **không** offline-first sync       |
+| Sprint | Capability                                     |
+| ------ | ---------------------------------------------- |
+| 1–3    | NetInfo banner; block mutations khi offline    |
+| 2      | Cache `products`, `tables` (read-only, online) |
+| 4+     | WS reconnect; **không** offline-first sync     |
 
 > Nháp giỏ **trước gửi bếp** được lưu local (D-30) — khác offline order sync.
 
@@ -994,12 +994,12 @@ Layer 3: API                  403 Forbidden → ErrorState
 
 ## 15. Sprint alignment
 
-| Sprint | Mobile architecture deliverables                            |
-| ------ | ----------------------------------------------------------- |
+| Sprint | Mobile architecture deliverables                                                  |
+| ------ | --------------------------------------------------------------------------------- |
 | **1**  | Auth, SecureStore, AuthProvider; routing StaffRole; **tablet trạm tabs (P2-03b)** |
-| **2**  | orders/products/tables hooks, cart draft persist (D-30)             |
-| **3**  | payments TM/CK, reports hooks                                       |
-| **4**  | WebSocket barista; polling fallback — **no offline queue**          |
+| **2**  | orders/products/tables hooks, cart draft persist (D-30)                           |
+| **3**  | payments TM/CK, reports hooks                                                     |
+| **4**  | WebSocket barista; polling fallback — **no offline queue**                        |
 
 ---
 

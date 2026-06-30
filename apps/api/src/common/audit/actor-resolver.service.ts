@@ -50,9 +50,11 @@ export class ActorResolverService {
       throw new BadRequestException('Nhân viên xác nhận không hợp lệ');
     }
 
-    if (isStationAccountEmail(
-      (await this.prisma.user.findUnique({ where: { id: actorStaff.userId } }))?.email ?? '',
-    )) {
+    if (
+      isStationAccountEmail(
+        (await this.prisma.user.findUnique({ where: { id: actorStaff.userId } }))?.email ?? '',
+      )
+    ) {
       throw new BadRequestException('Không chọn tài khoản trạm làm nhân viên thao tác');
     }
 

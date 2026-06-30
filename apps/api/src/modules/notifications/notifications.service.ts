@@ -32,9 +32,7 @@ export class NotificationsService {
         type: params.type,
         title: params.title,
         body: params.body,
-        metadata: params.metadata
-          ? (params.metadata as Prisma.InputJsonValue)
-          : undefined,
+        metadata: params.metadata ? (params.metadata as Prisma.InputJsonValue) : undefined,
       })),
     });
   }

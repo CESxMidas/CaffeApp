@@ -17,11 +17,11 @@ Cho phép thu ngân tạo và thanh toán đơn, barista nhận và hoàn thành
 
 ### Personas
 
-| Persona       | Tuổi  | Thiết bị                          | Kỹ năng tech |
-| ------------- | ----- | --------------------------------- | ------------ |
-| NV vận hành   | 20–30 | Tablet trạm chung + ĐT cá nhân    | Trung bình   |
-| QL chi nhánh  | 25–35 | ĐT cá nhân                        | Trung bình   |
-| Chủ quán      | 30–45 | ĐT cá nhân (đa chi nhánh)         | Trung bình   |
+| Persona      | Tuổi  | Thiết bị                       | Kỹ năng tech |
+| ------------ | ----- | ------------------------------ | ------------ |
+| NV vận hành  | 20–30 | Tablet trạm chung + ĐT cá nhân | Trung bình   |
+| QL chi nhánh | 25–35 | ĐT cá nhân                     | Trung bình   |
+| Chủ quán     | 30–45 | ĐT cá nhân (đa chi nhánh)      | Trung bình   |
 
 **Quy mô pilot:** 3 chi nhánh · ~50 bàn/CN · 2 NV vận hành/CN (pha + thu ngân).
 
@@ -81,13 +81,13 @@ Thanh toán được theo dõi qua bảng `payments` và `orders.status = PAID`.
 
 ### Nhóm A — Đăng nhập & Phân quyền (màn 01–04)
 
-| ID     | Requirement                                              | Priority |
-| ------ | -------------------------------------------------------- | -------- |
-| FR-A01 | Đăng nhập bằng email/SĐT + mật khẩu                      | Must     |
-| FR-A02 | Chọn chi nhánh phiên — **chỉ OWNER** (staff: CN từ assignment) | Must |
-| FR-A03 | Điều hướng theo `StaffRole` sau login — **không** màn chọn vai trò | Must |
+| ID     | Requirement                                                                                         | Priority |
+| ------ | --------------------------------------------------------------------------------------------------- | -------- |
+| FR-A01 | Đăng nhập bằng email/SĐT + mật khẩu                                                                 | Must     |
+| FR-A02 | Chọn chi nhánh phiên — **chỉ OWNER** (staff: CN từ assignment)                                      | Must     |
+| FR-A03 | Điều hướng theo `StaffRole` sau login — **không** màn chọn vai trò                                  | Must     |
 | FR-A04 | Trang chủ trạm vận hành: quick actions + **tab Thu ngân + Tab Bếp** (queue pha, hoàn thành → READY) | Must     |
-| FR-A05 | Đăng nhập sinh trắc học (Face ID / fingerprint)          | Could    |
+| FR-A05 | Đăng nhập sinh trắc học (Face ID / fingerprint)                                                     | Could    |
 
 **Business rules:**
 
@@ -117,7 +117,7 @@ Thanh toán được theo dõi qua bảng `payments` và `orders.status = PAID`.
 | FR-B12 | Danh sách đơn đang phục vụ                           | Must     |
 | FR-B13 | Lịch sử đơn trong ca/ngày                            | Should   |
 | FR-B14 | Gộp bàn / chuyển bàn / tách bill theo món            | Should   |
-| FR-B15 | Giảm giá %, số tiền, voucher (một KM/đơn)             | Should   |
+| FR-B15 | Giảm giá %, số tiền, voucher (một KM/đơn)            | Should   |
 
 **Business rules:**
 
@@ -175,18 +175,18 @@ Thanh toán được theo dõi qua bảng `payments` và `orders.status = PAID`.
 
 ## 5. Edge Cases
 
-| #     | Scenario                                  | Expected behavior                                     |
-| ----- | ----------------------------------------- | ----------------------------------------------------- |
-| EC-01 | Mất mạng khi đang tạo đơn                 | App không hoạt động; vận hành thủ công tại quán (B-18) |
-| EC-02 | Mất mạng barista                          | Cùng EC-01 — không offline queue MVP                    |
-| EC-03 | Hủy món trong giỏ (chưa gửi bếp)          | Xóa item, cập nhật tổng                               |
-| EC-04 | Hủy đơn đã gửi bếp                        | Chỉ manager/cashier; confirm dialog; notify barista   |
-| EC-05 | Đổi bàn giữa chừng                        | Chỉ khi đơn chưa PAID; release bàn cũ                 |
-| EC-06 | 2 thu ngân cùng chọn 1 bàn                | Optimistic lock; báo "Bàn đã được chọn"               |
-| EC-07 | Thanh toán thiếu tiền mặt                 | Disable nút hoàn tất; hiện lỗi                        |
+| #     | Scenario                                  | Expected behavior                                             |
+| ----- | ----------------------------------------- | ------------------------------------------------------------- |
+| EC-01 | Mất mạng khi đang tạo đơn                 | App không hoạt động; vận hành thủ công tại quán (B-18)        |
+| EC-02 | Mất mạng barista                          | Cùng EC-01 — không offline queue MVP                          |
+| EC-03 | Hủy món trong giỏ (chưa gửi bếp)          | Xóa item, cập nhật tổng                                       |
+| EC-04 | Hủy đơn đã gửi bếp                        | Chỉ manager/cashier; confirm dialog; notify barista           |
+| EC-05 | Đổi bàn giữa chừng                        | Chỉ khi đơn chưa PAID; release bàn cũ                         |
+| EC-06 | 2 thu ngân cùng chọn 1 bàn                | Optimistic lock; báo "Bàn đã được chọn"                       |
+| EC-07 | Thanh toán thiếu tiền mặt                 | Disable nút hoàn tất; hiện lỗi                                |
 | EC-08 | Chuyển khoản chưa xác nhận                | Đơn READY, chưa PAID; QL xử lý cuối ca nếu chưa vào TK (E-07) |
-| EC-09 | Barista hoàn thành khi chưa check hết món | Disable nút "Hoàn thành đơn"                          |
-| EC-10 | Session hết hạn                           | Redirect login; giữ draft local (encrypted)           |
+| EC-09 | Barista hoàn thành khi chưa check hết món | Disable nút "Hoàn thành đơn"                                  |
+| EC-10 | Session hết hạn                           | Redirect login; giữ draft local (encrypted)                   |
 
 ---
 

@@ -1,35 +1,46 @@
 import { useMemo, useState } from 'react';
-import { ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Image, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { router, useLocalSearchParams } from 'expo-router';
 import {
+  type BranchBankInfoDto,
   PaymentMethod,
   PAYMENT_METHOD_LABELS,
   colors,
   formatCurrency,
   spacing,
-  borderRadius,
   StaffRole,
 } from '@caffeapp/shared';
+import { useBranches } from '@features/auth';
 import { useCreatePayment, useOrder } from '@features/orders';
 import { useStaffActor } from '@features/staff';
 import { Button, Card, ErrorScreen, Input } from '@shared/components/ui';
 import { showMessage } from '@shared/lib/ui/confirm';
 import { opFrontTab } from '@shared/lib/navigation/operationalRoutes';
 
-const METHODS = [
-  PaymentMethod.CASH,
-  PaymentMethod.BANK_TRANSFER,
-  PaymentMethod.CARD,
-  PaymentMethod.E_WALLET,
-] as const;
+const METHODS = [PaymentMethod.CASH, PaymentMethod.BANK_TRANSFER] as const;
+
+function buildVietQrUrl(bankInfo: BranchBankInfoDto, amount: number, orderNumber: string): string {
+  const bankCode = encodeURIComponent(bankInfo.bankCode ?? '');
+  const account = encodeURIComponent(bankInfo.account);
+  const addInfo = encodeURIComponent(`CAFFE ${orderNumber}`);
+  const accountName = bankInfo.holder ? `&accountName=${encodeURIComponent(bankInfo.holder)}` : '';
+
+  return `https://img.vietqr.io/image/${bankCode}-${account}-compact2.png?amount=${amount}&addInfo=${addInfo}${accountName}`;
+}
 
 export default function CashierPaymentScreen() {
   const { orderId } = useLocalSearchParams<{ orderId: string }>();
   const { data: order, isError, refetch } = useOrder(orderId ?? null);
+  const { data: branches } = useBranches();
   const createPayment = useCreatePayment();
   const { runWithActor, pickerModal } = useStaffActor({ operatorRoles: [StaffRole.CASHIER] });
   const [method, setMethod] = useState<PaymentMethod>(PaymentMethod.CASH);
   const [cashReceived, setCashReceived] = useState('');
+
+  const branchBankInfo = useMemo(() => {
+    const branch = branches?.find((item) => item.id === order?.branchId);
+    return branch?.bankInfo ?? null;
+  }, [branches, order?.branchId]);
 
   const changeAmount = useMemo(() => {
     if (!order || method !== PaymentMethod.CASH) return 0;
@@ -46,6 +57,14 @@ export default function CashierPaymentScreen() {
     return true;
   }, [cashReceived, method, order]);
 
+  const transferQrUrl = useMemo(() => {
+    if (!order || method !== PaymentMethod.BANK_TRANSFER || !branchBankInfo?.bankCode) {
+      return null;
+    }
+
+    return buildVietQrUrl(branchBankInfo, order.total, order.orderNumber);
+  }, [branchBankInfo, method, order]);
+
   if (isError || !order) {
     return (
       <View style={styles.container}>
@@ -58,9 +77,7 @@ export default function CashierPaymentScreen() {
 
   const handlePay = () => {
     const amount =
-      method === PaymentMethod.CASH
-        ? Number(cashReceived.replace(/\D/g, '')) || 0
-        : order.total;
+      method === PaymentMethod.CASH ? Number(cashReceived.replace(/\D/g, '')) || 0 : order.total;
 
     runWithActor((actedByStaffId) => {
       createPayment.mutate(
@@ -132,11 +149,35 @@ export default function CashierPaymentScreen() {
         </View>
       ) : (
         <Card style={styles.hintCard}>
-          <Text style={styles.hint}>
-            {method === PaymentMethod.BANK_TRANSFER
-              ? 'Hiển thị QR/STK cho khách chuyển khoản, sau đó xác nhận.'
-              : 'Xác nhận khách đã thanh toán qua máy POS/ví.'}
-          </Text>
+          {transferQrUrl ? (
+            <Image source={{ uri: transferQrUrl }} style={styles.qrImage} resizeMode="contain" />
+          ) : null}
+          {branchBankInfo ? (
+            <View style={styles.bankInfo}>
+              <View style={styles.bankRow}>
+                <Text style={styles.bankLabel}>Ngân hàng</Text>
+                <Text style={styles.bankValue}>{branchBankInfo.bank}</Text>
+              </View>
+              <View style={styles.bankRow}>
+                <Text style={styles.bankLabel}>STK</Text>
+                <Text selectable style={styles.bankValue}>
+                  {branchBankInfo.account}
+                </Text>
+              </View>
+              {branchBankInfo.holder ? (
+                <View style={styles.bankRow}>
+                  <Text style={styles.bankLabel}>Chủ TK</Text>
+                  <Text style={styles.bankValue}>{branchBankInfo.holder}</Text>
+                </View>
+              ) : null}
+              <View style={styles.bankRow}>
+                <Text style={styles.bankLabel}>Số tiền</Text>
+                <Text style={styles.bankValue}>{formatCurrency(order.total)}</Text>
+              </View>
+            </View>
+          ) : (
+            <Text style={styles.hint}>Chưa có STK chuyển khoản cho chi nhánh này.</Text>
+          )}
         </Card>
       )}
 
@@ -157,11 +198,22 @@ const styles = StyleSheet.create({
   content: { padding: spacing.base, paddingBottom: spacing.xl },
   label: { fontSize: 14, color: colors.textSecondary },
   total: { fontSize: 28, fontWeight: '700', color: colors.primary, marginTop: spacing.xs },
-  breakdown: { marginTop: spacing.md, paddingTop: spacing.md, borderTopWidth: 1, borderTopColor: colors.border },
+  breakdown: {
+    marginTop: spacing.md,
+    paddingTop: spacing.md,
+    borderTopWidth: 1,
+    borderTopColor: colors.border,
+  },
   breakdownRow: { flexDirection: 'row', justifyContent: 'space-between', marginBottom: spacing.xs },
   breakdownLabel: { fontSize: 14, color: colors.textSecondary },
   breakdownValue: { fontSize: 14, color: colors.text, fontWeight: '500' },
-  sectionTitle: { fontSize: 16, fontWeight: '600', color: colors.text, marginTop: spacing.lg, marginBottom: spacing.sm },
+  sectionTitle: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: colors.text,
+    marginTop: spacing.lg,
+    marginBottom: spacing.sm,
+  },
   methodGrid: { gap: spacing.sm },
   methodBtn: {},
   cashBlock: { marginTop: spacing.md },
@@ -169,4 +221,15 @@ const styles = StyleSheet.create({
   changeValue: { fontWeight: '700', color: colors.primary },
   hintCard: { marginTop: spacing.md },
   hint: { fontSize: 14, color: colors.textSecondary, lineHeight: 20 },
+  qrImage: {
+    alignSelf: 'center',
+    width: 220,
+    height: 220,
+    marginBottom: spacing.md,
+    backgroundColor: colors.white,
+  },
+  bankInfo: { gap: spacing.sm },
+  bankRow: { flexDirection: 'row', justifyContent: 'space-between', gap: spacing.md },
+  bankLabel: { fontSize: 14, color: colors.textSecondary },
+  bankValue: { flex: 1, textAlign: 'right', fontSize: 14, color: colors.text, fontWeight: '600' },
 });

@@ -11,7 +11,7 @@ import {
 import { router } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import type { NotificationDto } from '@caffeapp/shared';
-import { colors, spacing, borderRadius } from '@caffeapp/shared';
+import { colors, spacing } from '@caffeapp/shared';
 import {
   useMarkAllNotificationsRead,
   useMarkNotificationRead,

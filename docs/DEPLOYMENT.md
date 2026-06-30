@@ -210,13 +210,13 @@ Seed **dev local** (`npm run db:seed`) dùng menu demo ngắn — 2 CN, phục v
 
 Seed **staging / UAT** (`npm run db:seed:staging`) import data giống quán thật:
 
-| Hạng mục | Nội dung |
-| -------- | -------- |
-| Chi nhánh | 3 CN (Q1, Q3, Q7) — `prisma/data/staging-branches.json` |
-| Bàn | 50/CN: Tầng 1 ×20, Tầng 2 ×20, Sân ×10 |
-| Menu | 38 món / 8 category từ D-13 — `prisma/data/staging-menu.json` |
-| Tài khoản | `owner@caffe.app` + QL/CASHIER/BARISTA/station mỗi CN |
-| VietQR | `bankInfo` theo CN (STK placeholder — chủ quán cập nhật JSON trước go-live) |
+| Hạng mục  | Nội dung                                                                    |
+| --------- | --------------------------------------------------------------------------- |
+| Chi nhánh | 3 CN (Q1, Q3, Q7) — `prisma/data/staging-branches.json`                     |
+| Bàn       | 50/CN: Tầng 1 ×20, Tầng 2 ×20, Sân ×10                                      |
+| Menu      | 38 món / 8 category từ D-13 — `prisma/data/staging-menu.json`               |
+| Tài khoản | `owner@caffe.app` + QL/CASHIER/BARISTA/station mỗi CN                       |
+| VietQR    | `bankInfo` theo CN (STK placeholder — chủ quán cập nhật JSON trước go-live) |
 
 ### Chạy trên staging DB
 
@@ -261,14 +261,14 @@ curl -s -H "Authorization: Bearer <token>" "https://<staging-api>/api/v1/tables?
 
 Tài khoản staging (mật khẩu mặc định `password123` hoặc `STAGING_SEED_PASSWORD`):
 
-| Email | Vai trò |
-| ----- | ------- |
-| `owner@caffe.app` | OWNER |
-| `manager.q1@caffe.app` | MANAGER CN Q1 |
-| `cashier.q1@caffe.app` | CASHIER |
-| `barista.q1@caffe.app` | BARISTA |
-| `station.q1@caffe.app` | Tablet trạm (CASHIER) |
-| `manager.q3@` / `q7@` … | Tương tự cho CN khác |
+| Email                   | Vai trò               |
+| ----------------------- | --------------------- |
+| `owner@caffe.app`       | OWNER                 |
+| `manager.q1@caffe.app`  | MANAGER CN Q1         |
+| `cashier.q1@caffe.app`  | CASHIER               |
+| `barista.q1@caffe.app`  | BARISTA               |
+| `station.q1@caffe.app`  | Tablet trạm (CASHIER) |
+| `manager.q3@` / `q7@` … | Tương tự cho CN khác  |
 
 ---
 

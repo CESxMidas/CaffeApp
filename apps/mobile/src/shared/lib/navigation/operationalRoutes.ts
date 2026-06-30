@@ -1,5 +1,5 @@
 import type { Href } from 'expo-router';
-import { StaffRole, STAFF_ROLE_TO_MOBILE_ROLE } from '@caffeapp/shared';
+import { STAFF_ROLE_TO_MOBILE_ROLE } from '@caffeapp/shared';
 import { useSessionStore } from '@shared/stores/session';
 
 export type OperationalGroup = '(station)' | '(cashier)';

@@ -14,6 +14,11 @@ import { syncTableEmptyIfIdle } from '@common/utils/table-status.util';
 import type { JwtPayload } from '@common/types/jwt-payload.types';
 import type { CreatePaymentDto } from './dto/create-payment.dto';
 
+const PILOT_PAYMENT_METHODS = new Set<PaymentMethod>([
+  PaymentMethod.CASH,
+  PaymentMethod.BANK_TRANSFER,
+]);
+
 @Injectable()
 export class PaymentsService {
   constructor(
@@ -23,6 +28,10 @@ export class PaymentsService {
   ) {}
 
   async create(payload: JwtPayload, dto: CreatePaymentDto): Promise<PaymentDto> {
+    if (!PILOT_PAYMENT_METHODS.has(dto.method)) {
+      throw new BadRequestException('Pilot chỉ hỗ trợ tiền mặt hoặc chuyển khoản');
+    }
+
     const order = await this.prisma.order.findUnique({
       where: { id: dto.orderId },
       include: { payments: true },

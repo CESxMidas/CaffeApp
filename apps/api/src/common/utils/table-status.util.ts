@@ -32,7 +32,9 @@ export function effectiveTableStatus(
 
 /** Sửa trạng thái bàn lệch so với đơn đang active (seed demo, thanh toán cũ, v.v.). */
 export async function repairBranchTableStatuses(
-  prisma: Prisma.TransactionClient | { table: Prisma.TransactionClient['table']; order: Prisma.TransactionClient['order'] },
+  prisma:
+    | Prisma.TransactionClient
+    | { table: Prisma.TransactionClient['table']; order: Prisma.TransactionClient['order'] },
   branchId: string,
 ): Promise<void> {
   const tables = await prisma.table.findMany({

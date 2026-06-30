@@ -2,13 +2,17 @@ import { ForbiddenException, Injectable, UnauthorizedException } from '@nestjs/c
 import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
 import type {
+  BranchBankInfoDto,
   BranchDto,
   LoginResponseDto,
   MeResponseDto,
   StaffDto,
   UserDto,
 } from '@caffeapp/shared';
-import { BranchAssignmentStatus as SharedBranchAssignmentStatus, isStationAccountEmail } from '@caffeapp/shared';
+import {
+  BranchAssignmentStatus as SharedBranchAssignmentStatus,
+  isStationAccountEmail,
+} from '@caffeapp/shared';
 import * as bcrypt from 'bcrypt';
 import { BranchAssignmentStatus, StaffRole, type Staff } from '@prisma/client';
 import { PrismaService } from '@common/prisma/prisma.service';
@@ -173,6 +177,7 @@ export class AuthService {
     name: string;
     address: string | null;
     phone: string | null;
+    bankInfo?: unknown;
     isActive: boolean;
   }): BranchDto {
     return {
@@ -180,7 +185,29 @@ export class AuthService {
       name: branch.name,
       address: branch.address,
       phone: branch.phone,
+      bankInfo: this.toBranchBankInfo(branch.bankInfo),
       isActive: branch.isActive,
+    };
+  }
+
+  private toBranchBankInfo(value: unknown): BranchBankInfoDto | null {
+    if (!value || typeof value !== 'object' || Array.isArray(value)) {
+      return null;
+    }
+
+    const bankInfo = value as Record<string, unknown>;
+    const bank = typeof bankInfo.bank === 'string' ? bankInfo.bank : null;
+    const account = typeof bankInfo.account === 'string' ? bankInfo.account : null;
+
+    if (!bank || !account) {
+      return null;
+    }
+
+    return {
+      bank,
+      account,
+      bankCode: typeof bankInfo.bankCode === 'string' ? bankInfo.bankCode : null,
+      holder: typeof bankInfo.holder === 'string' ? bankInfo.holder : null,
     };
   }
 }

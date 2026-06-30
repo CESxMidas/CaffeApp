@@ -1,22 +1,9 @@
 import { useMemo, useState, useCallback } from 'react';
-import {
-  Alert,
-  Pressable,
-  ScrollView,
-  StyleSheet,
-  Text,
-  View,
-} from 'react-native';
+import { Alert, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { router, useFocusEffect } from 'expo-router';
 import { isAxiosError } from 'axios';
 import { Ionicons } from '@expo/vector-icons';
-import {
-  TableStatus,
-  colors,
-  spacing,
-  borderRadius,
-  TABLE_STATUS_LABELS,
-} from '@caffeapp/shared';
+import { TableStatus, colors, spacing, borderRadius, TABLE_STATUS_LABELS } from '@caffeapp/shared';
 import type { TableDto } from '@caffeapp/shared';
 import { useTables } from '@features/orders';
 import { Button, EmptyState, ErrorScreen, SkeletonTableGrid } from '@shared/components/ui';
@@ -164,10 +151,7 @@ export default function TablesScreen() {
       : undefined;
     return (
       <View style={styles.container}>
-        <ErrorScreen
-          message={apiMessage ?? 'Không tải được sơ đồ bàn'}
-          onRetry={retryLoad}
-        />
+        <ErrorScreen message={apiMessage ?? 'Không tải được sơ đồ bàn'} onRetry={retryLoad} />
       </View>
     );
   }
@@ -230,8 +214,7 @@ export default function TablesScreen() {
       <View style={styles.footer}>
         {selected ? (
           <Text style={styles.selectedLabel}>
-            Đã chọn:{' '}
-            <Text style={styles.selectedCode}>Bàn {selected.code.replace('B', '')}</Text>
+            Đã chọn: <Text style={styles.selectedCode}>Bàn {selected.code.replace('B', '')}</Text>
           </Text>
         ) : (
           <Text style={styles.selectedHint}>Chọn bàn trống để tiếp tục</Text>

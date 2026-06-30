@@ -52,7 +52,12 @@ export default function OrderTypeScreen() {
 const styles = StyleSheet.create({
   container: { flex: 1, padding: spacing.base, backgroundColor: colors.background },
   title: { fontSize: 22, fontWeight: '700', color: colors.text, marginTop: spacing.sm },
-  desc: { fontSize: 14, color: colors.textSecondary, marginBottom: spacing.lg, marginTop: spacing.xs },
+  desc: {
+    fontSize: 14,
+    color: colors.textSecondary,
+    marginBottom: spacing.lg,
+    marginTop: spacing.xs,
+  },
   cards: { gap: spacing.base },
   cardPress: { borderRadius: borderRadius.md },
   typeCard: { alignItems: 'center', paddingVertical: spacing.xl, paddingHorizontal: spacing.lg },

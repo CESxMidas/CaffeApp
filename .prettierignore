@@ -3,5 +3,10 @@ dist
 .expo
 coverage
 apps/api/dist
+apps/mobile/android/.gradle
+apps/mobile/android/build
+apps/mobile/android/app/.cxx
+apps/mobile/android/app/build
+apps/mobile/expo-env.d.ts
 packages/shared/dist
 package-lock.json

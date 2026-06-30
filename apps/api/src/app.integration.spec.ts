@@ -13,6 +13,7 @@ import {
 } from '@prisma/client';
 import { AppModule } from './app.module';
 import { PrismaService } from './common/prisma/prisma.service';
+import type { BranchBankInfoDto } from '@caffeapp/shared';
 
 const ids = {
   branch: '11111111-1111-1111-1111-111111111111',
@@ -50,14 +51,77 @@ type OrderRecord = {
   }>;
 };
 
+type UserRow = {
+  id: string;
+  email: string;
+  passwordHash: string;
+  fullName: string;
+  isActive: boolean;
+};
+
+type StaffRow = {
+  id: string;
+  userId: string;
+  branchId: string;
+  role: StaffRole;
+  fullName: string;
+  isActive: boolean;
+  branchAssignmentStatus: BranchAssignmentStatus;
+};
+
+type BranchRow = {
+  id: string;
+  name: string;
+  address: string;
+  phone: string;
+  bankInfo: BranchBankInfoDto;
+  isActive: boolean;
+};
+
+type ProductRow = {
+  id: string;
+  branchId: string;
+  name: string;
+  price: number;
+  isAvailable: boolean;
+};
+
+type TableRow = {
+  id: string;
+  branchId: string;
+  code: string;
+  name: string;
+  status: TableStatus;
+};
+
+type PaymentRow = {
+  id: string;
+  orderId: string;
+  method: PaymentMethod;
+  amount: number;
+  changeAmount: number | null;
+  reference: string | null;
+  paidAt: Date;
+};
+
+type StaffWhere = {
+  id?: string;
+  branchId?: string | null;
+  isActive?: boolean;
+  branchAssignmentStatus?: BranchAssignmentStatus;
+  role?: { in?: StaffRole[] };
+};
+
+type OrderItemCreateData = Omit<OrderRecord['items'][number], 'id'>;
+
 class InMemoryPrisma {
-  private users: any[] = [];
-  private staffRows: any[] = [];
-  private branches: any[] = [];
-  private products: any[] = [];
-  private tables: any[] = [];
+  private users: UserRow[] = [];
+  private staffRows: StaffRow[] = [];
+  private branches: BranchRow[] = [];
+  private products: ProductRow[] = [];
+  private tables: TableRow[] = [];
   private orders: OrderRecord[] = [];
-  private payments: any[] = [];
+  private payments: PaymentRow[] = [];
   private orderSeq = 1;
   private paymentSeq = 1;
 
@@ -69,6 +133,12 @@ class InMemoryPrisma {
         name: 'Caffe Pilot',
         address: '1 Test Street',
         phone: '0900000000',
+        bankInfo: {
+          bank: 'Vietcombank',
+          bankCode: 'VCB',
+          account: '1023456789',
+          holder: 'CTY TNHH CA PHE PILOT',
+        },
         isActive: true,
       },
     ];
@@ -129,26 +199,36 @@ class InMemoryPrisma {
   }
 
   user = {
-    findUnique: jest.fn(async ({ where, include }: any) => {
-      const user = this.users.find((u) => u.id === where.id || u.email === where.email);
-      if (!user) return null;
-      if (include?.staff) {
-        return { ...user, staff: this.staffRows.find((s) => s.userId === user.id) ?? null };
-      }
-      return { ...user };
-    }),
+    findUnique: jest.fn(
+      async ({
+        where,
+        include,
+      }: {
+        where: { id?: string; email?: string };
+        include?: { staff?: boolean };
+      }) => {
+        const user = this.users.find((u) => u.id === where.id || u.email === where.email);
+        if (!user) return null;
+        if (include?.staff) {
+          return { ...user, staff: this.staffRows.find((s) => s.userId === user.id) ?? null };
+        }
+        return { ...user };
+      },
+    ),
   };
 
   staff = {
-    findUnique: jest.fn(async ({ where, include }: any) => {
-      const staff = this.staffRows.find((s) => s.id === where.id);
-      if (!staff) return null;
-      if (include?.user) {
-        return { ...staff, user: this.users.find((u) => u.id === staff.userId) };
-      }
-      return { ...staff };
-    }),
-    findFirst: jest.fn(async ({ where }: any) => {
+    findUnique: jest.fn(
+      async ({ where, include }: { where: { id: string }; include?: { user?: boolean } }) => {
+        const staff = this.staffRows.find((s) => s.id === where.id);
+        if (!staff) return null;
+        if (include?.user) {
+          return { ...staff, user: this.users.find((u) => u.id === staff.userId) };
+        }
+        return { ...staff };
+      },
+    ),
+    findFirst: jest.fn(async ({ where }: { where: StaffWhere }) => {
       return (
         this.staffRows.find((staff) => {
           if (where.id && staff.id !== where.id) return false;
@@ -165,55 +245,79 @@ class InMemoryPrisma {
         }) ?? null
       );
     }),
-    findMany: jest.fn(async ({ where, select }: any) => {
-      const rows = this.staffRows.filter((staff) => {
-        if (where.branchId && staff.branchId !== where.branchId) return false;
-        if (where.isActive !== undefined && staff.isActive !== where.isActive) return false;
-        if (where.role?.in && !where.role.in.includes(staff.role)) return false;
-        return true;
-      });
-      return select?.id
-        ? rows.map((staff) => ({ id: staff.id }))
-        : rows.map((staff) => ({ ...staff }));
-    }),
+    findMany: jest.fn(
+      async ({ where, select }: { where: StaffWhere; select?: { id?: boolean } }) => {
+        const rows = this.staffRows.filter((staff) => {
+          if (where.branchId && staff.branchId !== where.branchId) return false;
+          if (where.isActive !== undefined && staff.isActive !== where.isActive) return false;
+          if (where.role?.in && !where.role.in.includes(staff.role)) return false;
+          return true;
+        });
+        return select?.id
+          ? rows.map((staff) => ({ id: staff.id }))
+          : rows.map((staff) => ({ ...staff }));
+      },
+    ),
   };
 
   branch = {
-    findUnique: jest.fn(async ({ where }: any) => {
+    findUnique: jest.fn(async ({ where }: { where: { id: string } }) => {
       const branch = this.branches.find((b) => b.id === where.id);
+      return branch ? { ...branch } : null;
+    }),
+    findFirst: jest.fn(async ({ where }: { where: { id?: string; isActive?: boolean } }) => {
+      const branch = this.branches.find((branch) => {
+        if (where.id && branch.id !== where.id) return false;
+        if (where.isActive !== undefined && branch.isActive !== where.isActive) return false;
+        return true;
+      });
       return branch ? { ...branch } : null;
     }),
   };
 
   product = {
-    findMany: jest.fn(async ({ where }: any) => {
-      const wanted = new Set(where.id.in);
-      return this.products.filter(
-        (product) =>
-          wanted.has(product.id) &&
-          product.branchId === where.branchId &&
-          product.isAvailable === where.isAvailable,
-      );
-    }),
+    findMany: jest.fn(
+      async ({
+        where,
+      }: {
+        where: { id: { in: string[] }; branchId: string; isAvailable: boolean };
+      }) => {
+        const wanted = new Set(where.id.in);
+        return this.products.filter(
+          (product) =>
+            wanted.has(product.id) &&
+            product.branchId === where.branchId &&
+            product.isAvailable === where.isAvailable,
+        );
+      },
+    ),
   };
 
   table = {
-    findFirst: jest.fn(async ({ where }: any) => {
+    findFirst: jest.fn(async ({ where }: { where: { id: string; branchId: string } }) => {
       return (
         this.tables.find((table) => table.id === where.id && table.branchId === where.branchId) ??
         null
       );
     }),
-    updateMany: jest.fn(async ({ where, data }: any) => {
-      const table = this.tables.find(
-        (row) =>
-          row.id === where.id && row.branchId === where.branchId && row.status === where.status,
-      );
-      if (!table) return { count: 0 };
-      Object.assign(table, data);
-      return { count: 1 };
-    }),
-    update: jest.fn(async ({ where, data }: any) => {
+    updateMany: jest.fn(
+      async ({
+        where,
+        data,
+      }: {
+        where: { id: string; branchId: string; status: TableStatus };
+        data: Partial<TableRow>;
+      }) => {
+        const table = this.tables.find(
+          (row) =>
+            row.id === where.id && row.branchId === where.branchId && row.status === where.status,
+        );
+        if (!table) return { count: 0 };
+        Object.assign(table, data);
+        return { count: 1 };
+      },
+    ),
+    update: jest.fn(async ({ where, data }: { where: { id: string }; data: Partial<TableRow> }) => {
       const table = this.tables.find((row) => row.id === where.id);
       if (!table) throw new Error('Table not found');
       Object.assign(table, data);
@@ -222,56 +326,86 @@ class InMemoryPrisma {
   };
 
   order = {
-    count: jest.fn(async ({ where }: any) => {
-      return this.orders.filter((order) => {
-        if (where.branchId && order.branchId !== where.branchId) return false;
-        if (where.tableId && order.tableId !== where.tableId) return false;
-        if (where.createdAt?.gte && order.createdAt < where.createdAt.gte) return false;
-        if (where.status?.notIn && where.status.notIn.includes(order.status)) return false;
-        return true;
-      }).length;
-    }),
-    create: jest.fn(async ({ data }: any) => {
-      const now = new Date();
-      const order: OrderRecord = {
-        id: `88888888-8888-8888-8888-${String(this.orderSeq++).padStart(12, '0')}`,
-        branchId: data.branchId,
-        tableId: data.tableId,
-        orderNumber: data.orderNumber,
-        orderType: data.orderType,
-        status: data.status,
-        subtotal: data.subtotal,
-        taxAmount: data.taxAmount,
-        total: data.total,
-        notes: data.notes,
-        createdAt: now,
-        updatedAt: now,
-        deliveredAt: null,
-        paidAt: null,
-        items: data.items.create.map((item: any, index: number) => ({
-          id: `99999999-9999-9999-9999-${String(index + 1).padStart(12, '0')}`,
-          ...item,
-        })),
-      };
-      this.orders.push(order);
-      return { ...order, items: order.items.map((item) => ({ ...item })) };
-    }),
-    findUnique: jest.fn(async ({ where }: any) => {
+    count: jest.fn(
+      async ({
+        where,
+      }: {
+        where: {
+          branchId?: string;
+          tableId?: string | null;
+          createdAt?: { gte?: Date };
+          status?: { notIn?: OrderStatus[] };
+        };
+      }) => {
+        return this.orders.filter((order) => {
+          if (where.branchId && order.branchId !== where.branchId) return false;
+          if (where.tableId && order.tableId !== where.tableId) return false;
+          if (where.createdAt?.gte && order.createdAt < where.createdAt.gte) return false;
+          if (where.status?.notIn && where.status.notIn.includes(order.status)) return false;
+          return true;
+        }).length;
+      },
+    ),
+    create: jest.fn(
+      async ({
+        data,
+      }: {
+        data: Omit<
+          OrderRecord,
+          'id' | 'createdAt' | 'updatedAt' | 'deliveredAt' | 'paidAt' | 'items'
+        > & {
+          items: { create: OrderItemCreateData[] };
+        };
+      }) => {
+        const now = new Date();
+        const order: OrderRecord = {
+          id: `88888888-8888-8888-8888-${String(this.orderSeq++).padStart(12, '0')}`,
+          branchId: data.branchId,
+          tableId: data.tableId,
+          orderNumber: data.orderNumber,
+          orderType: data.orderType,
+          status: data.status,
+          subtotal: data.subtotal,
+          taxAmount: data.taxAmount,
+          total: data.total,
+          notes: data.notes,
+          createdAt: now,
+          updatedAt: now,
+          deliveredAt: null,
+          paidAt: null,
+          items: data.items.create.map((item, index) => ({
+            id: `99999999-9999-9999-9999-${String(index + 1).padStart(12, '0')}`,
+            ...item,
+          })),
+        };
+        this.orders.push(order);
+        return { ...order, items: order.items.map((item) => ({ ...item })) };
+      },
+    ),
+    findUnique: jest.fn(async ({ where }: { where: { id: string } }) => {
       const order = this.orders.find((row) => row.id === where.id);
       return order
         ? { ...order, items: order.items.map((item) => ({ ...item })), payments: [] }
         : null;
     }),
-    update: jest.fn(async ({ where, data }: any) => {
-      const order = this.orders.find((row) => row.id === where.id);
-      if (!order) throw new Error('Order not found');
-      Object.assign(order, data, { updatedAt: new Date() });
-      return { ...order, items: order.items.map((item) => ({ ...item })) };
-    }),
+    update: jest.fn(
+      async ({
+        where,
+        data,
+      }: {
+        where: { id: string };
+        data: Partial<Omit<OrderRecord, 'id' | 'items'>>;
+      }) => {
+        const order = this.orders.find((row) => row.id === where.id);
+        if (!order) throw new Error('Order not found');
+        Object.assign(order, data, { updatedAt: new Date() });
+        return { ...order, items: order.items.map((item) => ({ ...item })) };
+      },
+    ),
   };
 
   payment = {
-    create: jest.fn(async ({ data }: any) => {
+    create: jest.fn(async ({ data }: { data: Omit<PaymentRow, 'id'> }) => {
       const payment = {
         id: `aaaaaaaa-aaaa-aaaa-aaaa-${String(this.paymentSeq++).padStart(12, '0')}`,
         orderId: data.orderId,
@@ -395,6 +529,23 @@ describe('API auth, order, and payment flows', () => {
     expect(me.body.data.user.email).toBe('cashier@caffe.app');
     expect(me.body.data.staff.role).toBe(StaffRole.CASHIER);
     expect(me.body.data.branch.id).toBe(ids.branch);
+    expect(me.body.data.branch.bankInfo.account).toBe('1023456789');
+  });
+
+  it('returns branch bank info for VietQR payments', async () => {
+    const token = await login('cashier@caffe.app');
+
+    const response = await request(app.getHttpServer())
+      .get('/branches')
+      .set('Authorization', `Bearer ${token}`)
+      .expect(200);
+
+    expect(response.body.data[0].bankInfo).toEqual({
+      bank: 'Vietcombank',
+      bankCode: 'VCB',
+      account: '1023456789',
+      holder: 'CTY TNHH CA PHE PILOT',
+    });
   });
 
   it('runs the order lifecycle without SERVING', async () => {
@@ -473,6 +624,20 @@ describe('API auth, order, and payment flows', () => {
       amount: 60000,
       changeAmount: 6000,
     });
+  });
+
+  it('rejects non-pilot payment methods', async () => {
+    const cashierToken = await login('cashier@caffe.app');
+    const baristaToken = await login('barista@caffe.app');
+    const orderId = await createReadyDeliveredOrder(cashierToken, baristaToken);
+
+    const response = await request(app.getHttpServer())
+      .post('/payments')
+      .set('Authorization', `Bearer ${cashierToken}`)
+      .send({ orderId, method: PaymentMethod.CARD, amount: 54000 })
+      .expect(400);
+
+    expect(response.body.message).toBe('Pilot chỉ hỗ trợ tiền mặt hoặc chuyển khoản');
   });
 
   it('accepts BANK_TRANSFER payment with a manual reference', async () => {

@@ -24,10 +24,12 @@ export function StaffPickerModal({
   onClose,
   onSelect,
 }: StaffPickerModalProps) {
-  const { data: operators, isLoading, isError, refetch } = useBranchOperators(
-    visible,
-    operatorRoles,
-  );
+  const {
+    data: operators,
+    isLoading,
+    isError,
+    refetch,
+  } = useBranchOperators(visible, operatorRoles);
 
   const subtitle =
     operatorRoles?.length === 1 && operatorRoles[0] === StaffRole.BARISTA
@@ -94,7 +96,12 @@ const styles = StyleSheet.create({
     maxHeight: '70%',
   },
   title: { fontSize: 18, fontWeight: '700', color: colors.text },
-  subtitle: { fontSize: 13, color: colors.textSecondary, marginTop: spacing.xs, marginBottom: spacing.md },
+  subtitle: {
+    fontSize: 13,
+    color: colors.textSecondary,
+    marginTop: spacing.xs,
+    marginBottom: spacing.md,
+  },
   loader: { marginVertical: spacing.xl },
   list: { maxHeight: 320 },
   row: {

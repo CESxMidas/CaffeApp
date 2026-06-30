@@ -190,13 +190,13 @@ erDiagram
 
 ### `OrderStatus`
 
-| Value       | Mô tả                      |
-| ----------- | -------------------------- |
-| `PENDING`   | Đã gửi bếp, chờ pha        |
-| `MAKING`    | Barista đang pha           |
+| Value       | Mô tả                                  |
+| ----------- | -------------------------------------- |
+| `PENDING`   | Đã gửi bếp, chờ pha                    |
+| `MAKING`    | Barista đang pha                       |
 | `READY`     | Barista hoàn thành pha — sẵn sàng giao |
-| `PAID`      | Đã thanh toán              |
-| `CANCELLED` | Đã hủy                     |
+| `PAID`      | Đã thanh toán                          |
+| `CANCELLED` | Đã hủy                                 |
 
 Flow: `PENDING → MAKING → READY → PAID` (hoặc `CANCELLED` trước `PAID`).
 

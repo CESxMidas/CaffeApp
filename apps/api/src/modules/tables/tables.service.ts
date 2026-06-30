@@ -48,11 +48,8 @@ export class TablesService {
         capacity: t.capacity,
         status: status as TableDto['status'],
         occupiedSince:
-          status === TableStatus.OCCUPIED && active?.since
-            ? active.since.toISOString()
-            : null,
-        activeOrderId:
-          status === TableStatus.OCCUPIED && active?.orderId ? active.orderId : null,
+          status === TableStatus.OCCUPIED && active?.since ? active.since.toISOString() : null,
+        activeOrderId: status === TableStatus.OCCUPIED && active?.orderId ? active.orderId : null,
       };
     });
   }
