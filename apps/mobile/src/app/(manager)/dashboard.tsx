@@ -2,12 +2,39 @@ import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { router } from 'expo-router';
 import { ActivityIndicator } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { colors, spacing, formatCurrency } from '@caffeapp/shared';
+import { colors, spacing, borderRadius, formatCurrency } from '@caffeapp/shared';
 import { Card } from '@shared/components/ui';
 import { useIsOwner, usePermission } from '@shared/hooks/usePermission';
 import { usePendingBranchAssignments } from '@features/staff';
-import { useRevenueReport } from '@features/manager';
+import { useRevenueReport, useHourlyRevenue } from '@features/manager';
 import { useSessionStore } from '@shared/stores/session';
+
+const HOURS = Array.from({ length: 24 }, (_, i) => i);
+const MAX_BAR_HEIGHT = 120;
+
+function HourlyChart({ data }: { data: { hour: number; revenue: number; orders: number }[] }) {
+  const maxRevenue = Math.max(...data.map((d) => d.revenue), 1);
+
+  return (
+    <Card style={styles.chartCard}>
+      <Text style={styles.chartTitle}>Doanh thu theo giờ</Text>
+      <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+        <View style={styles.chartContainer}>
+          {data.map((item) => {
+            const height = (item.revenue / maxRevenue) * MAX_BAR_HEIGHT;
+            return (
+              <View key={item.hour} style={styles.barColumn}>
+                <Text style={styles.barOrders}>{item.orders}</Text>
+                <View style={[styles.bar, { height: Math.max(height, 4) }]} />
+                <Text style={styles.barHour}>{item.hour}h</Text>
+              </View>
+            );
+          })}
+        </View>
+      </ScrollView>
+    </Card>
+  );
+}
 
 export default function ManagerDashboardScreen() {
   const isOwner = useIsOwner();
@@ -15,6 +42,7 @@ export default function ManagerDashboardScreen() {
   const activeBranchId = useSessionStore((s) => s.activeBranchId);
   const { data: pending } = usePendingBranchAssignments(isOwner);
   const { data: revenue, isLoading } = useRevenueReport(activeBranchId);
+  const { data: hourlyData, isLoading: hourlyLoading } = useHourlyRevenue(activeBranchId);
   const pendingCount = isOwner ? (pending?.length ?? 0) : 0;
   const employeeName = useSessionStore((s) => s.employeeName);
 
@@ -53,6 +81,8 @@ export default function ManagerDashboardScreen() {
           <Text style={styles.statLabel}>Khách tại bàn</Text>
         </Card>
       </View>
+
+      {!hourlyLoading && hourlyData ? <HourlyChart data={hourlyData} /> : null}
 
       {isOwner ? (
         <Pressable onPress={() => router.push('/(manager)/branch-approvals')}>
@@ -141,6 +171,23 @@ const styles = StyleSheet.create({
   statCard: { flex: 1, alignItems: 'center' },
   statValue: { fontSize: 24, fontWeight: '700', color: colors.text },
   statLabel: { fontSize: 14, color: colors.textSecondary, marginTop: spacing.xs },
+  chartCard: { marginTop: spacing.base },
+  chartTitle: { fontSize: 16, fontWeight: '600', color: colors.text, marginBottom: spacing.md },
+  chartContainer: {
+    flexDirection: 'row',
+    alignItems: 'flex-end',
+    gap: spacing.xs,
+    height: MAX_BAR_HEIGHT + 40,
+  },
+  barColumn: { alignItems: 'center', width: 24 },
+  bar: {
+    width: 16,
+    backgroundColor: colors.primary,
+    borderRadius: borderRadius.sm,
+    minHeight: 4,
+  },
+  barOrders: { fontSize: 10, color: colors.textSecondary, marginBottom: 2 },
+  barHour: { fontSize: 10, color: colors.textMuted, marginTop: 4 },
   ownerCard: { marginTop: spacing.lg },
   ownerCardRow: { flexDirection: 'row', alignItems: 'center', gap: spacing.md },
   linkCard: { marginTop: spacing.lg },

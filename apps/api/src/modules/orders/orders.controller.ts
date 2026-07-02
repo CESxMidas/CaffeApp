@@ -8,6 +8,8 @@ import { CancelOrderDto } from './dto/cancel-order.dto';
 import { CreateOrderDto } from './dto/create-order.dto';
 import { DeliverOrderDto } from './dto/deliver-order.dto';
 import { UpdateOrderStatusDto } from './dto/update-order-status.dto';
+import { OrderStatsDto } from './dto/order-stats.dto';
+import { TableOrdersDto } from './dto/table-orders.dto';
 import { OrdersService } from './orders.service';
 
 @Controller('orders')
@@ -30,6 +32,65 @@ export class OrdersController {
       tableId,
       deliveryState,
     );
+    return { data };
+  }
+
+  // Task 8.1: GET /orders/queue (barista queue)
+  @Get('queue')
+  @Roles(StaffRole.BARISTA, StaffRole.MANAGER, StaffRole.OWNER)
+  async queue(
+    @CurrentUser() user: JwtPayload,
+    @Query('branchId') branchId?: string,
+  ): Promise<{ data: OrderDto[] }> {
+    const data = await this.ordersService.getQueue(user, branchId);
+    return { data };
+  }
+
+  // Task 8.2: GET /orders/stats (statistics)
+  @Get('stats/summary')
+  @Roles(StaffRole.MANAGER, StaffRole.OWNER)
+  async stats(
+    @CurrentUser() user: JwtPayload,
+    @Query('branchId') branchId?: string,
+    @Query('date') date?: string,
+  ): Promise<{ data: OrderStatsDto }> {
+    const data = await this.ordersService.getStats(user, branchId, date);
+    return { data };
+  }
+
+  // FR-D02: GET /orders/stats/hourly (revenue by hour)
+  @Get('stats/hourly')
+  @Roles(StaffRole.MANAGER, StaffRole.OWNER)
+  async hourlyStats(
+    @CurrentUser() user: JwtPayload,
+    @Query('branchId') branchId?: string,
+    @Query('date') date?: string,
+  ): Promise<{ data: { hour: number; revenue: number; orders: number }[] }> {
+    const data = await this.ordersService.getHourlyStats(user, branchId, date);
+    return { data };
+  }
+
+  // Task 12.1: GET /orders/my-tables (cashier view - orders grouped by table)
+  @Get('tables')
+  @Roles(StaffRole.CASHIER, StaffRole.MANAGER, StaffRole.OWNER)
+  async getOrdersByTables(
+    @CurrentUser() user: JwtPayload,
+    @Query('branchId') branchId?: string,
+  ): Promise<{ data: TableOrdersDto[] }> {
+    const data = await this.ordersService.getOrdersByTables(user, branchId);
+    return { data };
+  }
+
+  // Task 12.2: GET /orders/history (order history with date filters)
+  @Get('history')
+  @Roles(StaffRole.CASHIER, StaffRole.MANAGER, StaffRole.OWNER)
+  async history(
+    @CurrentUser() user: JwtPayload,
+    @Query('branchId') branchId?: string,
+    @Query('startDate') startDate?: string,
+    @Query('endDate') endDate?: string,
+  ): Promise<{ data: OrderDto[] }> {
+    const data = await this.ordersService.getHistory(user, branchId, startDate, endDate);
     return { data };
   }
 

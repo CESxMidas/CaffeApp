@@ -25,6 +25,7 @@ import type { CancelOrderDto } from './dto/cancel-order.dto';
 import type { CreateOrderDto as CreateOrderBodyDto } from './dto/create-order.dto';
 import type { DeliverOrderDto } from './dto/deliver-order.dto';
 import type { UpdateOrderStatusDto } from './dto/update-order-status.dto';
+import type { OrderStatsDto } from './dto/order-stats.dto';
 
 const STATUS_TRANSITIONS: Record<OrderStatus, OrderStatus[]> = {
   [OrderStatus.PENDING]: [OrderStatus.MAKING, OrderStatus.CANCELLED],
@@ -366,6 +367,149 @@ export class OrdersService {
     );
   }
 
+  // Task 8.1: GET /orders/queue (barista queue)
+  async getQueue(payload: JwtPayload, branchId?: string): Promise<OrderDto[]> {
+    const scopedBranchId = resolveBranchScope(payload, branchId);
+
+    const orders = await this.prisma.order.findMany({
+      where: {
+        branchId: scopedBranchId,
+        status: { in: [OrderStatus.PENDING, OrderStatus.MAKING, OrderStatus.READY] },
+      },
+      include: { items: true },
+      orderBy: { createdAt: 'asc' },
+      take: 50,
+    });
+
+    return orders.map((o) => this.toOrderDto(o));
+  }
+
+  // FR-D02: GET /orders/stats/hourly (revenue by hour)
+  async getHourlyStats(
+    payload: JwtPayload,
+    branchId?: string,
+    date?: string,
+  ): Promise<{ hour: number; revenue: number; orders: number }[]> {
+    const scopedBranchId = resolveBranchScope(payload, branchId);
+
+    // Build date filter
+    let start: Date;
+    let end: Date;
+    if (date) {
+      start = new Date(date);
+      start.setHours(0, 0, 0, 0);
+      end = new Date(start);
+      end.setDate(end.getDate() + 1);
+    } else {
+      start = new Date();
+      start.setHours(0, 0, 0, 0);
+      end = new Date(start);
+      end.setDate(end.getDate() + 1);
+    }
+
+    // Get PAID orders for the day
+    const orders = await this.prisma.order.findMany({
+      where: {
+        branchId: scopedBranchId,
+        status: OrderStatus.PAID,
+        createdAt: { gte: start, lt: end },
+      },
+      select: {
+        total: true,
+        createdAt: true,
+      },
+    });
+
+    // Group by hour
+    const hourlyMap = new Map<number, { revenue: number; orders: number }>();
+    for (let h = 0; h < 24; h++) {
+      hourlyMap.set(h, { revenue: 0, orders: 0 });
+    }
+
+    for (const order of orders) {
+      const hour = order.createdAt.getHours();
+      const data = hourlyMap.get(hour)!;
+      data.revenue += order.total;
+      data.orders++;
+    }
+
+    // Convert to array sorted by hour
+    return Array.from(hourlyMap.entries())
+      .sort(([a], [b]) => a - b)
+      .map(([hour, data]) => ({
+        hour,
+        revenue: data.revenue,
+        orders: data.orders,
+      }));
+  }
+
+  // Task 8.2: GET /orders/stats (statistics)
+  async getStats(payload: JwtPayload, branchId?: string, date?: string): Promise<OrderStatsDto> {
+    const scopedBranchId = resolveBranchScope(payload, branchId);
+
+    // Build date filter
+    let dateFilter = {};
+    if (date) {
+      const start = new Date(date);
+      start.setHours(0, 0, 0, 0);
+      const end = new Date(start);
+      end.setDate(end.getDate() + 1);
+      dateFilter = { createdAt: { gte: start, lt: end } };
+    }
+
+    // Get orders with status counts
+    const orders = await this.prisma.order.findMany({
+      where: {
+        branchId: scopedBranchId,
+        ...dateFilter,
+      },
+      select: {
+        status: true,
+        total: true,
+      },
+    });
+
+    // Calculate stats by status
+    const statusCounts: Record<string, { count: number; revenue: number }> = {
+      PENDING: { count: 0, revenue: 0 },
+      MAKING: { count: 0, revenue: 0 },
+      READY: { count: 0, revenue: 0 },
+      PAID: { count: 0, revenue: 0 },
+      CANCELLED: { count: 0, revenue: 0 },
+    };
+
+    let totalRevenue = 0;
+    for (const order of orders) {
+      statusCounts[order.status].count++;
+      if (order.status === OrderStatus.PAID) {
+        statusCounts[order.status].revenue += order.total;
+        totalRevenue += order.total;
+      }
+    }
+
+    const totalOrders = orders.length;
+    const paidOrders = statusCounts[OrderStatus.PAID].count;
+
+    return {
+      summary: {
+        totalOrders,
+        pendingOrders: statusCounts[OrderStatus.PENDING].count,
+        makingOrders: statusCounts[OrderStatus.MAKING].count,
+        readyOrders: statusCounts[OrderStatus.READY].count,
+        deliveredOrders: 0, // deprecated - no longer tracked separately
+        paidOrders,
+        cancelledOrders: statusCounts[OrderStatus.CANCELLED].count,
+        totalRevenue,
+        averageOrderValue: paidOrders > 0 ? Math.round(totalRevenue / paidOrders) : 0,
+      },
+      byStatus: Object.entries(statusCounts).map(([status, data]) => ({
+        status,
+        count: data.count,
+        revenue: data.revenue,
+      })),
+    };
+  }
+
   private assertStatusRole(role: StaffRole, from: OrderStatus, to: OrderStatus): void {
     if (to === OrderStatus.CANCELLED) {
       if (from === OrderStatus.READY) {
@@ -473,5 +617,102 @@ export class OrdersService {
         notes: item.notes,
       })),
     };
+  }
+
+  // Task 12.1: GET /orders/my-tables (cashier view - orders grouped by table)
+  async getOrdersByTables(
+    payload: JwtPayload,
+    branchId?: string,
+  ): Promise<import('./dto/table-orders.dto').TableOrdersDto[]> {
+    const scopedBranchId = resolveBranchScope(payload, branchId);
+
+    // Get all tables in branch
+    const tables = await this.prisma.table.findMany({
+      where: { branchId: scopedBranchId },
+      orderBy: [{ floor: 'asc' }, { code: 'asc' }],
+    });
+
+    // Get active orders (not PAID or CANCELLED)
+    const activeOrders = await this.prisma.order.findMany({
+      where: {
+        branchId: scopedBranchId,
+        status: { notIn: [OrderStatus.PAID, OrderStatus.CANCELLED] },
+        tableId: { not: null },
+      },
+      include: { items: true },
+      orderBy: { createdAt: 'asc' },
+    });
+
+    // Group orders by table
+    const tableMap = new Map<string, import('./dto/table-orders.dto').TableOrdersDto>();
+
+    // Initialize all tables
+    for (const table of tables) {
+      tableMap.set(table.id, {
+        tableId: table.id,
+        tableCode: table.code,
+        tableFloor: table.floor,
+        orders: [],
+        totalAmount: 0,
+        activeOrderCount: 0,
+      });
+    }
+
+    // Add orders to tables
+    for (const order of activeOrders) {
+      if (!order.tableId) continue;
+
+      const tableData = tableMap.get(order.tableId);
+      if (tableData) {
+        tableData.orders.push(this.toOrderDto(order));
+        tableData.totalAmount += order.total;
+        tableData.activeOrderCount++;
+      }
+    }
+
+    // Return only tables with orders or all tables
+    return Array.from(tableMap.values());
+  }
+
+  // Task 12.2: GET /orders/history (order history with date filters)
+  async getHistory(
+    payload: JwtPayload,
+    branchId?: string,
+    startDate?: string,
+    endDate?: string,
+  ): Promise<OrderDto[]> {
+    const scopedBranchId = resolveBranchScope(payload, branchId);
+
+    // Build date filter
+    let dateFilter = {};
+    if (startDate && endDate) {
+      const start = new Date(startDate);
+      start.setHours(0, 0, 0, 0);
+      const end = new Date(endDate);
+      end.setHours(23, 59, 59, 999);
+      dateFilter = { createdAt: { gte: start, lte: end } };
+    } else if (startDate) {
+      const start = new Date(startDate);
+      start.setHours(0, 0, 0, 0);
+      dateFilter = { createdAt: { gte: start } };
+    } else if (endDate) {
+      const end = new Date(endDate);
+      end.setHours(23, 59, 59, 999);
+      dateFilter = { createdAt: { lte: end } };
+    }
+
+    // Get completed orders (PAID, CANCELLED)
+    const orders = await this.prisma.order.findMany({
+      where: {
+        branchId: scopedBranchId,
+        status: { in: [OrderStatus.PAID, OrderStatus.CANCELLED] },
+        ...dateFilter,
+      },
+      include: { items: true },
+      orderBy: { createdAt: 'desc' },
+      take: 100,
+    });
+
+    return orders.map((o) => this.toOrderDto(o));
   }
 }

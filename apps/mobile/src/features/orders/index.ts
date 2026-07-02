@@ -1,6 +1,7 @@
 export {
   useTables,
   useProducts,
+  useCategories,
   useCreateOrder,
   useOrders,
   useOrder,

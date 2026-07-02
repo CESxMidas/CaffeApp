@@ -14,4 +14,14 @@ export const reportService = {
     );
     return data.data;
   },
+
+  async getHourlyRevenue(params: {
+    branchId?: string;
+    date?: string;
+  }): Promise<{ hour: number; revenue: number; orders: number }[]> {
+    const { data } = await apiClient.get<
+      ApiDataResponse<{ hour: number; revenue: number; orders: number }[]>
+    >(`${API_ENDPOINTS.orders}/stats/hourly`, { params });
+    return data.data;
+  },
 };

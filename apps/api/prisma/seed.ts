@@ -13,6 +13,14 @@ const BRANCH_Q1 = 'a0000000-0000-0000-0000-000000000001';
 const BRANCH_Q3 = 'a0000000-0000-0000-0000-000000000002';
 const DEMO_PASSWORD = 'password123';
 
+// VietQR bank info for testing
+const BANK_INFO = {
+  bank: 'MSB',
+  bankCode: 'MSB',
+  account: '88898017684358',
+  holder: 'Do Huy Hoang',
+};
+
 interface DemoUser {
   id: string;
   email: string;
@@ -221,17 +229,14 @@ async function main() {
       name: 'CN Quận 1',
       address: '123 Nguyễn Huệ, Q.1, TP.HCM',
       phone: '0281234567',
+      bankInfo: BANK_INFO,
     },
     create: {
       id: BRANCH_Q1,
       name: 'CN Quận 1',
       address: '123 Nguyễn Huệ, Q.1, TP.HCM',
       phone: '0281234567',
-      bankInfo: {
-        bank: 'Vietcombank',
-        account: '1234567890',
-        holder: 'Cafe ABC',
-      },
+      bankInfo: BANK_INFO,
     },
   });
 
@@ -241,17 +246,14 @@ async function main() {
       name: 'CN Quận 3',
       address: '45 Võ Văn Tần, Q.3, TP.HCM',
       phone: '0287654321',
+      bankInfo: BANK_INFO,
     },
     create: {
       id: BRANCH_Q3,
       name: 'CN Quận 3',
       address: '45 Võ Văn Tần, Q.3, TP.HCM',
       phone: '0287654321',
-      bankInfo: {
-        bank: 'Techcombank',
-        account: '9876543210',
-        holder: 'Cafe ABC Q3',
-      },
+      bankInfo: BANK_INFO,
     },
   });
 

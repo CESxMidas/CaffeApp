@@ -30,6 +30,16 @@ export default function ManagerLayout() {
           }}
         />
         <Tabs.Screen
+          name="menu-management"
+          options={{
+            title: 'Menu',
+            headerTitle: 'Quản lý menu',
+            tabBarIcon: ({ color, size }: { color: string; size: number }) => (
+              <Ionicons name="restaurant-outline" size={size} color={color} />
+            ),
+          }}
+        />
+        <Tabs.Screen
           name="owner-tools"
           options={{
             href: null,

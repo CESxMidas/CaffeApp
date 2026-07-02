@@ -9,10 +9,12 @@ import { OrderStatus, PaymentMethod } from '@prisma/client';
 import { PrismaService } from '@common/prisma/prisma.service';
 import { ActorResolverService } from '@common/audit/actor-resolver.service';
 import { AuditService } from '@common/audit/audit.service';
-import { assertBranchAccess } from '@common/utils/branch-scope.util';
+import { assertBranchAccess, resolveBranchScope } from '@common/utils/branch-scope.util';
 import { syncTableEmptyIfIdle } from '@common/utils/table-status.util';
+import { generateVietQRData } from '@common/utils/vietqr.util';
 import type { JwtPayload } from '@common/types/jwt-payload.types';
 import type { CreatePaymentDto } from './dto/create-payment.dto';
+import type { GenerateQrDto } from './dto/generate-qr.dto';
 
 const PILOT_PAYMENT_METHODS = new Set<PaymentMethod>([
   PaymentMethod.CASH,
@@ -119,6 +121,146 @@ export class PaymentsService {
       changeAmount: payment.changeAmount,
       reference: payment.reference,
       paidAt: payment.paidAt.toISOString(),
+    };
+  }
+
+  // VietQR: Generate QR code for bank transfer payment
+  async generateQr(
+    payload: JwtPayload,
+    dto: GenerateQrDto,
+  ): Promise<{
+    qrUrl: string;
+    bankCode: string;
+    accountNo: string;
+    accountName: string;
+    amount: number;
+    addInfo: string;
+  }> {
+    const scopedBranchId = resolveBranchScope(payload);
+
+    // Verify order exists and belongs to branch
+    const order = await this.prisma.order.findUnique({
+      where: { id: dto.orderId },
+    });
+
+    if (!order) {
+      throw new NotFoundException('Đơn không tồn tại');
+    }
+
+    if (order.branchId !== scopedBranchId) {
+      throw new NotFoundException('Đơn không thuộc chi nhánh này');
+    }
+
+    // Get branch bank info
+    const branch = await this.prisma.branch.findUnique({
+      where: { id: scopedBranchId },
+      select: {
+        bankInfo: true,
+      },
+    });
+
+    if (!branch?.bankInfo) {
+      throw new NotFoundException('Chi nhánh chưa cấu hình thông tin ngân hàng');
+    }
+
+    // Parse bank info from JSON
+    const bankInfo = branch.bankInfo as {
+      bank?: string;
+      bankCode?: string;
+      account?: string;
+      holder?: string;
+    };
+
+    if (!bankInfo.account || !bankInfo.bank) {
+      throw new NotFoundException('Thông tin ngân hàng không hợp lệ');
+    }
+
+    // Generate VietQR data
+    const qrData = generateVietQRData({
+      bankCode: bankInfo.bankCode || bankInfo.bank,
+      accountNo: bankInfo.account,
+      accountName: bankInfo.holder || '',
+      amount: dto.amount,
+      addInfo: `Don#${order.orderNumber}`,
+    });
+
+    return {
+      qrUrl: qrData.qrUrl,
+      bankCode: qrData.bankCode,
+      accountNo: qrData.accountNo,
+      accountName: qrData.accountName,
+      amount: qrData.amount || dto.amount,
+      addInfo: qrData.addInfo || `Don#${order.orderNumber}`,
+    };
+  }
+
+  // Get payment by order ID
+  async getByOrder(payload: JwtPayload, orderId: string): Promise<PaymentDto[]> {
+    const order = await this.prisma.order.findUnique({
+      where: { id: orderId },
+    });
+
+    if (!order) {
+      throw new NotFoundException('Đơn không tồn tại');
+    }
+
+    assertBranchAccess(payload, order.branchId);
+
+    const payments = await this.prisma.payment.findMany({
+      where: { orderId },
+      orderBy: { createdAt: 'desc' },
+    });
+
+    return payments.map((p) => ({
+      id: p.id,
+      orderId: p.orderId,
+      method: p.method as PaymentDto['method'],
+      amount: p.amount,
+      changeAmount: p.changeAmount,
+      reference: p.reference,
+      paidAt: p.paidAt.toISOString(),
+    }));
+  }
+
+  // Verify bank transfer payment (manual confirmation by manager)
+  async verify(
+    payload: JwtPayload,
+    paymentId: string,
+    dto: { verified: boolean; notes?: string },
+  ): Promise<PaymentDto> {
+    const payment = await this.prisma.payment.findUnique({
+      where: { id: paymentId },
+      include: { order: true },
+    });
+
+    if (!payment) {
+      throw new NotFoundException('Giao dịch không tồn tại');
+    }
+
+    assertBranchAccess(payload, payment.order.branchId);
+
+    if (payment.method !== PaymentMethod.BANK_TRANSFER) {
+      throw new BadRequestException('Chỉ áp dụng cho thanh toán chuyển khoản');
+    }
+
+    // Update payment reference with verification info
+    const updated = await this.prisma.payment.update({
+      where: { id: paymentId },
+      data: {
+        reference: dto.verified
+          ? `Verified by ${payload.email} at ${new Date().toISOString()}${dto.notes ? ' - ' + dto.notes : ''}`
+          : payment.reference,
+      },
+    });
+
+    return {
+      id: updated.id,
+      orderId: updated.orderId,
+      method: updated.method as PaymentDto['method'],
+      amount: updated.amount,
+      changeAmount: updated.changeAmount,
+      reference: updated.reference,
+      paidAt: updated.paidAt.toISOString(),
     };
   }
 }
