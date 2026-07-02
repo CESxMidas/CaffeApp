@@ -1,5 +1,4 @@
-import type { ApiDataResponse, TableDto } from '@caffeapp/shared';
-import { TableStatus } from '@caffeapp/shared';
+import type { ApiDataResponse, TableDto, TableStatus } from '@caffeapp/shared';
 import { API_ENDPOINTS } from '@shared/config/api.config';
 import { apiClient } from './apiClient';
 

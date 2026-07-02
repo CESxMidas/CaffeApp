@@ -63,8 +63,7 @@ export default function BaristaOrderDetailScreen() {
   const { runWithActor, pickerModal } = useStaffActor({ operatorRoles: [StaffRole.BARISTA] });
 
   // US-C03: Timer when status = MAKING — use updatedAt as "started pha" timestamp
-  const timerStartedAt =
-    order?.status === OrderStatus.MAKING ? order.updatedAt : null;
+  const timerStartedAt = order?.status === OrderStatus.MAKING ? order.updatedAt : null;
   const elapsed = useElapsedTimer(timerStartedAt);
 
   if (isLoading) {
@@ -220,7 +219,12 @@ const styles = StyleSheet.create({
     paddingVertical: 4,
     borderRadius: 6,
   },
-  timerText: { color: colors.white, fontSize: 14, fontWeight: '700', fontVariant: ['tabular-nums'] },
+  timerText: {
+    color: colors.white,
+    fontSize: 14,
+    fontWeight: '700',
+    fontVariant: ['tabular-nums'],
+  },
   meta: { fontSize: 14, color: colors.textSecondary, marginTop: spacing.xs },
   total: { fontSize: 18, fontWeight: '700', color: colors.primary, marginTop: spacing.sm },
   preparedHint: { fontSize: 13, color: colors.primary, marginTop: spacing.xs, fontWeight: '500' },

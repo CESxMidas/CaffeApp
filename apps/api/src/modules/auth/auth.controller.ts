@@ -6,6 +6,7 @@ import type { JwtPayload } from '@common/types/jwt-payload.types';
 import { AuthService } from './auth.service';
 import { ChangePasswordDto } from './dto/change-password.dto';
 import { LoginDto } from './dto/login.dto';
+import { RefreshDto } from './dto/refresh.dto';
 
 @Controller('auth')
 export class AuthController {
@@ -22,6 +23,16 @@ export class AuthController {
   @Get('me')
   async me(@CurrentUser() user: JwtPayload): Promise<{ data: MeResponseDto }> {
     const data = await this.authService.getMe(user);
+    return { data };
+  }
+
+  @Public()
+  @Post('refresh')
+  @HttpCode(HttpStatus.OK)
+  async refresh(
+    @Body() dto: RefreshDto,
+  ): Promise<{ data: { accessToken: string; expiresIn: number } }> {
+    const data = await this.authService.refresh(dto.refreshToken);
     return { data };
   }
 

@@ -87,23 +87,57 @@ export class AuthService {
     };
   }
 
+  async refresh(refreshToken: string): Promise<{ accessToken: string; expiresIn: number }> {
+    try {
+      const payload = this.jwtService.verify<JwtPayload>(refreshToken);
+      if (payload.type !== 'refresh') {
+        throw new UnauthorizedException('Token không hợp lệ');
+      }
+
+      const user = await this.prisma.user.findUnique({
+        where: { id: payload.sub },
+        include: { staff: true },
+      });
+
+      if (!user || !user.isActive || !user.staff || !user.staff.isActive) {
+        throw new UnauthorizedException('Session không hợp lệ');
+      }
+
+      const accessToken = this.jwtService.sign(
+        {
+          sub: user.id,
+          staffId: user.staff.id,
+          email: user.email,
+          role: user.staff.role as StaffDto['role'],
+          branchId: user.staff.role === StaffRole.OWNER ? null : user.staff.branchId,
+          type: 'access',
+        },
+        { expiresIn: this.config.get<string>('jwt.expiresIn', '15m') as `${number}m` },
+      );
+
+      return { accessToken, expiresIn: this.getAccessExpiresInSeconds() };
+    } catch {
+      throw new UnauthorizedException('Refresh token không hợp lệ hoặc đã hết hạn');
+    }
+  }
+
   async changePassword(payload: JwtPayload, dto: ChangePasswordDto): Promise<void> {
     const user = await this.prisma.user.findUnique({
       where: { id: payload.sub },
     });
 
     if (!user || !user.isActive) {
-      throw new UnauthorizedException('Session khÃ´ng há»£p lá»‡');
+      throw new UnauthorizedException('Session không hợp lệ');
     }
 
     const passwordValid = await bcrypt.compare(dto.currentPassword, user.passwordHash);
     if (!passwordValid) {
-      throw new BadRequestException('Máº­t kháº©u hiá»‡n táº¡i khÃ´ng Ä‘Ãºng');
+      throw new BadRequestException('Mật khẩu hiện tại không đúng');
     }
 
     const samePassword = await bcrypt.compare(dto.newPassword, user.passwordHash);
     if (samePassword) {
-      throw new BadRequestException('Máº­t kháº©u má»›i pháº£i khÃ¡c máº­t kháº©u hiá»‡n táº¡i');
+      throw new BadRequestException('Mật khẩu mới phải khác mật khẩu hiện tại');
     }
 
     const passwordHash = await bcrypt.hash(dto.newPassword, 10);

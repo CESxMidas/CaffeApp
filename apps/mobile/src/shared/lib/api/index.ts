@@ -1,4 +1,4 @@
-export { apiClient, getApiBaseUrl, setApiAccessToken } from './apiClient';
+export { apiClient, getApiBaseUrl, setApiAccessToken, setOnLogoutCallback } from './apiClient';
 export { authService } from './authService';
 export { branchesService } from './branchesService';
 export { staffService } from './staffService';

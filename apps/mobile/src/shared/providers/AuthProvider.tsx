@@ -1,7 +1,8 @@
 import { useEffect, type ReactNode } from 'react';
 import { StaffRole, BranchAssignmentStatus } from '@caffeapp/shared';
-import { setApiAccessToken } from '@shared/lib/api';
+import { setApiAccessToken, setOnLogoutCallback } from '@shared/lib/api';
 import { loadPersistedSession } from '@shared/lib/storage';
+import { logout } from '@shared/lib/auth/logout';
 import { useSessionStore } from '@shared/stores/session';
 
 interface AuthProviderProps {
@@ -15,6 +16,11 @@ export function AuthProvider({ children }: AuthProviderProps) {
   const setHydrated = useSessionStore((s) => s.setHydrated);
 
   useEffect(() => {
+    // Wire 401 -> auto-logout when token refresh fails
+    setOnLogoutCallback(() => {
+      void logout();
+    });
+
     let mounted = true;
 
     async function hydrate() {
@@ -78,7 +84,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
           });
         }
       } catch {
-        // Storage unavailable or corrupt — treat as logged out
+        // Storage unavailable or corrupt - treat as logged out
       } finally {
         if (mounted) {
           setHydrated();
