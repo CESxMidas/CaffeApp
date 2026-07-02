@@ -12,7 +12,7 @@ Sprint 0 dùng Supabase trực tiếp trong thiết kế. Production nội bộ 
 - **Mobile:** Expo + Axios + TanStack Query → gọi NestJS API only
 - **Backend:** NestJS + Prisma + PostgreSQL
 - **Shared:** enums, DTOs, types trong `packages/shared`
-- **Supabase:** deprecated cho mobile direct access; `docs/legacy/supabase/` giữ làm reference
+- **Supabase:** deprecated cho mobile direct access
 
 ## Consequences
 

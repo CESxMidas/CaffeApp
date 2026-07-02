@@ -2,7 +2,11 @@ import type {
   ApiDataResponse,
   CreateOrderDto,
   DeliverOrderRequestDto,
+  MergeOrdersDto,
   OrderDto,
+  SplitOrderDto,
+  SplitOrderResponseDto,
+  TransferOrderTableDto,
   UpdateOrderStatusDto,
 } from '@caffeapp/shared';
 import { API_ENDPOINTS } from '@shared/config/api.config';
@@ -50,6 +54,42 @@ export const orderService = {
     const { data } = await apiClient.post<ApiDataResponse<OrderDto>>(
       `${API_ENDPOINTS.orders}/${orderId}/deliver`,
       body,
+    );
+    return data.data;
+  },
+
+  async transferTable(orderId: string, body: TransferOrderTableDto): Promise<OrderDto> {
+    const { data } = await apiClient.patch<ApiDataResponse<OrderDto>>(
+      `${API_ENDPOINTS.orders}/${orderId}/table`,
+      body,
+    );
+    return data.data;
+  },
+
+  async mergeOrders(body: MergeOrdersDto): Promise<OrderDto> {
+    const { data } = await apiClient.post<ApiDataResponse<OrderDto>>(
+      `${API_ENDPOINTS.orders}/merge`,
+      body,
+    );
+    return data.data;
+  },
+
+  async splitOrder(orderId: string, body: SplitOrderDto): Promise<SplitOrderResponseDto> {
+    const { data } = await apiClient.post<ApiDataResponse<SplitOrderResponseDto>>(
+      `${API_ENDPOINTS.orders}/${orderId}/split`,
+      body,
+    );
+    return data.data;
+  },
+
+  async toggleItemPrepared(
+    orderId: string,
+    itemId: string,
+    isPrepared: boolean,
+  ): Promise<OrderDto> {
+    const { data } = await apiClient.patch<ApiDataResponse<OrderDto>>(
+      `${API_ENDPOINTS.orders}/${orderId}/items/${itemId}/prepared`,
+      { isPrepared },
     );
     return data.data;
   },

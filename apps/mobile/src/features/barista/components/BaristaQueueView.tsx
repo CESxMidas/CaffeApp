@@ -1,4 +1,4 @@
-import { useMemo } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import {
   ActivityIndicator,
   Pressable,
@@ -23,8 +23,23 @@ const STATUS_COLORS: Record<(typeof QUEUE_STATUSES)[number], string> = {
   [OrderStatus.READY]: colors.primary,
 };
 
+const PRIORITY_THRESHOLD_MS = 5 * 60 * 1000;
+const TICK_INTERVAL_MS = 30_000;
+
+function useNow(intervalMs = TICK_INTERVAL_MS) {
+  const [now, setNow] = useState(() => Date.now());
+
+  useEffect(() => {
+    const intervalId = setInterval(() => setNow(Date.now()), intervalMs);
+    return () => clearInterval(intervalId);
+  }, [intervalMs]);
+
+  return now;
+}
+
 export function BaristaQueueView() {
   const { data: orders, isLoading, isError, refetch, isRefetching } = useBaristaQueue();
+  const now = useNow();
 
   const grouped = useMemo(() => {
     const map = new Map<OrderStatus, OrderDto[]>();
@@ -88,7 +103,7 @@ export function BaristaQueueView() {
               </Text>
             </View>
             {sectionOrders.map((order) => (
-              <OrderCard key={order.id} order={order} />
+              <OrderCard key={order.id} order={order} now={now} />
             ))}
           </View>
         );
@@ -97,14 +112,23 @@ export function BaristaQueueView() {
   );
 }
 
-function OrderCard({ order }: { order: OrderDto }) {
+function OrderCard({ order, now }: { order: OrderDto; now: number }) {
   const typeLabel = order.orderType === OrderType.DINE_IN ? 'Tại bàn' : 'Mang đi';
+  const elapsedMs = now - new Date(order.createdAt).getTime();
+  const isPriority = order.status === OrderStatus.PENDING && elapsedMs > PRIORITY_THRESHOLD_MS;
 
   return (
     <Pressable onPress={() => router.push(opKitchenOrder(order.id))}>
       <Card style={styles.orderCard}>
         <View style={styles.orderHeader}>
-          <Text style={styles.orderNumber}>#{order.orderNumber}</Text>
+          <View style={styles.orderHeaderLeft}>
+            <Text style={styles.orderNumber}>#{order.orderNumber}</Text>
+            {isPriority ? (
+              <View style={styles.priorityBadge}>
+                <Text style={styles.priorityBadgeText}>Ưu tiên</Text>
+              </View>
+            ) : null}
+          </View>
           <Text style={styles.orderType}>{typeLabel}</Text>
         </View>
         {order.items.map((item) => (
@@ -141,7 +165,15 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     marginBottom: spacing.sm,
   },
+  orderHeaderLeft: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm },
   orderNumber: { fontSize: 16, fontWeight: '700', color: colors.text },
+  priorityBadge: {
+    backgroundColor: colors.accent,
+    paddingHorizontal: spacing.sm,
+    paddingVertical: 2,
+    borderRadius: 4,
+  },
+  priorityBadgeText: { color: colors.white, fontSize: 10, fontWeight: '700' },
   orderType: { fontSize: 12, color: colors.textSecondary, fontWeight: '500' },
   itemRow: { flexDirection: 'row', gap: spacing.sm, marginTop: spacing.xs },
   itemQty: { fontSize: 15, fontWeight: '700', color: colors.primary, minWidth: 28 },

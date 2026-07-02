@@ -13,6 +13,8 @@ import {
   StaffRole,
   TableStatus,
   NotificationType,
+  ShiftStatus,
+  type Prisma,
 } from '@prisma/client';
 import { PrismaService } from '@common/prisma/prisma.service';
 import { AuditService } from '@common/audit/audit.service';
@@ -21,11 +23,16 @@ import { assertBranchAccess, resolveBranchScope } from '@common/utils/branch-sco
 import { syncTableEmptyIfIdle } from '@common/utils/table-status.util';
 import type { JwtPayload } from '@common/types/jwt-payload.types';
 import { NotificationsService } from '@modules/notifications/notifications.service';
+import { OrdersGateway } from './orders.gateway';
 import type { CancelOrderDto } from './dto/cancel-order.dto';
 import type { CreateOrderDto as CreateOrderBodyDto } from './dto/create-order.dto';
 import type { DeliverOrderDto } from './dto/deliver-order.dto';
 import type { UpdateOrderStatusDto } from './dto/update-order-status.dto';
 import type { OrderStatsDto } from './dto/order-stats.dto';
+import type { MergeOrdersDto } from './dto/merge-orders.dto';
+import type { SplitOrderDto } from './dto/split-order.dto';
+import type { ToggleItemPreparedDto } from './dto/toggle-item-prepared.dto';
+import type { TransferOrderTableDto } from './dto/transfer-order-table.dto';
 
 const STATUS_TRANSITIONS: Record<OrderStatus, OrderStatus[]> = {
   [OrderStatus.PENDING]: [OrderStatus.MAKING, OrderStatus.CANCELLED],
@@ -37,6 +44,42 @@ const STATUS_TRANSITIONS: Record<OrderStatus, OrderStatus[]> = {
 
 export type DeliveryStateFilter = 'awaiting_delivery' | 'awaiting_payment';
 
+const ACTIVE_ORDER_STATUSES: OrderStatus[] = [
+  OrderStatus.PENDING,
+  OrderStatus.MAKING,
+  OrderStatus.READY,
+];
+
+type OrderWithItemsAndPayments = {
+  id: string;
+  branchId: string;
+  shiftId: string | null;
+  tableId: string | null;
+  orderNumber: string;
+  orderType: OrderType;
+  status: OrderStatus;
+  subtotal: number;
+  taxAmount: number;
+  total: number;
+  notes: string | null;
+  createdAt: Date;
+  updatedAt: Date;
+  deliveredAt: Date | null;
+  paidAt: Date | null;
+  items: Array<{
+    id: string;
+    productId: string;
+    productName: string;
+    quantity: number;
+    unitPrice: number;
+    lineTotal: number;
+    notes: string | null;
+    isPrepared: boolean;
+    preparedAt: Date | null;
+  }>;
+  payments?: Array<{ id: string }>;
+};
+
 @Injectable()
 export class OrdersService {
   constructor(
@@ -44,6 +87,7 @@ export class OrdersService {
     private readonly notifications: NotificationsService,
     private readonly audit: AuditService,
     private readonly actorResolver: ActorResolverService,
+    private readonly gateway: OrdersGateway,
   ) {}
 
   async listForBranch(
@@ -143,6 +187,12 @@ export class OrdersService {
     );
 
     const order = await this.prisma.$transaction(async (tx) => {
+      const activeShift = await tx.shift.findFirst({
+        where: { branchId, status: ShiftStatus.OPEN },
+        orderBy: { createdAt: 'desc' },
+        select: { id: true },
+      });
+
       if (dto.tableId) {
         const activeOnTable = await tx.order.count({
           where: {
@@ -170,6 +220,7 @@ export class OrdersService {
       const created = await tx.order.create({
         data: {
           branchId,
+          shiftId: activeShift?.id ?? null,
           tableId: dto.tableId ?? null,
           orderNumber,
           orderType: dto.orderType,
@@ -213,7 +264,10 @@ export class OrdersService {
       metadata: { orderId: order.id, orderNumber: order.orderNumber },
     });
 
-    return this.toOrderDto(order);
+    const orderDto = this.toOrderDto(order);
+    this.gateway.emitOrderCreated(branchId, orderDto);
+
+    return orderDto;
   }
 
   async getById(payload: JwtPayload, orderId: string): Promise<OrderDto> {
@@ -300,7 +354,10 @@ export class OrdersService {
       });
     }
 
-    return this.toOrderDto(updated);
+    const updatedDto = this.toOrderDto(updated);
+    this.gateway.emitOrderStatusChanged(order.branchId, updatedDto);
+
+    return updatedDto;
   }
 
   async deliver(payload: JwtPayload, orderId: string, dto: DeliverOrderDto): Promise<OrderDto> {
@@ -355,7 +412,10 @@ export class OrdersService {
         : undefined,
     });
 
-    return this.toOrderDto(updated);
+    const updatedDto = this.toOrderDto(updated);
+    this.gateway.emitOrderStatusChanged(order.branchId, updatedDto);
+
+    return updatedDto;
   }
 
   async cancel(payload: JwtPayload, orderId: string, dto: CancelOrderDto): Promise<OrderDto> {
@@ -365,6 +425,464 @@ export class OrdersService {
       { status: OrderStatus.CANCELLED, actedByStaffId: dto.actedByStaffId },
       { reason: dto.reason },
     );
+  }
+
+  async transferTable(
+    payload: JwtPayload,
+    orderId: string,
+    dto: TransferOrderTableDto,
+  ): Promise<OrderDto> {
+    const order = await this.prisma.order.findUnique({
+      where: { id: orderId },
+      include: { items: true, payments: true },
+    });
+    if (!order) {
+      throw new NotFoundException('Đơn không tồn tại');
+    }
+    assertBranchAccess(payload, order.branchId);
+    this.assertOrderCanBeRebilled(order);
+
+    if (order.orderType !== OrderType.DINE_IN) {
+      throw new BadRequestException('Chỉ đơn tại bàn mới được chuyển bàn');
+    }
+
+    const table = await this.prisma.table.findFirst({
+      where: { id: dto.tableId, branchId: order.branchId },
+    });
+    if (!table) {
+      throw new NotFoundException('Bàn không tồn tại');
+    }
+    if (table.status === TableStatus.MAINTENANCE) {
+      throw new ConflictException('Bàn đang bảo trì');
+    }
+    if (order.tableId === dto.tableId) {
+      return this.toOrderDto(order);
+    }
+
+    const targetOrders = await this.prisma.order.findMany({
+      where: {
+        branchId: order.branchId,
+        tableId: dto.tableId,
+        status: { in: ACTIVE_ORDER_STATUSES },
+      },
+      include: { items: true, payments: true },
+      orderBy: { createdAt: 'asc' },
+    });
+
+    const occupiedByOtherOrder = targetOrders.find((target) => target.id !== order.id);
+    if (occupiedByOtherOrder) {
+      if (!dto.mergeIntoOccupied) {
+        throw new ConflictException('Bàn đã có đơn đang phục vụ');
+      }
+      return this.mergeOrders(payload, {
+        targetOrderId: occupiedByOtherOrder.id,
+        sourceOrderIds: [order.id],
+        actedByStaffId: dto.actedByStaffId,
+      });
+    }
+
+    const actorUserId = await this.actorResolver.resolveActorUserId(
+      payload,
+      dto.actedByStaffId,
+      order.branchId,
+    );
+    const before = this.auditOrderSnapshot(order);
+
+    const updated = await this.prisma.$transaction(async (tx) => {
+      const result = await tx.order.update({
+        where: { id: order.id },
+        data: { tableId: dto.tableId },
+        include: { items: true },
+      });
+
+      await tx.table.update({
+        where: { id: dto.tableId },
+        data: { status: TableStatus.OCCUPIED },
+      });
+
+      if (order.tableId) {
+        await syncTableEmptyIfIdle(tx, order.tableId);
+      }
+
+      return result;
+    });
+
+    void this.audit.log({
+      branchId: order.branchId,
+      actorId: actorUserId,
+      entityType: 'order',
+      entityId: order.id,
+      action: 'order.table.transferred',
+      beforeData: before as Prisma.InputJsonValue,
+      afterData: this.auditOrderSnapshot(updated) as Prisma.InputJsonValue,
+      metadata: {
+        fromTableId: order.tableId,
+        toTableId: dto.tableId,
+        ...(dto.actedByStaffId ? { actedByStaffId: dto.actedByStaffId } : {}),
+      } as Prisma.InputJsonValue,
+    });
+
+    const updatedDto = this.toOrderDto(updated);
+    this.gateway.emitOrderStatusChanged(order.branchId, updatedDto);
+
+    return updatedDto;
+  }
+
+  async mergeOrders(payload: JwtPayload, dto: MergeOrdersDto): Promise<OrderDto> {
+    const sourceOrderIds = Array.from(new Set(dto.sourceOrderIds)).filter(
+      (sourceId) => sourceId !== dto.targetOrderId,
+    );
+    if (sourceOrderIds.length === 0) {
+      throw new BadRequestException('Cần chọn ít nhất một đơn để gộp');
+    }
+
+    const target = await this.prisma.order.findUnique({
+      where: { id: dto.targetOrderId },
+      include: { items: true, payments: true },
+    });
+    if (!target) {
+      throw new NotFoundException('Đơn đích không tồn tại');
+    }
+    assertBranchAccess(payload, target.branchId);
+    this.assertOrderCanBeRebilled(target);
+
+    const actorUserId = await this.actorResolver.resolveActorUserId(
+      payload,
+      dto.actedByStaffId,
+      target.branchId,
+    );
+
+    const result = await this.prisma.$transaction(async (tx) => {
+      const txTarget = await tx.order.findUnique({
+        where: { id: target.id },
+        include: { items: true, payments: true },
+      });
+      if (!txTarget) {
+        throw new NotFoundException('Đơn đích không tồn tại');
+      }
+      this.assertOrderCanBeRebilled(txTarget);
+
+      const sources: OrderWithItemsAndPayments[] = [];
+      for (const sourceOrderId of sourceOrderIds) {
+        const source = await tx.order.findUnique({
+          where: { id: sourceOrderId },
+          include: { items: true, payments: true },
+        });
+        if (!source) {
+          throw new NotFoundException('Đơn cần gộp không tồn tại');
+        }
+        if (source.branchId !== txTarget.branchId) {
+          throw new BadRequestException('Không thể gộp đơn khác chi nhánh');
+        }
+        this.assertOrderCanBeRebilled(source);
+        sources.push(source);
+      }
+
+      const before = {
+        target: this.auditOrderSnapshot(txTarget),
+        sources: sources.map((source) => this.auditOrderSnapshot(source)),
+      };
+      const movedItemIds = sources.flatMap((source) => source.items.map((item) => item.id));
+
+      for (const source of sources) {
+        await tx.orderItem.updateMany({
+          where: { orderId: source.id },
+          data: { orderId: txTarget.id },
+        });
+      }
+
+      const mergedItems = [...txTarget.items, ...sources.flatMap((source) => source.items)];
+      const totals = this.totalsFromItems(mergedItems);
+      const mergedStatus = this.mergeStatus([txTarget, ...sources]);
+      const deliveredAt = this.mergeDeliveredAt(mergedStatus, [txTarget, ...sources]);
+
+      const updatedTarget = await tx.order.update({
+        where: { id: txTarget.id },
+        data: {
+          ...totals,
+          status: mergedStatus,
+          deliveredAt,
+        },
+        include: { items: true },
+      });
+
+      for (const source of sources) {
+        await tx.order.update({
+          where: { id: source.id },
+          data: {
+            status: OrderStatus.CANCELLED,
+            subtotal: 0,
+            taxAmount: 0,
+            total: 0,
+            deliveredAt: null,
+          },
+        });
+
+        if (source.tableId && source.tableId !== txTarget.tableId) {
+          await syncTableEmptyIfIdle(tx, source.tableId);
+        }
+      }
+
+      if (txTarget.tableId) {
+        await tx.table.update({
+          where: { id: txTarget.tableId },
+          data: { status: TableStatus.OCCUPIED },
+        });
+      }
+
+      return {
+        updatedTarget,
+        before,
+        after: {
+          target: this.auditOrderSnapshot(updatedTarget),
+          sources: sources.map((source) => ({
+            ...this.auditOrderSnapshot(source),
+            status: OrderStatus.CANCELLED,
+            subtotal: 0,
+            taxAmount: 0,
+            total: 0,
+          })),
+          movedItemIds,
+        },
+      };
+    });
+
+    void this.audit.log({
+      branchId: target.branchId,
+      actorId: actorUserId,
+      entityType: 'order',
+      entityId: target.id,
+      action: 'order.merge',
+      beforeData: result.before as Prisma.InputJsonValue,
+      afterData: result.after as Prisma.InputJsonValue,
+      metadata: {
+        sourceOrderIds,
+        ...(dto.actedByStaffId ? { actedByStaffId: dto.actedByStaffId } : {}),
+      } as Prisma.InputJsonValue,
+    });
+
+    const updatedDto = this.toOrderDto(result.updatedTarget);
+    this.gateway.emitOrderStatusChanged(target.branchId, updatedDto);
+
+    return updatedDto;
+  }
+
+  async splitOrder(
+    payload: JwtPayload,
+    orderId: string,
+    dto: SplitOrderDto,
+  ): Promise<{ sourceOrder: OrderDto; splitOrder: OrderDto }> {
+    const order = await this.prisma.order.findUnique({
+      where: { id: orderId },
+      include: { items: true, payments: true },
+    });
+    if (!order) {
+      throw new NotFoundException('Đơn không tồn tại');
+    }
+    assertBranchAccess(payload, order.branchId);
+    this.assertOrderCanBeRebilled(order);
+
+    const splitMap = new Map<string, number>();
+    for (const item of dto.items) {
+      splitMap.set(item.itemId, (splitMap.get(item.itemId) ?? 0) + item.quantity);
+    }
+
+    const totalQuantity = order.items.reduce((sum, item) => sum + item.quantity, 0);
+    const splitQuantity = Array.from(splitMap.values()).reduce(
+      (sum, quantity) => sum + quantity,
+      0,
+    );
+    if (splitQuantity >= totalQuantity) {
+      throw new BadRequestException('Bill gốc phải còn ít nhất một món');
+    }
+
+    for (const [itemId, quantity] of splitMap.entries()) {
+      const item = order.items.find((entry) => entry.id === itemId);
+      if (!item) {
+        throw new BadRequestException('Món tách bill không thuộc đơn này');
+      }
+      if (quantity > item.quantity) {
+        throw new BadRequestException('Số lượng tách bill vượt quá số món');
+      }
+    }
+
+    const actorUserId = await this.actorResolver.resolveActorUserId(
+      payload,
+      dto.actedByStaffId,
+      order.branchId,
+    );
+
+    const orderNumber = await this.nextOrderNumber(order.branchId);
+    const before = this.auditOrderSnapshot(order);
+
+    const result = await this.prisma.$transaction(async (tx) => {
+      const splitItems = order.items
+        .map((item) => {
+          const quantity = splitMap.get(item.id) ?? 0;
+          if (quantity === 0) return null;
+          return {
+            originalItem: item,
+            quantity,
+            lineTotal: item.unitPrice * quantity,
+          };
+        })
+        .filter((item): item is NonNullable<typeof item> => item !== null);
+
+      const splitTotals = this.totalsFromItems(
+        splitItems.map((item) => ({
+          lineTotal: item.lineTotal,
+        })),
+      );
+
+      const splitOrder = await tx.order.create({
+        data: {
+          branchId: order.branchId,
+          shiftId: order.shiftId,
+          tableId: order.tableId,
+          orderNumber,
+          orderType: order.orderType,
+          status: order.status,
+          subtotal: splitTotals.subtotal,
+          taxAmount: splitTotals.taxAmount,
+          total: splitTotals.total,
+          notes: order.notes,
+          deliveredAt: order.deliveredAt,
+          items: {
+            create: splitItems.map(({ originalItem, quantity, lineTotal }) => ({
+              productId: originalItem.productId,
+              productName: originalItem.productName,
+              quantity,
+              unitPrice: originalItem.unitPrice,
+              lineTotal,
+              notes: originalItem.notes,
+              isPrepared: originalItem.isPrepared,
+              preparedAt: originalItem.preparedAt,
+            })),
+          },
+        },
+        include: { items: true },
+      });
+
+      for (const { originalItem, quantity } of splitItems) {
+        const remainingQuantity = originalItem.quantity - quantity;
+        if (remainingQuantity === 0) {
+          await tx.orderItem.delete({ where: { id: originalItem.id } });
+        } else {
+          await tx.orderItem.update({
+            where: { id: originalItem.id },
+            data: {
+              quantity: remainingQuantity,
+              lineTotal: originalItem.unitPrice * remainingQuantity,
+            },
+          });
+        }
+      }
+
+      const remainingItems = order.items
+        .map((item) => {
+          const movedQuantity = splitMap.get(item.id) ?? 0;
+          const quantity = item.quantity - movedQuantity;
+          if (quantity <= 0) return null;
+          return { ...item, quantity, lineTotal: item.unitPrice * quantity };
+        })
+        .filter((item): item is NonNullable<typeof item> => item !== null);
+      const sourceTotals = this.totalsFromItems(remainingItems);
+
+      const sourceOrder = await tx.order.update({
+        where: { id: order.id },
+        data: sourceTotals,
+        include: { items: true },
+      });
+
+      return { sourceOrder, splitOrder };
+    });
+
+    void this.audit.log({
+      branchId: order.branchId,
+      actorId: actorUserId,
+      entityType: 'order',
+      entityId: order.id,
+      action: 'order.split',
+      beforeData: before as Prisma.InputJsonValue,
+      afterData: {
+        sourceOrder: this.auditOrderSnapshot(result.sourceOrder),
+        splitOrder: this.auditOrderSnapshot(result.splitOrder),
+        movedItems: Array.from(splitMap.entries()).map(([itemId, quantity]) => ({
+          itemId,
+          quantity,
+        })),
+      } as Prisma.InputJsonValue,
+      metadata: dto.actedByStaffId
+        ? ({ actedByStaffId: dto.actedByStaffId } as Prisma.InputJsonValue)
+        : undefined,
+    });
+
+    const sourceDto = this.toOrderDto(result.sourceOrder);
+    const splitDto = this.toOrderDto(result.splitOrder);
+    this.gateway.emitOrderStatusChanged(order.branchId, sourceDto);
+    this.gateway.emitOrderCreated(order.branchId, splitDto);
+
+    return { sourceOrder: sourceDto, splitOrder: splitDto };
+  }
+
+  // US-C03: Toggle item prepared status (barista check từng món)
+  async toggleItemPrepared(
+    payload: JwtPayload,
+    orderId: string,
+    itemId: string,
+    dto: ToggleItemPreparedDto,
+  ): Promise<OrderDto> {
+    const order = await this.prisma.order.findUnique({
+      where: { id: orderId },
+      include: { items: true },
+    });
+    if (!order) {
+      throw new NotFoundException('Đơn không tồn tại');
+    }
+    assertBranchAccess(payload, order.branchId);
+
+    if (order.status !== OrderStatus.MAKING && order.status !== OrderStatus.PENDING) {
+      throw new ConflictException('Chỉ đánh dấu món khi đơn đang chờ hoặc đang pha');
+    }
+
+    const item = order.items.find((i) => i.id === itemId);
+    if (!item) {
+      throw new NotFoundException('Món không thuộc đơn này');
+    }
+
+    const actorUserId = await this.actorResolver.resolveActorUserId(
+      payload,
+      dto.actedByStaffId,
+      order.branchId,
+    );
+
+    const preparedAt = dto.isPrepared ? new Date() : null;
+
+    await this.prisma.orderItem.update({
+      where: { id: itemId },
+      data: { isPrepared: dto.isPrepared, preparedAt },
+    });
+
+    void this.audit.log({
+      branchId: order.branchId,
+      actorId: actorUserId,
+      entityType: 'order_item',
+      entityId: itemId,
+      action: dto.isPrepared ? 'order_item.prepared' : 'order_item.unprepared',
+      afterData: { isPrepared: dto.isPrepared, orderId, productName: item.productName },
+      metadata: dto.actedByStaffId
+        ? ({ actedByStaffId: dto.actedByStaffId } as import('@prisma/client').Prisma.InputJsonValue)
+        : undefined,
+    });
+
+    const updated = await this.prisma.order.findUnique({
+      where: { id: orderId },
+      include: { items: true },
+    });
+
+    this.gateway.emitQueueUpdated(order.branchId);
+
+    return this.toOrderDto(updated!);
   }
 
   // Task 8.1: GET /orders/queue (barista queue)
@@ -510,6 +1028,98 @@ export class OrdersService {
     };
   }
 
+  private assertOrderCanBeRebilled(order: OrderWithItemsAndPayments): void {
+    if (!ACTIVE_ORDER_STATUSES.includes(order.status)) {
+      throw new ConflictException('Chỉ xử lý bill cho đơn chưa thanh toán hoặc chưa hủy');
+    }
+    if (order.payments?.length) {
+      throw new ConflictException('Đơn đã có giao dịch thanh toán, không thể đổi bill');
+    }
+  }
+
+  private totalsFromItems(items: Array<{ lineTotal: number }>): {
+    subtotal: number;
+    taxAmount: number;
+    total: number;
+  } {
+    const subtotal = items.reduce((sum, item) => sum + item.lineTotal, 0);
+    const { tax_amount, total } = calculateOrderTotal(subtotal);
+    return { subtotal, taxAmount: tax_amount, total };
+  }
+
+  private mergeStatus(orders: Array<{ status: OrderStatus }>): OrderStatus {
+    const rank: Record<OrderStatus, number> = {
+      [OrderStatus.PENDING]: 0,
+      [OrderStatus.MAKING]: 1,
+      [OrderStatus.READY]: 2,
+      [OrderStatus.PAID]: 3,
+      [OrderStatus.CANCELLED]: 4,
+    };
+
+    let current: OrderStatus = OrderStatus.READY;
+    for (const order of orders) {
+      if (rank[order.status] < rank[current]) {
+        current = order.status;
+      }
+    }
+    return current;
+  }
+
+  private mergeDeliveredAt(
+    status: OrderStatus,
+    orders: Array<{ deliveredAt: Date | null }>,
+  ): Date | null {
+    if (status !== OrderStatus.READY) {
+      return null;
+    }
+    if (orders.some((order) => !order.deliveredAt)) {
+      return null;
+    }
+    return orders[0]?.deliveredAt ?? null;
+  }
+
+  private auditOrderSnapshot(order: {
+    id: string;
+    tableId: string | null;
+    orderNumber: string;
+    orderType: string;
+    status: string;
+    subtotal: number;
+    taxAmount: number;
+    total: number;
+    deliveredAt?: Date | null;
+    items: Array<{
+      id: string;
+      productId: string;
+      productName: string;
+      quantity: number;
+      unitPrice: number;
+      lineTotal: number;
+      notes: string | null;
+    }>;
+  }) {
+    return {
+      id: order.id,
+      tableId: order.tableId,
+      orderNumber: order.orderNumber,
+      orderType: order.orderType,
+      status: order.status,
+      subtotal: order.subtotal,
+      taxAmount: order.taxAmount,
+      total: order.total,
+      deliveredAt: order.deliveredAt?.toISOString() ?? null,
+      items: order.items.map((item) => ({
+        id: item.id,
+        productId: item.productId,
+        productName: item.productName,
+        quantity: item.quantity,
+        unitPrice: item.unitPrice,
+        lineTotal: item.lineTotal,
+        notes: item.notes,
+      })),
+    };
+  }
+
   private assertStatusRole(role: StaffRole, from: OrderStatus, to: OrderStatus): void {
     if (to === OrderStatus.CANCELLED) {
       if (from === OrderStatus.READY) {
@@ -571,6 +1181,7 @@ export class OrdersService {
     id: string;
     branchId: string;
     tableId: string | null;
+    shiftId: string | null;
     orderNumber: string;
     orderType: string;
     status: string;
@@ -590,11 +1201,14 @@ export class OrdersService {
       unitPrice: number;
       lineTotal: number;
       notes: string | null;
+      isPrepared: boolean;
+      preparedAt: Date | null;
     }>;
   }): OrderDto {
     return {
       id: o.id,
       branchId: o.branchId,
+      shiftId: o.shiftId,
       tableId: o.tableId,
       orderNumber: o.orderNumber,
       orderType: o.orderType as OrderDto['orderType'],
@@ -615,6 +1229,8 @@ export class OrdersService {
         unitPrice: item.unitPrice,
         lineTotal: item.lineTotal,
         notes: item.notes,
+        isPrepared: item.isPrepared,
+        preparedAt: item.preparedAt?.toISOString() ?? null,
       })),
     };
   }

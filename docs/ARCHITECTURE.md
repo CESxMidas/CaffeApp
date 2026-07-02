@@ -9,15 +9,15 @@
 
 ## 1. Principles
 
-| #   | Principle                                                                 |
-| --- | ------------------------------------------------------------------------- |
-| 1   | Mobile **never** accesses PostgreSQL directly                             |
-| 2   | All business rules live in **NestJS API**                                 |
-| 3   | **PostgreSQL** is the single source of truth (Prisma ORM)                 |
-| 4   | **Shared contracts** (`@caffeapp/shared/contracts`) define FE/BE boundary |
-| 5   | Mobile: **Zustand** = local UI state; **TanStack Query** = server state   |
-| 6   | API: **Controller → Service → Repository** (Prisma) per module            |
-| 7   | Every order/payment mutation → **audit_logs** (Sprint 2+)                 |
+| #   | Principle                                                               |
+| --- | ----------------------------------------------------------------------- |
+| 1   | Mobile **never** accesses PostgreSQL directly                           |
+| 2   | All business rules live in **NestJS API**                               |
+| 3   | **PostgreSQL** is the single source of truth (Prisma ORM)               |
+| 4   | **Shared package** (`@caffeapp/shared`) defines FE/BE boundary          |
+| 5   | Mobile: **Zustand** = local UI state; **TanStack Query** = server state |
+| 6   | API: **Controller → Service → Repository** (Prisma) per module          |
+| 7   | Every order/payment mutation → **audit_logs** (Sprint 2+)               |
 
 ---
 
@@ -59,8 +59,7 @@ CaffeApp/
 └── docs/
     ├── ARCHITECTURE.md         # This file
     ├── ARCHITECTURE_REVIEW.md  # Principal review
-    ├── adr/                    # Decision records
-    └── legacy/                 # Superseded references (Supabase SQL)
+    └── adr/                    # Decision records
 ```
 
 ---
@@ -108,8 +107,7 @@ All endpoints: `/api/v1/*`
 
 - **ORM:** Prisma (`apps/api/prisma/schema.prisma`)
 - **Migrations:** `apps/api/prisma/migrations/`
-- **Local dev:** `infra/docker-compose.yml`
-- **Legacy SQL:** `docs/legacy/supabase/` (reference only)
+- **Local dev:** `infra/docker-compose.yml` or Neon PostgreSQL (cloud)
 
 ### Core entities
 
@@ -137,8 +135,6 @@ All endpoints: `/api/v1/*`
 | ADR                                       | Title               | Status         |
 | ----------------------------------------- | ------------------- | -------------- |
 | [001](adr/001-react-native-expo.md)       | React Native + Expo | Accepted       |
-| [002](adr/002-supabase-backend.md)        | Supabase BaaS       | **Superseded** |
-| [003](adr/003-realtime-strategy.md)       | Realtime strategy   | **Superseded** |
 | [004](adr/004-auth-rbac.md)               | Auth & RBAC         | **Superseded** |
 | [005](adr/005-monorepo-structure.md)      | Monorepo            | Accepted       |
 | [006](adr/006-fe-be-split-nestjs.md)      | FE/BE split         | Accepted       |

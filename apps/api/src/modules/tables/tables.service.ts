@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { ConflictException, Injectable, NotFoundException } from '@nestjs/common';
 import type { TableDto } from '@caffeapp/shared';
 import { OrderStatus, TableStatus } from '@prisma/client';
 import { PrismaService } from '@common/prisma/prisma.service';
@@ -121,13 +121,6 @@ export class TablesService {
       throw new NotFoundException('Bàn không tồn tại');
     }
 
-    // Update table status
-    const table = await this.prisma.table.update({
-      where: { id: tableId },
-      data: { status: dto.status },
-    });
-
-    // Get active order if any
     const activeOrder = await this.prisma.order.findFirst({
       where: {
         branchId: scopedBranchId,
@@ -137,6 +130,16 @@ export class TablesService {
       select: { id: true, createdAt: true },
       orderBy: { createdAt: 'asc' },
       take: 1,
+    });
+
+    if (dto.status === TableStatus.MAINTENANCE && activeOrder) {
+      throw new ConflictException('Không thể đặt bảo trì khi bàn đang có khách');
+    }
+
+    // Update table status
+    const table = await this.prisma.table.update({
+      where: { id: tableId },
+      data: { status: dto.status },
     });
 
     const status = effectiveTableStatus(table.status, activeOrder ? 1 : 0);

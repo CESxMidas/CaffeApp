@@ -1,4 +1,9 @@
-import { ForbiddenException, Injectable, UnauthorizedException } from '@nestjs/common';
+import {
+  BadRequestException,
+  ForbiddenException,
+  Injectable,
+  UnauthorizedException,
+} from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
 import type {
@@ -17,6 +22,7 @@ import * as bcrypt from 'bcrypt';
 import { BranchAssignmentStatus, StaffRole, type Staff } from '@prisma/client';
 import { PrismaService } from '@common/prisma/prisma.service';
 import type { JwtPayload } from '@common/types/jwt-payload.types';
+import type { ChangePasswordDto } from './dto/change-password.dto';
 import type { LoginDto } from './dto/login.dto';
 
 @Injectable()
@@ -79,6 +85,32 @@ export class AuthService {
       staff: this.toStaffDto(user.staff, user.email),
       branch,
     };
+  }
+
+  async changePassword(payload: JwtPayload, dto: ChangePasswordDto): Promise<void> {
+    const user = await this.prisma.user.findUnique({
+      where: { id: payload.sub },
+    });
+
+    if (!user || !user.isActive) {
+      throw new UnauthorizedException('Session khÃ´ng há»£p lá»‡');
+    }
+
+    const passwordValid = await bcrypt.compare(dto.currentPassword, user.passwordHash);
+    if (!passwordValid) {
+      throw new BadRequestException('Máº­t kháº©u hiá»‡n táº¡i khÃ´ng Ä‘Ãºng');
+    }
+
+    const samePassword = await bcrypt.compare(dto.newPassword, user.passwordHash);
+    if (samePassword) {
+      throw new BadRequestException('Máº­t kháº©u má»›i pháº£i khÃ¡c máº­t kháº©u hiá»‡n táº¡i');
+    }
+
+    const passwordHash = await bcrypt.hash(dto.newPassword, 10);
+    await this.prisma.user.update({
+      where: { id: user.id },
+      data: { passwordHash },
+    });
   }
 
   /** Non-owner staff must have owner-approved branch assignment — never self-selected. */
@@ -166,6 +198,7 @@ export class AuthService {
       branchId: staff.branchId,
       role: staff.role as StaffDto['role'],
       fullName: staff.fullName,
+      phone: staff.phone,
       isActive: staff.isActive,
       branchAssignmentStatus: staff.branchAssignmentStatus as SharedBranchAssignmentStatus,
       isStationAccount: isStationAccountEmail(email),

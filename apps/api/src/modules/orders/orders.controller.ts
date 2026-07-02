@@ -1,5 +1,5 @@
 import { Body, Controller, Get, Param, Patch, Post, Query } from '@nestjs/common';
-import type { OrderDto } from '@caffeapp/shared';
+import type { OrderDto, SplitOrderResponseDto } from '@caffeapp/shared';
 import { StaffRole } from '@prisma/client';
 import { CurrentUser } from '@common/decorators/current-user.decorator';
 import { Roles } from '@common/decorators/roles.decorator';
@@ -7,9 +7,13 @@ import type { JwtPayload } from '@common/types/jwt-payload.types';
 import { CancelOrderDto } from './dto/cancel-order.dto';
 import { CreateOrderDto } from './dto/create-order.dto';
 import { DeliverOrderDto } from './dto/deliver-order.dto';
+import { MergeOrdersDto } from './dto/merge-orders.dto';
+import { SplitOrderDto } from './dto/split-order.dto';
 import { UpdateOrderStatusDto } from './dto/update-order-status.dto';
 import { OrderStatsDto } from './dto/order-stats.dto';
 import { TableOrdersDto } from './dto/table-orders.dto';
+import { ToggleItemPreparedDto } from './dto/toggle-item-prepared.dto';
+import { TransferOrderTableDto } from './dto/transfer-order-table.dto';
 import { OrdersService } from './orders.service';
 
 @Controller('orders')
@@ -114,6 +118,38 @@ export class OrdersController {
     return { data };
   }
 
+  @Post('merge')
+  @Roles(StaffRole.CASHIER, StaffRole.MANAGER, StaffRole.OWNER)
+  async merge(
+    @CurrentUser() user: JwtPayload,
+    @Body() dto: MergeOrdersDto,
+  ): Promise<{ data: OrderDto }> {
+    const data = await this.ordersService.mergeOrders(user, dto);
+    return { data };
+  }
+
+  @Patch(':orderId/table')
+  @Roles(StaffRole.CASHIER, StaffRole.MANAGER, StaffRole.OWNER)
+  async transferTable(
+    @CurrentUser() user: JwtPayload,
+    @Param('orderId') orderId: string,
+    @Body() dto: TransferOrderTableDto,
+  ): Promise<{ data: OrderDto }> {
+    const data = await this.ordersService.transferTable(user, orderId, dto);
+    return { data };
+  }
+
+  @Post(':orderId/split')
+  @Roles(StaffRole.CASHIER, StaffRole.MANAGER, StaffRole.OWNER)
+  async split(
+    @CurrentUser() user: JwtPayload,
+    @Param('orderId') orderId: string,
+    @Body() dto: SplitOrderDto,
+  ): Promise<{ data: SplitOrderResponseDto }> {
+    const data = await this.ordersService.splitOrder(user, orderId, dto);
+    return { data };
+  }
+
   @Patch(':orderId/status')
   @Roles(StaffRole.CASHIER, StaffRole.BARISTA, StaffRole.MANAGER, StaffRole.OWNER)
   async updateStatus(
@@ -144,6 +180,19 @@ export class OrdersController {
     @Body() dto: CancelOrderDto,
   ): Promise<{ data: OrderDto }> {
     const data = await this.ordersService.cancel(user, orderId, dto);
+    return { data };
+  }
+
+  // US-C03: Toggle item prepared status (barista check từng món)
+  @Patch(':orderId/items/:itemId/prepared')
+  @Roles(StaffRole.BARISTA, StaffRole.MANAGER, StaffRole.OWNER)
+  async toggleItemPrepared(
+    @CurrentUser() user: JwtPayload,
+    @Param('orderId') orderId: string,
+    @Param('itemId') itemId: string,
+    @Body() dto: ToggleItemPreparedDto,
+  ): Promise<{ data: OrderDto }> {
+    const data = await this.ordersService.toggleItemPrepared(user, orderId, itemId, dto);
     return { data };
   }
 }

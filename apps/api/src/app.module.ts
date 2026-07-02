@@ -17,6 +17,7 @@ import { ProductsModule } from '@modules/products/products.module';
 import { OrdersModule } from '@modules/orders/orders.module';
 import { PaymentsModule } from '@modules/payments/payments.module';
 import { ReportsModule } from '@modules/reports/reports.module';
+import { ShiftsModule } from '@modules/shifts/shifts.module';
 import { NotificationsModule } from '@modules/notifications/notifications.module';
 
 @Module({
@@ -39,6 +40,7 @@ import { NotificationsModule } from '@modules/notifications/notifications.module
     OrdersModule,
     PaymentsModule,
     ReportsModule,
+    ShiftsModule,
     NotificationsModule,
   ],
   providers: [

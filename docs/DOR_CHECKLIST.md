@@ -24,7 +24,7 @@ Checklist cho toàn dự án trước khi bắt đầu code feature:
 
 **Global Gate Result:** ✅ **PASS**
 
-> **Ghi chú G6:** OpenAPI machine-readable (`openapi.yaml`) chưa generate — contract markdown là source of truth. Archive Supabase OpenAPI: [docs/legacy/openapi-supabase.yaml](../legacy/openapi-supabase.yaml).  
+> **Ghi chú G6:** OpenAPI machine-readable (`openapi.yaml`) chưa generate — contract markdown là source of truth.
 > **Ghi chú G7:** Design mockup PNGs được index tại [design/screens/INDEX.md](../design/screens/INDEX.md); file ảnh có thể chưa commit vào repo.
 
 ---

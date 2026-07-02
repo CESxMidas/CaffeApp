@@ -14,6 +14,11 @@ export interface LoginRequestDto {
   password: string;
 }
 
+export interface ChangePasswordRequestDto {
+  currentPassword: string;
+  newPassword: string;
+}
+
 export interface LoginResponseDto {
   accessToken: string;
   refreshToken: string;
@@ -46,6 +51,7 @@ export interface StaffDto {
   branchId: string | null;
   role: StaffRole;
   fullName: string;
+  phone: string | null;
   isActive: boolean;
   branchAssignmentStatus: BranchAssignmentStatus;
   /** True for shared tablet station login (A-09). */
@@ -124,11 +130,14 @@ export interface OrderItemDto {
   unitPrice: number;
   lineTotal: number;
   notes: string | null;
+  isPrepared: boolean;
+  preparedAt: string | null;
 }
 
 export interface OrderDto {
   id: string;
   branchId: string;
+  shiftId: string | null;
   tableId: string | null;
   orderNumber: string;
   orderType: OrderType;
@@ -170,6 +179,33 @@ export interface DeliverOrderRequestDto {
   actedByStaffId?: string;
 }
 
+export interface TransferOrderTableDto {
+  tableId: string;
+  mergeIntoOccupied?: boolean;
+  actedByStaffId?: string;
+}
+
+export interface MergeOrdersDto {
+  targetOrderId: string;
+  sourceOrderIds: string[];
+  actedByStaffId?: string;
+}
+
+export interface SplitOrderItemDto {
+  itemId: string;
+  quantity: number;
+}
+
+export interface SplitOrderDto {
+  items: SplitOrderItemDto[];
+  actedByStaffId?: string;
+}
+
+export interface SplitOrderResponseDto {
+  sourceOrder: OrderDto;
+  splitOrder: OrderDto;
+}
+
 export interface CreatePaymentDto {
   orderId: string;
   method: PaymentMethod;
@@ -198,6 +234,47 @@ export interface RevenueReportDto {
     guestCount: number;
   };
   series: Array<{ period: string; revenue: number; orders: number }>;
+  /** Breakdown by payment method (US-D02). */
+  byPaymentMethod: Array<{
+    method: PaymentMethod;
+    revenue: number;
+    orders: number;
+  }>;
+  /** Top selling items (US-D02). */
+  topItems: Array<{
+    productId: string;
+    productName: string;
+    quantity: number;
+    revenue: number;
+  }>;
+}
+
+export interface ShiftDto {
+  id: string;
+  branchId: string;
+  name: string;
+  shiftType: string;
+  startTime: string;
+  endTime: string;
+  openedAt: string | null;
+  closedAt: string | null;
+  status: 'OPEN' | 'CLOSED';
+  totalRevenue: number;
+  totalOrders: number;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface OpenShiftDto {
+  branchId: string;
+  name: string;
+  shiftType: string;
+  startTime: string;
+  endTime: string;
+}
+
+export interface CloseShiftDto {
+  shiftId: string;
 }
 
 export type NotificationType = 'ORDER_READY' | 'ORDER_NEW' | 'BRANCH_ASSIGNMENT' | 'SYSTEM';

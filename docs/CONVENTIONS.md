@@ -57,8 +57,8 @@ import { Button } from '@shared/components/ui';
 import { useSessionStore } from '@shared/stores/session';
 import { authService } from '@shared/lib/api';
 
-// ✅ Mobile — contracts from monorepo package
-import { OrderStatus } from '@caffeapp/shared/contracts';
+// ✅ Mobile — shared from monorepo package
+import { OrderStatus } from '@caffeapp/shared';
 import { colors } from '@caffeapp/shared/theme';
 
 // ✅ API — internal modules
@@ -121,4 +121,4 @@ import { ROLE_LABELS } from '@caffeapp/shared/constants';
 import { colors } from '@caffeapp/shared/theme';
 ```
 
-Canonical boundary: `@caffeapp/shared/contracts`
+Canonical boundary: `@caffeapp/shared`

@@ -6,6 +6,10 @@ export class RevenueReportQueryDto {
   @IsEntityId()
   branchId?: string;
 
+  @IsOptional()
+  @IsEntityId()
+  shiftId?: string;
+
   @IsDateString()
   from!: string;
 

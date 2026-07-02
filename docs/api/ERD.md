@@ -5,9 +5,6 @@
 **Source of truth:** `apps/api/prisma/schema.prisma`  
 **Last synced:** 2026-06-28
 
-> **Lưu ý:** Schema Supabase cũ (`employees`, `user_roles`, `menu_items`, …) đã **deprecated**.  
-> Xem archive: [docs/legacy/README.md](../legacy/README.md)
-
 ---
 
 ## ERD Diagram

@@ -42,6 +42,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
             branchId: persisted.activeBranchId,
             role: staffRole,
             fullName: persisted.employeeName ?? '',
+            phone: null,
             isActive: true,
             branchAssignmentStatus: BranchAssignmentStatus.APPROVED,
             isStationAccount: persisted.isStationDevice,

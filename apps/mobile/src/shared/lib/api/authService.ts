@@ -1,5 +1,6 @@
 import type {
   ApiDataResponse,
+  ChangePasswordRequestDto,
   LoginRequestDto,
   LoginResponseDto,
   MeResponseDto,
@@ -19,5 +20,13 @@ export const authService = {
   async getMe(): Promise<MeResponseDto> {
     const { data } = await apiClient.get<ApiDataResponse<MeResponseDto>>(API_ENDPOINTS.auth.me);
     return data.data;
+  },
+
+  async changePassword(payload: ChangePasswordRequestDto): Promise<void> {
+    await apiClient.post<ApiDataResponse<{ ok: true }>>(API_ENDPOINTS.auth.changePassword, payload);
+  },
+
+  async logout(): Promise<void> {
+    await apiClient.post<ApiDataResponse<{ ok: true }>>(API_ENDPOINTS.auth.logout);
   },
 };

@@ -6,7 +6,7 @@
 **Auth:** `Authorization: Bearer {accessToken}` (trừ endpoint `Public`)
 
 > Tài liệu này là **contract thiết kế** — không phải implementation.  
-> DTO names khớp `@caffeapp/shared/contracts`. Inventory là domain mới (chưa có trong Prisma).
+> DTO names khớp `@caffeapp/shared`. Inventory là domain mới (chưa có trong Prisma).
 
 ### Trạng thái implementation (2026-06-28)
 
@@ -15,7 +15,7 @@
 | `GET /health`        | ✅ Implemented | Response **không** bọc `{ data }` — trả raw `{ status, service, timestamp }` |
 | Tất cả endpoint khác | 📋 Design only | Module shells tại `apps/api/src/modules/`                                    |
 
-OpenAPI machine-readable: **chưa generate**. Archive Supabase: [docs/legacy/openapi-supabase.yaml](../legacy/openapi-supabase.yaml).
+OpenAPI machine-readable: **chưa generate**.
 
 ---
 
@@ -1918,7 +1918,7 @@ Xem thêm [API_ERD_REFACTOR_CHECKLIST.md](../API_ERD_REFACTOR_CHECKLIST.md) §3.
 
 ## 12. DTO Index (shared package)
 
-Các DTO cần bổ sung vào `@caffeapp/shared/contracts`:
+Các DTO cần bổ sung vào `@caffeapp/shared`:
 
 | DTO                                                                            | Module                |
 | ------------------------------------------------------------------------------ | --------------------- |

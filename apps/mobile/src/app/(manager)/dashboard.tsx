@@ -6,7 +6,7 @@ import { colors, spacing, borderRadius, formatCurrency } from '@caffeapp/shared'
 import { Card } from '@shared/components/ui';
 import { useIsOwner, usePermission } from '@shared/hooks/usePermission';
 import { usePendingBranchAssignments } from '@features/staff';
-import { useRevenueReport, useHourlyRevenue } from '@features/manager';
+import { useRevenueReport, useHourlyRevenue, useActiveShift } from '@features/manager';
 import { useSessionStore } from '@shared/stores/session';
 
 const HOURS = Array.from({ length: 24 }, (_, i) => i);
@@ -43,6 +43,7 @@ export default function ManagerDashboardScreen() {
   const { data: pending } = usePendingBranchAssignments(isOwner);
   const { data: revenue, isLoading } = useRevenueReport(activeBranchId);
   const { data: hourlyData, isLoading: hourlyLoading } = useHourlyRevenue(activeBranchId);
+  const { data: activeShift } = useActiveShift(activeBranchId);
   const pendingCount = isOwner ? (pending?.length ?? 0) : 0;
   const employeeName = useSessionStore((s) => s.employeeName);
 
@@ -83,6 +84,53 @@ export default function ManagerDashboardScreen() {
       </View>
 
       {!hourlyLoading && hourlyData ? <HourlyChart data={hourlyData} /> : null}
+
+      <Pressable onPress={() => router.push('/(manager)/reports' as never)}>
+        <Card style={styles.linkCard}>
+          <View style={styles.linkCardRow}>
+            <View style={styles.linkIconWrap}>
+              <Ionicons name="bar-chart-outline" size={24} color={colors.primary} />
+            </View>
+            <View style={styles.linkCardContent}>
+              <Text style={styles.linkCardTitle}>Báo cáo chi tiết</Text>
+              <Text style={styles.linkCardDesc}>Doanh thu, top món, phương thức thanh toán</Text>
+            </View>
+            <Ionicons name="chevron-forward" size={20} color={colors.textMuted} />
+          </View>
+        </Card>
+      </Pressable>
+
+      <Pressable onPress={() => router.push('/(manager)/shifts' as never)}>
+        <Card style={styles.linkCard}>
+          <View style={styles.linkCardRow}>
+            <View style={styles.linkIconWrap}>
+              <Ionicons name="time-outline" size={24} color={colors.primary} />
+            </View>
+            <View style={styles.linkCardContent}>
+              <Text style={styles.linkCardTitle}>Ca làm việc</Text>
+              <Text style={styles.linkCardDesc}>
+                {activeShift ? `Đang mở: ${activeShift.name}` : 'Mở / đóng ca, xem lịch sử'}
+              </Text>
+            </View>
+            <Ionicons name="chevron-forward" size={20} color={colors.textMuted} />
+          </View>
+        </Card>
+      </Pressable>
+
+      <Pressable onPress={() => router.push('/(manager)/tables' as never)}>
+        <Card style={styles.linkCard}>
+          <View style={styles.linkCardRow}>
+            <View style={styles.linkIconWrap}>
+              <Ionicons name="grid-outline" size={24} color={colors.primary} />
+            </View>
+            <View style={styles.linkCardContent}>
+              <Text style={styles.linkCardTitle}>Quản lý bàn</Text>
+              <Text style={styles.linkCardDesc}>Đặt / bỏ bảo trì bàn trong chi nhánh</Text>
+            </View>
+            <Ionicons name="chevron-forward" size={20} color={colors.textMuted} />
+          </View>
+        </Card>
+      </Pressable>
 
       {isOwner ? (
         <Pressable onPress={() => router.push('/(manager)/branch-approvals')}>

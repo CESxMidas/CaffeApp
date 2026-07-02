@@ -1,5 +1,5 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
-import { OrderStatus } from '@prisma/client';
+import { OrderStatus, PaymentMethod } from '@prisma/client';
 import { PrismaService } from '@common/prisma/prisma.service';
 import { resolveBranchScope } from '@common/utils/branch-scope.util';
 import type { JwtPayload } from '@common/types/jwt-payload.types';
@@ -14,6 +14,8 @@ export interface RevenueReportDto {
     guestCount: number;
   };
   series: Array<{ period: string; revenue: number; orders: number }>;
+  byPaymentMethod: Array<{ method: PaymentMethod; revenue: number; orders: number }>;
+  topItems: Array<{ productId: string; productName: string; quantity: number; revenue: number }>;
 }
 
 @Injectable()
@@ -30,20 +32,31 @@ export class ReportsService {
       throw new BadRequestException('from phải nhỏ hơn hoặc bằng to');
     }
 
+    const paidOrderScope = query.shiftId
+      ? { branchId, shiftId: query.shiftId }
+      : { branchId, paidAt: { gte: from, lte: to } };
+    const cancelledOrderScope = query.shiftId
+      ? { branchId, shiftId: query.shiftId }
+      : { branchId, updatedAt: { gte: from, lte: to } };
+
     const paidOrders = await this.prisma.order.findMany({
       where: {
-        branchId,
+        ...paidOrderScope,
         status: OrderStatus.PAID,
-        paidAt: { gte: from, lte: to },
       },
-      select: { total: true, paidAt: true, orderType: true },
+      select: {
+        id: true,
+        total: true,
+        paidAt: true,
+        orderType: true,
+        items: { select: { productId: true, productName: true, quantity: true, lineTotal: true } },
+      },
     });
 
     const cancelledCount = await this.prisma.order.count({
       where: {
-        branchId,
+        ...cancelledOrderScope,
         status: OrderStatus.CANCELLED,
-        updatedAt: { gte: from, lte: to },
       },
     });
 
@@ -64,6 +77,48 @@ export class ReportsService {
       .sort(([a], [b]) => a.localeCompare(b))
       .map(([period, stats]) => ({ period, ...stats }));
 
+    // Breakdown by payment method
+    const payments = await this.prisma.payment.findMany({
+      where: {
+        order: { ...paidOrderScope, status: OrderStatus.PAID },
+      },
+      select: { method: true, amount: true, orderId: true },
+    });
+
+    const paymentMap = new Map<PaymentMethod, { revenue: number; orders: Set<string> }>();
+    for (const p of payments) {
+      const entry = paymentMap.get(p.method) ?? { revenue: 0, orders: new Set<string>() };
+      entry.revenue += p.amount;
+      entry.orders.add(p.orderId);
+      paymentMap.set(p.method, entry);
+    }
+
+    const byPaymentMethod = Array.from(paymentMap.entries()).map(([method, data]) => ({
+      method,
+      revenue: data.revenue,
+      orders: data.orders.size,
+    }));
+
+    // Top selling items
+    const itemMap = new Map<string, { productName: string; quantity: number; revenue: number }>();
+    for (const order of paidOrders) {
+      for (const item of order.items) {
+        const entry = itemMap.get(item.productId) ?? {
+          productName: item.productName,
+          quantity: 0,
+          revenue: 0,
+        };
+        entry.quantity += item.quantity;
+        entry.revenue += item.lineTotal;
+        itemMap.set(item.productId, entry);
+      }
+    }
+
+    const topItems = Array.from(itemMap.entries())
+      .map(([productId, data]) => ({ productId, ...data }))
+      .sort((a, b) => b.revenue - a.revenue)
+      .slice(0, 10);
+
     return {
       summary: {
         totalRevenue,
@@ -73,6 +128,8 @@ export class ReportsService {
         guestCount,
       },
       series,
+      byPaymentMethod,
+      topItems,
     };
   }
 }

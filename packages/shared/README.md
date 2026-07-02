@@ -6,21 +6,19 @@ Shared contracts between mobile and API.
 
 ```
 src/
-├── contracts/     # Canonical FE/BE boundary (enums + DTOs)
 ├── domain/          # Domain helpers (session role mapping)
 ├── enums/           # Shared enums
 ├── dto/             # API request/response types
 ├── constants/       # Labels, VAT, formatters
-├── theme/           # Design tokens (mobile)
-└── types/           # @deprecated legacy re-exports
+└── theme/           # Design tokens (mobile)
 ```
 
 ## Imports
 
 ```typescript
 // Preferred
-import { OrderStatus, StaffRole } from '@caffeapp/shared/contracts';
-import type { LoginRequestDto } from '@caffeapp/shared/dto';
+import { OrderStatus, StaffRole } from '@caffeapp/shared';
+import type { LoginRequestDto } from '@caffeapp/shared';
 
 // Subpath exports
 import { colors } from '@caffeapp/shared/theme';

@@ -37,6 +37,8 @@ export const API_ENDPOINTS = {
     login: '/api/v1/auth/login',
     refresh: '/api/v1/auth/refresh',
     me: '/api/v1/auth/me',
+    changePassword: '/api/v1/auth/change-password',
+    logout: '/api/v1/auth/logout',
   },
   branches: '/api/v1/branches',
   tables: '/api/v1/tables',
@@ -44,6 +46,7 @@ export const API_ENDPOINTS = {
   orders: '/api/v1/orders',
   payments: '/api/v1/payments',
   reports: '/api/v1/reports',
+  shifts: '/api/v1/shifts',
   notifications: '/api/v1/notifications',
   staff: {
     list: '/api/v1/staff',

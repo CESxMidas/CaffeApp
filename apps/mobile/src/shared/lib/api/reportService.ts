@@ -7,6 +7,7 @@ export const reportService = {
     from: string;
     to: string;
     branchId?: string;
+    shiftId?: string;
   }): Promise<RevenueReportDto> {
     const { data } = await apiClient.get<ApiDataResponse<RevenueReportDto>>(
       `${API_ENDPOINTS.reports}/revenue`,

@@ -237,6 +237,8 @@ model OrderItem {
   unitPrice   Int      @map("unit_price")
   lineTotal   Int      @map("line_total")
   notes       String?
+  isPrepared  Boolean  @default(false) @map("is_prepared")
+  preparedAt  DateTime? @map("prepared_at")
   createdAt   DateTime @default(now()) @map("created_at")
 
   order   Order   @relation(fields: [orderId], references: [id], onDelete: Cascade)

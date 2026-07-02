@@ -6,6 +6,3 @@ export * from './domain/station-account';
 export * from './domain/order-lifecycle';
 export * from './constants/index';
 export * from './theme/tokens';
-
-/** @deprecated Import from `./enums` or `./dto` instead */
-export * from './types/index';

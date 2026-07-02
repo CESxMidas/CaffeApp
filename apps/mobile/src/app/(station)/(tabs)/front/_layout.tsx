@@ -1,6 +1,7 @@
 import { Tabs } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { colors } from '@caffeapp/shared';
+import { NotificationHeaderButton } from '@features/notifications';
 
 export default function StationFrontTabsLayout() {
   return (
@@ -9,6 +10,7 @@ export default function StationFrontTabsLayout() {
         tabBarActiveTintColor: colors.primary,
         tabBarInactiveTintColor: colors.textMuted,
         headerStyle: { backgroundColor: colors.surface },
+        headerRight: () => <NotificationHeaderButton />,
         tabBarStyle: { backgroundColor: colors.surface, height: 56, paddingBottom: 4 },
       }}
     >

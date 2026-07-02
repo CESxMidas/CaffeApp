@@ -56,6 +56,22 @@ export default function ManagerLayout() {
           }}
         />
         <Tabs.Screen
+          name="staff/[id]"
+          options={{
+            href: null,
+            title: 'Chi tiết nhân viên',
+            ...backHeader,
+          }}
+        />
+        <Tabs.Screen
+          name="tables"
+          options={{
+            href: null,
+            title: 'Quản lý bàn',
+            ...backHeader,
+          }}
+        />
+        <Tabs.Screen
           name="branch-approvals"
           options={{
             href: null,

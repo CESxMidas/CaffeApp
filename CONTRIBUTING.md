@@ -101,15 +101,14 @@ Mobile **không** kết nối Supabase/PostgreSQL trực tiếp — mọi reques
 
 ## Questions
 
-| Topic               | Document                                                       |
-| ------------------- | -------------------------------------------------------------- |
-| System architecture | [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md)                   |
-| Mobile architecture | [docs/MOBILE_ARCHITECTURE.md](docs/MOBILE_ARCHITECTURE.md)     |
-| Coding conventions  | [docs/CONVENTIONS.md](docs/CONVENTIONS.md)                     |
-| Git & branches      | [docs/GIT.md](docs/GIT.md)                                     |
-| Deployment          | [docs/DEPLOYMENT.md](docs/DEPLOYMENT.md)                       |
-| Security            | [docs/SECURITY.md](docs/SECURITY.md)                           |
-| Testing             | [docs/TESTING.md](docs/TESTING.md)                             |
-| Release             | [docs/RELEASE.md](docs/RELEASE.md)                             |
-| ADRs                | [docs/adr/](docs/adr/)                                         |
-| Legacy (Supabase)   | [docs/legacy/README.md](docs/legacy/README.md) — **READ ONLY** |
+| Topic               | Document                                                   |
+| ------------------- | ---------------------------------------------------------- |
+| System architecture | [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md)               |
+| Mobile architecture | [docs/MOBILE_ARCHITECTURE.md](docs/MOBILE_ARCHITECTURE.md) |
+| Coding conventions  | [docs/CONVENTIONS.md](docs/CONVENTIONS.md)                 |
+| Git & branches      | [docs/GIT.md](docs/GIT.md)                                 |
+| Deployment          | [docs/DEPLOYMENT.md](docs/DEPLOYMENT.md)                   |
+| Security            | [docs/SECURITY.md](docs/SECURITY.md)                       |
+| Testing             | [docs/TESTING.md](docs/TESTING.md)                         |
+| Release             | [docs/RELEASE.md](docs/RELEASE.md)                         |
+| ADRs                | [docs/adr/](docs/adr/)                                     |

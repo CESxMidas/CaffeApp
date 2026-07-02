@@ -1,14 +1,18 @@
 import { BadRequestException, ForbiddenException, Injectable } from '@nestjs/common';
 import type { BranchOperatorDto, StaffDto, StaffListItemDto } from '@caffeapp/shared';
 import { isStationAccountEmail } from '@caffeapp/shared';
-import { BranchAssignmentStatus, StaffRole } from '@prisma/client';
+import { BranchAssignmentStatus, NotificationType, StaffRole } from '@prisma/client';
 import { PrismaService } from '@common/prisma/prisma.service';
 import { assertBranchAccess } from '@common/utils/branch-scope.util';
 import type { JwtPayload } from '@common/types/jwt-payload.types';
+import { NotificationsService } from '@modules/notifications/notifications.service';
 
 @Injectable()
 export class StaffService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly notifications: NotificationsService,
+  ) {}
 
   /** MANAGER/OWNER lists staff for branch assignment workflow. */
   async listStaff(payload: JwtPayload): Promise<{ data: StaffListItemDto[] }> {
@@ -123,6 +127,22 @@ export class StaffService {
       },
     });
 
+    if (updated.branchAssignmentStatus === BranchAssignmentStatus.PENDING_OWNER) {
+      const owners = await this.prisma.staff.findMany({
+        where: { role: StaffRole.OWNER, isActive: true },
+        select: { id: true },
+      });
+
+      void this.notifications.notifyStaff({
+        branchId,
+        staffIds: owners.map((owner) => owner.id),
+        type: NotificationType.BRANCH_ASSIGNMENT,
+        title: 'Có đề xuất gán chi nhánh',
+        body: `${updated.fullName} đang chờ chủ quán duyệt chi nhánh ${branch.name}`,
+        metadata: { staffId: updated.id, branchId },
+      });
+    }
+
     return { data: this.toStaffDto(updated) };
   }
 
@@ -207,6 +227,7 @@ export class StaffService {
     branchId: string | null;
     role: StaffRole;
     fullName: string;
+    phone: string | null;
     isActive: boolean;
     branchAssignmentStatus: BranchAssignmentStatus;
     user: { email: string };
@@ -225,6 +246,7 @@ export class StaffService {
     branchId: string | null;
     role: StaffRole;
     fullName: string;
+    phone: string | null;
     isActive: boolean;
     branchAssignmentStatus: BranchAssignmentStatus;
   }): StaffDto {
@@ -234,6 +256,7 @@ export class StaffService {
       branchId: staff.branchId,
       role: staff.role as StaffDto['role'],
       fullName: staff.fullName,
+      phone: staff.phone,
       isActive: staff.isActive,
       branchAssignmentStatus: staff.branchAssignmentStatus as StaffDto['branchAssignmentStatus'],
     };

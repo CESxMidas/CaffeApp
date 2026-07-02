@@ -37,6 +37,29 @@ export class NotificationsService {
     });
   }
 
+  async notifyStaff(params: {
+    branchId: string;
+    staffIds: string[];
+    type: NotificationType;
+    title: string;
+    body: string;
+    metadata?: Record<string, unknown>;
+  }): Promise<void> {
+    const staffIds = Array.from(new Set(params.staffIds)).filter(Boolean);
+    if (staffIds.length === 0) return;
+
+    await this.prisma.notification.createMany({
+      data: staffIds.map((staffId) => ({
+        branchId: params.branchId,
+        staffId,
+        type: params.type,
+        title: params.title,
+        body: params.body,
+        metadata: params.metadata ? (params.metadata as Prisma.InputJsonValue) : undefined,
+      })),
+    });
+  }
+
   async listForStaff(staffId: string, limit = 50) {
     return this.prisma.notification.findMany({
       where: { staffId },

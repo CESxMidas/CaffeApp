@@ -34,15 +34,17 @@ function StaffRow({
   item,
   selected,
   onSelect,
+  onOpenDetail,
 }: {
   item: StaffListItemDto;
   selected: boolean;
   onSelect: () => void;
+  onOpenDetail: () => void;
 }) {
   return (
-    <Pressable onPress={onSelect}>
-      <Card style={[styles.staffCard, selected && styles.staffCardSelected]}>
-        <View style={styles.staffRow}>
+    <Card style={[styles.staffCard, selected && styles.staffCardSelected]}>
+      <View style={styles.staffRow}>
+        <Pressable style={styles.staffPressArea} onPress={onSelect}>
           <View style={styles.avatar}>
             <Text style={styles.avatarText}>{item.fullName.charAt(0)}</Text>
           </View>
@@ -57,6 +59,8 @@ function StaffRow({
               <Text style={styles.staffBranchMuted}>Chưa có chi nhánh</Text>
             )}
           </View>
+        </Pressable>
+        <View style={styles.staffActions}>
           <View
             style={[
               styles.badge,
@@ -67,9 +71,12 @@ function StaffRow({
               {BRANCH_ASSIGNMENT_STATUS_LABELS[item.branchAssignmentStatus]}
             </Text>
           </View>
+          <Pressable style={styles.detailButton} onPress={onOpenDetail} hitSlop={8}>
+            <Ionicons name="information-circle-outline" size={22} color={colors.primary} />
+          </Pressable>
         </View>
-      </Card>
-    </Pressable>
+      </View>
+    </Card>
   );
 }
 
@@ -193,6 +200,7 @@ export default function StaffManagementScreen() {
               item={item}
               selected={selectedStaffId === item.id}
               onSelect={() => setSelectedStaffId(item.id)}
+              onOpenDetail={() => router.push(`/(manager)/staff/${item.id}` as never)}
             />
           ))}
         </View>
@@ -283,6 +291,12 @@ const styles = StyleSheet.create({
   staffCard: { marginBottom: 0 },
   staffCardSelected: { borderColor: colors.primary, borderWidth: 2 },
   staffRow: { flexDirection: 'row', alignItems: 'center', gap: spacing.md },
+  staffPressArea: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.md,
+  },
   avatar: {
     width: 40,
     height: 40,
@@ -297,6 +311,13 @@ const styles = StyleSheet.create({
   staffMeta: { fontSize: 12, color: colors.textSecondary, marginTop: 2 },
   staffBranch: { fontSize: 12, color: colors.text, marginTop: 2 },
   staffBranchMuted: { fontSize: 12, color: colors.textMuted, marginTop: 2 },
+  staffActions: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm },
+  detailButton: {
+    width: 36,
+    height: 36,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
   badge: {
     paddingHorizontal: spacing.sm,
     paddingVertical: 4,

@@ -6,5 +6,12 @@ export { orderService } from './orderService';
 export { paymentService } from './paymentService';
 export { productService } from './productService';
 export { reportService } from './reportService';
+export { shiftService } from './shiftService';
 export { notificationService } from './notificationService';
 export { tableService } from './tableService';
+export {
+  connectOrderSocket,
+  disconnectOrderSocket,
+  getOrderSocket,
+  ORDER_WS_EVENTS,
+} from './socketClient';

@@ -12,11 +12,6 @@ PostgreSQL 16 is the **single source of truth** for CaffeApp POS data.
 | Seed              | `apps/api/prisma/seed.ts`       |
 | ERD documentation | `docs/api/ERD.md`               |
 
-## Legacy Supabase SQL
-
-The `docs/legacy/supabase/migrations/` folder contains the original Sprint 0 schema reference (**ARCHIVED — READ ONLY**).  
-New development uses **Prisma migrations** in `apps/api`.
-
 ## Models (11)
 
 `User`, `Staff`, `Branch`, `Table`, `ProductCategory`, `Product`, `Shift`, `Order`, `OrderItem`, `Payment`, `AuditLog`

@@ -1,5 +1,6 @@
 export {
   useTables,
+  useUpdateTableStatus,
   useProducts,
   useCategories,
   useCreateOrder,
@@ -7,5 +8,9 @@ export {
   useOrder,
   useUpdateOrderStatus,
   useDeliverOrder,
+  useToggleItemPrepared,
+  useTransferOrderTable,
+  useMergeOrders,
+  useSplitOrder,
   useCreatePayment,
 } from './hooks';
