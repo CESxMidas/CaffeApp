@@ -1,6 +1,7 @@
 import { Tabs } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { colors } from '@caffeapp/shared';
+import { NotificationHeaderButton } from '@features/notifications';
 import { HeaderBackButton } from '@shared/components/HeaderBackButton';
 import { RoleGuard } from '@shared/components/RoleGuard';
 
@@ -17,6 +18,7 @@ export default function ManagerLayout() {
           tabBarActiveTintColor: colors.primary,
           tabBarInactiveTintColor: colors.textMuted,
           headerStyle: { backgroundColor: colors.surface },
+          headerRight: () => <NotificationHeaderButton href="/(manager)/notifications" />,
         }}
       >
         <Tabs.Screen
@@ -76,6 +78,14 @@ export default function ManagerLayout() {
           options={{
             href: null,
             title: 'Duyệt gán chi nhánh',
+            ...backHeader,
+          }}
+        />
+        <Tabs.Screen
+          name="notifications"
+          options={{
+            href: null,
+            title: 'Thông báo',
             ...backHeader,
           }}
         />

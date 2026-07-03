@@ -9,7 +9,6 @@ import { usePendingBranchAssignments } from '@features/staff';
 import { useRevenueReport, useHourlyRevenue, useActiveShift } from '@features/manager';
 import { useSessionStore } from '@shared/stores/session';
 
-const HOURS = Array.from({ length: 24 }, (_, i) => i);
 const MAX_BAR_HEIGHT = 120;
 
 function HourlyChart({ data }: { data: { hour: number; revenue: number; orders: number }[] }) {

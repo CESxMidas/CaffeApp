@@ -6,9 +6,11 @@ import {
 } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
+import { randomInt } from 'crypto';
 import type {
   BranchBankInfoDto,
   BranchDto,
+  ChangePasswordCodeResponseDto,
   LoginResponseDto,
   MeResponseDto,
   StaffDto,
@@ -19,11 +21,17 @@ import {
   isStationAccountEmail,
 } from '@caffeapp/shared';
 import * as bcrypt from 'bcrypt';
-import { BranchAssignmentStatus, StaffRole, type Staff } from '@prisma/client';
+import { BranchAssignmentStatus, NotificationType, StaffRole, type Staff } from '@prisma/client';
+import { AuditService } from '@common/audit/audit.service';
+import { EmailService } from '@common/email/email.service';
 import { PrismaService } from '@common/prisma/prisma.service';
+import { NotificationsService } from '@modules/notifications/notifications.service';
 import type { JwtPayload } from '@common/types/jwt-payload.types';
-import type { ChangePasswordDto } from './dto/change-password.dto';
+import type { ChangePasswordDto, ConfirmChangePasswordDto } from './dto/change-password.dto';
 import type { LoginDto } from './dto/login.dto';
+
+const PASSWORD_CHANGE_OTP_MINUTES = 10;
+const PASSWORD_CHANGE_MAX_ATTEMPTS = 5;
 
 @Injectable()
 export class AuthService {
@@ -31,6 +39,9 @@ export class AuthService {
     private readonly prisma: PrismaService,
     private readonly jwtService: JwtService,
     private readonly config: ConfigService,
+    private readonly email: EmailService,
+    private readonly audit: AuditService,
+    private readonly notifications: NotificationsService,
   ) {}
 
   async login(dto: LoginDto): Promise<LoginResponseDto> {
@@ -121,9 +132,13 @@ export class AuthService {
     }
   }
 
-  async changePassword(payload: JwtPayload, dto: ChangePasswordDto): Promise<void> {
+  async requestPasswordChangeCode(
+    payload: JwtPayload,
+    dto: ChangePasswordDto,
+  ): Promise<ChangePasswordCodeResponseDto> {
     const user = await this.prisma.user.findUnique({
       where: { id: payload.sub },
+      include: { staff: true },
     });
 
     if (!user || !user.isActive) {
@@ -140,11 +155,135 @@ export class AuthService {
       throw new BadRequestException('Mật khẩu mới phải khác mật khẩu hiện tại');
     }
 
+    const code = String(randomInt(100000, 1000000));
+    const codeHash = await bcrypt.hash(code, 10);
     const passwordHash = await bcrypt.hash(dto.newPassword, 10);
-    await this.prisma.user.update({
-      where: { id: user.id },
-      data: { passwordHash },
+
+    await this.prisma.passwordChangeOtp.updateMany({
+      where: { userId: user.id, consumedAt: null },
+      data: { consumedAt: new Date() },
     });
+
+    await this.prisma.passwordChangeOtp.create({
+      data: {
+        userId: user.id,
+        codeHash,
+        newPasswordHash: passwordHash,
+        expiresAt: new Date(Date.now() + PASSWORD_CHANGE_OTP_MINUTES * 60_000),
+      },
+    });
+
+    await this.email.sendPasswordChangeCode({
+      to: user.email,
+      fullName: user.fullName,
+      code,
+      expiresInMinutes: PASSWORD_CHANGE_OTP_MINUTES,
+    });
+
+    return { expiresInMinutes: PASSWORD_CHANGE_OTP_MINUTES };
+  }
+
+  async confirmPasswordChange(payload: JwtPayload, dto: ConfirmChangePasswordDto): Promise<void> {
+    const user = await this.prisma.user.findUnique({
+      where: { id: payload.sub },
+      include: { staff: true },
+    });
+
+    if (!user || !user.isActive || !user.staff) {
+      throw new UnauthorizedException('Session không hợp lệ');
+    }
+
+    const otp = await this.prisma.passwordChangeOtp.findFirst({
+      where: {
+        userId: user.id,
+        consumedAt: null,
+        expiresAt: { gte: new Date() },
+      },
+      orderBy: { createdAt: 'desc' },
+    });
+
+    if (!otp) {
+      throw new BadRequestException('Mã xác nhận không hợp lệ hoặc đã hết hạn');
+    }
+
+    if (otp.attempts >= PASSWORD_CHANGE_MAX_ATTEMPTS) {
+      await this.prisma.passwordChangeOtp.update({
+        where: { id: otp.id },
+        data: { consumedAt: new Date() },
+      });
+      throw new BadRequestException('Mã xác nhận đã nhập sai quá số lần cho phép');
+    }
+
+    const codeValid = await bcrypt.compare(dto.code, otp.codeHash);
+    if (!codeValid) {
+      await this.prisma.passwordChangeOtp.update({
+        where: { id: otp.id },
+        data: { attempts: { increment: 1 } },
+      });
+      throw new BadRequestException('Mã xác nhận không đúng');
+    }
+
+    await this.prisma.$transaction(async (tx) => {
+      await tx.user.update({
+        where: { id: user.id },
+        data: { passwordHash: otp.newPasswordHash },
+      });
+      await tx.passwordChangeOtp.update({
+        where: { id: otp.id },
+        data: { consumedAt: new Date() },
+      });
+    });
+
+    await this.audit.log({
+      branchId: user.staff.branchId,
+      actorId: user.id,
+      entityType: 'USER',
+      entityId: user.id,
+      action: 'auth.password_changed',
+      metadata: {
+        staffId: user.staff.id,
+        staffRole: user.staff.role,
+        email: user.email,
+      },
+    });
+
+    if (user.staff.branchId) {
+      await this.notifications.notifyBranchRoles({
+        branchId: user.staff.branchId,
+        roles: [StaffRole.MANAGER],
+        type: NotificationType.SYSTEM,
+        title: 'Nhân viên đổi mật khẩu',
+        body: `${user.fullName} (${user.email}) đã đổi mật khẩu thành công.`,
+        metadata: {
+          event: 'auth.password_changed',
+          staffId: user.staff.id,
+          userId: user.id,
+          email: user.email,
+        },
+      });
+
+      const owners = await this.prisma.staff.findMany({
+        where: {
+          role: StaffRole.OWNER,
+          isActive: true,
+        },
+        select: { id: true },
+      });
+
+      await this.notifications.notifyStaff({
+        branchId: user.staff.branchId,
+        staffIds: owners.map((owner) => owner.id),
+        type: NotificationType.SYSTEM,
+        title: 'Nhân viên đổi mật khẩu',
+        body: `${user.fullName} (${user.email}) đã đổi mật khẩu thành công.`,
+        metadata: {
+          event: 'auth.password_changed',
+          staffId: user.staff.id,
+          userId: user.id,
+          email: user.email,
+        },
+      });
+    }
   }
 
   /** Non-owner staff must have owner-approved branch assignment — never self-selected. */

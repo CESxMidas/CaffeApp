@@ -19,6 +19,14 @@ export interface ChangePasswordRequestDto {
   newPassword: string;
 }
 
+export interface ConfirmChangePasswordRequestDto {
+  code: string;
+}
+
+export interface ChangePasswordCodeResponseDto {
+  expiresInMinutes: number;
+}
+
 export interface LoginResponseDto {
   accessToken: string;
   refreshToken: string;

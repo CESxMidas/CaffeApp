@@ -83,7 +83,7 @@ flowchart TB
 
 ### Should Have (Sprint 5–6)
 
-- Thanh toán thẻ / ví (ghi nhận hoặc VNPay Sandbox)
+- Thanh toán thẻ / ví/cổng: sau pilot, chưa chọn nhà cung cấp
 - Gộp/chuyển/tách bàn; giảm giá cơ bản (B-30, B-31)
 - Quản lý menu, nhân viên, audit UI (D)
 - Thông báo push, cài đặt (E)
@@ -92,7 +92,7 @@ flowchart TB
 ### Could Have (Post-MVP)
 
 - In hóa đơn Bluetooth
-- VNPay / MoMo production
+- Cổng thanh toán production ngoài VietQR
 - Ảnh món upload, export PDF
 
 ### Won't Have (MVP pilot)

@@ -15,6 +15,7 @@ import {
 } from '@prisma/client';
 import { AppModule } from './app.module';
 import { PrismaService } from './common/prisma/prisma.service';
+import { EmailService } from './common/email/email.service';
 import type { BranchBankInfoDto } from '@caffeapp/shared';
 
 const ids = {
@@ -143,6 +144,17 @@ type NotificationRow = {
   createdAt: Date;
 };
 
+type PasswordChangeOtpRow = {
+  id: string;
+  userId: string;
+  codeHash: string;
+  newPasswordHash: string;
+  attempts: number;
+  expiresAt: Date;
+  consumedAt: Date | null;
+  createdAt: Date;
+};
+
 type StaffWhere = {
   id?: string;
   branchId?: string | null;
@@ -164,10 +176,12 @@ class InMemoryPrisma {
   private payments: PaymentRow[] = [];
   private shifts: ShiftRow[] = [];
   private notifications: NotificationRow[] = [];
+  private passwordChangeOtps: PasswordChangeOtpRow[] = [];
   private orderSeq = 1;
   private itemSeq = 1;
   private paymentSeq = 1;
   private notificationSeq = 1;
+  private passwordChangeOtpSeq = 1;
 
   async seed() {
     const passwordHash = await bcrypt.hash('password123', 4);
@@ -275,6 +289,7 @@ class InMemoryPrisma {
     ];
     this.shifts = [];
     this.notifications = [];
+    this.passwordChangeOtps = [];
   }
 
   user = {
@@ -749,6 +764,90 @@ class InMemoryPrisma {
     create: jest.fn(async () => ({})),
   };
 
+  passwordChangeOtp = {
+    updateMany: jest.fn(
+      async ({
+        where,
+        data,
+      }: {
+        where: { userId?: string; consumedAt?: null };
+        data: Partial<Pick<PasswordChangeOtpRow, 'consumedAt'>>;
+      }) => {
+        let count = 0;
+        for (const otp of this.passwordChangeOtps) {
+          if (where.userId && otp.userId !== where.userId) continue;
+          if (where.consumedAt === null && otp.consumedAt !== null) continue;
+          Object.assign(otp, data);
+          count += 1;
+        }
+        return { count };
+      },
+    ),
+    create: jest.fn(
+      async ({
+        data,
+      }: {
+        data: Pick<PasswordChangeOtpRow, 'userId' | 'codeHash' | 'newPasswordHash' | 'expiresAt'>;
+      }) => {
+        const row: PasswordChangeOtpRow = {
+          id: `99999999-9999-9999-9999-${String(this.passwordChangeOtpSeq++).padStart(12, '0')}`,
+          userId: data.userId,
+          codeHash: data.codeHash,
+          newPasswordHash: data.newPasswordHash,
+          attempts: 0,
+          expiresAt: data.expiresAt,
+          consumedAt: null,
+          createdAt: new Date(),
+        };
+        this.passwordChangeOtps.push(row);
+        return { ...row };
+      },
+    ),
+    findFirst: jest.fn(
+      async ({
+        where,
+        orderBy,
+      }: {
+        where: { userId: string; consumedAt?: null; expiresAt?: { gte?: Date } };
+        orderBy?: { createdAt?: 'asc' | 'desc' };
+      }) => {
+        let rows = this.passwordChangeOtps.filter((otp) => {
+          if (otp.userId !== where.userId) return false;
+          if (where.consumedAt === null && otp.consumedAt !== null) return false;
+          if (where.expiresAt?.gte && otp.expiresAt < where.expiresAt.gte) return false;
+          return true;
+        });
+        if (orderBy?.createdAt === 'desc') {
+          rows = [...rows].sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
+        }
+        return rows[0] ? { ...rows[0] } : null;
+      },
+    ),
+    update: jest.fn(
+      async ({
+        where,
+        data,
+      }: {
+        where: { id: string };
+        data: Partial<Pick<PasswordChangeOtpRow, 'consumedAt'>> & {
+          attempts?: { increment: number } | number;
+        };
+      }) => {
+        const otp = this.passwordChangeOtps.find((row) => row.id === where.id);
+        if (!otp) throw new Error('Password change OTP not found');
+        if (typeof data.attempts === 'object') {
+          otp.attempts += data.attempts.increment;
+        } else if (typeof data.attempts === 'number') {
+          otp.attempts = data.attempts;
+        }
+        if (data.consumedAt !== undefined) {
+          otp.consumedAt = data.consumedAt;
+        }
+        return { ...otp };
+      },
+    ),
+  };
+
   private matchesOrderWhere(
     order: OrderRecord,
     where: {
@@ -921,6 +1020,7 @@ class InMemoryPrisma {
 describe('API auth, order, and payment flows', () => {
   let app: INestApplication;
   let prisma: InMemoryPrisma;
+  let sentPasswordCode: string | null = null;
 
   beforeAll(async () => {
     process.env.NODE_ENV = 'test';
@@ -937,6 +1037,12 @@ describe('API auth, order, and payment flows', () => {
     })
       .overrideProvider(PrismaService)
       .useValue(prisma)
+      .overrideProvider(EmailService)
+      .useValue({
+        sendPasswordChangeCode: jest.fn(async ({ code }: { code: string }) => {
+          sentPasswordCode = code;
+        }),
+      })
       .compile();
 
     app = moduleRef.createNestApplication();
@@ -1438,8 +1544,9 @@ describe('API auth, order, and payment flows', () => {
     });
   });
 
-  it('changes password after verifying the current password', async () => {
+  it('changes password after verifying email OTP code', async () => {
     const managerToken = await login('manager@caffe.app');
+    sentPasswordCode = null;
 
     await request(app.getHttpServer())
       .post('/auth/change-password')
@@ -1451,6 +1558,20 @@ describe('API auth, order, and payment flows', () => {
       .post('/auth/change-password')
       .set('Authorization', `Bearer ${managerToken}`)
       .send({ currentPassword: 'password123', newPassword: 'newpassword123' })
+      .expect(200);
+
+    expect(sentPasswordCode).toMatch(/^\d{6}$/);
+
+    await request(app.getHttpServer())
+      .post('/auth/change-password/confirm')
+      .set('Authorization', `Bearer ${managerToken}`)
+      .send({ code: '000000' })
+      .expect(400);
+
+    await request(app.getHttpServer())
+      .post('/auth/change-password/confirm')
+      .set('Authorization', `Bearer ${managerToken}`)
+      .send({ code: sentPasswordCode })
       .expect(200);
 
     await request(app.getHttpServer())

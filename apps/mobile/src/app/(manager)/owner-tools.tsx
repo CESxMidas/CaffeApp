@@ -24,14 +24,14 @@ const OWNER_ACTIONS = [
   {
     icon: 'git-branch-outline' as const,
     title: 'Quản lý chi nhánh',
-    desc: 'Xem và cấu hình tất cả chi nhánh trong chuỗi',
-    status: 'Sprint 3+',
+    desc: 'Tạo, sửa, xóa chi nhánh trong chuỗi',
+    route: '/(manager)/branches' as const,
   },
   {
     icon: 'person-add-outline' as const,
     title: 'Tạo tài khoản',
-    desc: 'Thêm user mới và gán vai trò nhân viên (OWNER only API)',
-    status: 'Sprint 3+',
+    desc: 'Thêm user mới và gán vai trò nhân viên',
+    route: '/(manager)/create-user' as const,
   },
   {
     icon: 'document-text-outline' as const,

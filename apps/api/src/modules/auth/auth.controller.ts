@@ -1,10 +1,14 @@
 import { Body, Controller, Get, HttpCode, HttpStatus, Post } from '@nestjs/common';
-import type { LoginResponseDto, MeResponseDto } from '@caffeapp/shared';
+import type {
+  ChangePasswordCodeResponseDto,
+  LoginResponseDto,
+  MeResponseDto,
+} from '@caffeapp/shared';
 import { Public } from '@common/decorators/public.decorator';
 import { CurrentUser } from '@common/decorators/current-user.decorator';
 import type { JwtPayload } from '@common/types/jwt-payload.types';
 import { AuthService } from './auth.service';
-import { ChangePasswordDto } from './dto/change-password.dto';
+import { ChangePasswordDto, ConfirmChangePasswordDto } from './dto/change-password.dto';
 import { LoginDto } from './dto/login.dto';
 import { RefreshDto } from './dto/refresh.dto';
 
@@ -41,8 +45,18 @@ export class AuthController {
   async changePassword(
     @CurrentUser() user: JwtPayload,
     @Body() dto: ChangePasswordDto,
+  ): Promise<{ data: ChangePasswordCodeResponseDto }> {
+    const data = await this.authService.requestPasswordChangeCode(user, dto);
+    return { data };
+  }
+
+  @Post('change-password/confirm')
+  @HttpCode(HttpStatus.OK)
+  async confirmChangePassword(
+    @CurrentUser() user: JwtPayload,
+    @Body() dto: ConfirmChangePasswordDto,
   ): Promise<{ data: { ok: true } }> {
-    await this.authService.changePassword(user, dto);
+    await this.authService.confirmPasswordChange(user, dto);
     return { data: { ok: true } };
   }
 

@@ -244,17 +244,21 @@
 
 ---
 
-### US-B09: Thanh toán ví / cổng (VNPay Sandbox)
+### US-B09: Thanh toán ví / cổng (post-pilot)
 
-**Là** thu ngân, **tôi muốn** ghi nhận thanh toán ví/cổng, **để** linh hoạt phương thức.
+**Là** thu ngân, **tôi muốn** có lựa chọn mở rộng thanh toán ví/cổng sau pilot, **để** linh hoạt phương thức khi quán cần.
 
-**Priority pilot:** Could — **VNPay Sandbox** cho dev/UAT; pilot quán thật dùng TM + CK (E-09).
+**Priority pilot:** Out of pilot — MVP/pilot dùng **Tiền mặt + Chuyển khoản VietQR**. Không triển khai cổng online.
 
 **Acceptance Criteria:**
 
-- Given môi trường Sandbox
-- When khách thanh toán qua VNPay test + IPN xác nhận
-- Then PAID với `payment_method=E_WALLET` (hoặc ghi nhận thủ công MVP v2)
+- Given đang ở pilot
+- When mở màn thanh toán
+- Then chỉ hiển thị Tiền mặt và Chuyển khoản VietQR
+
+- Given sau pilot có quyết định mở rộng cổng thanh toán
+- When chọn nhà cung cấp mới
+- Then cập nhật API/payment method riêng sau khi có yêu cầu nghiệp vụ mới
 
 **Design:** `13-thanh-toan-vi-dien-tu.png` | **Points:** 3
 
@@ -483,10 +487,13 @@
 
 - Given nhấn "Đăng xuất"
 - Then clear tokens + redirect login
-- Given đổi MK thành công
-- Then toast confirm + optional re-login
+- Given nhập MK cũ + MK mới hợp lệ
+- When nhấn "Gửi mã xác nhận"
+- Then hệ thống gửi mã 6 số về email đăng nhập
+- Given nhập đúng mã còn hạn
+- Then đổi MK thành công, toast confirm, và quản lý/chủ quán nhận notification bảo mật
 
-**Design:** `28-cai-dat.png` | **API:** `POST /api/v1/auth/logout` | **Points:** 3
+**Design:** `28-cai-dat.png` | **API:** `POST /api/v1/auth/change-password`, `POST /api/v1/auth/change-password/confirm`, `POST /api/v1/auth/logout` | **Points:** 3
 
 ---
 

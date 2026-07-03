@@ -1,18 +1,22 @@
 import { Pressable, StyleSheet, Text, View } from 'react-native';
-import { router } from 'expo-router';
+import { router, type Href } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { colors, spacing } from '@caffeapp/shared';
 import { opStack } from '@shared/lib/navigation/operationalRoutes';
 import { useUnreadNotificationCount } from '../hooks/useNotifications';
 
-export function NotificationHeaderButton() {
+interface NotificationHeaderButtonProps {
+  href?: Href;
+}
+
+export function NotificationHeaderButton({ href }: NotificationHeaderButtonProps) {
   const { data } = useUnreadNotificationCount();
   const count = data ?? 0;
 
   return (
     <Pressable
       accessibilityRole="button"
-      onPress={() => router.push(opStack('/notifications'))}
+      onPress={() => router.push(href ?? opStack('/notifications'))}
       style={styles.button}
     >
       <Ionicons name="notifications-outline" size={24} color={colors.text} />

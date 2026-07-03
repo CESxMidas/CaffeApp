@@ -1,7 +1,7 @@
 import { ActivityIndicator, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { colors, formatCurrency, spacing } from '@caffeapp/shared';
-import type { PaymentMethod, RevenueReportDto } from '@caffeapp/shared';
+import type { PaymentMethod } from '@caffeapp/shared';
 import { Card, ErrorScreen } from '@shared/components/ui';
 import { useRevenueReport } from '@features/manager';
 import { useSessionStore } from '@shared/stores/session';

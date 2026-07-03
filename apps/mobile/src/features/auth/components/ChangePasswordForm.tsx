@@ -19,18 +19,42 @@ function getErrorMessage(error: unknown): string {
   return 'Không đổi được mật khẩu';
 }
 
+function isStrongPassword(value: string): boolean {
+  return value.length >= 8 && /[A-Za-z]/.test(value) && /\d/.test(value);
+}
+
 export function ChangePasswordForm() {
   const [currentPassword, setCurrentPassword] = useState('');
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
+  const [otpCode, setOtpCode] = useState('');
+  const [codeSent, setCodeSent] = useState(false);
+  const [expiresInMinutes, setExpiresInMinutes] = useState<number | null>(null);
   const [formError, setFormError] = useState<string | null>(null);
 
-  const mutation = useMutation({
-    mutationFn: () => authService.changePassword({ currentPassword, newPassword }),
+  const requestCode = useMutation({
+    mutationFn: () => authService.requestPasswordChangeCode({ currentPassword, newPassword }),
+    onSuccess: (data) => {
+      setCodeSent(true);
+      setExpiresInMinutes(data.expiresInMinutes);
+      setOtpCode('');
+      setFormError(null);
+      showToast({ title: 'Đã gửi mã xác nhận đến email', variant: 'success' });
+    },
+    onError: (error) => {
+      setFormError(getErrorMessage(error));
+    },
+  });
+
+  const confirmCode = useMutation({
+    mutationFn: () => authService.confirmPasswordChange({ code: otpCode }),
     onSuccess: () => {
       setCurrentPassword('');
       setNewPassword('');
       setConfirmPassword('');
+      setOtpCode('');
+      setCodeSent(false);
+      setExpiresInMinutes(null);
       setFormError(null);
       showToast({ title: 'Đã đổi mật khẩu', variant: 'success' });
     },
@@ -39,9 +63,9 @@ export function ChangePasswordForm() {
     },
   });
 
-  function submit() {
-    if (newPassword.length < 6) {
-      setFormError('Mật khẩu mới cần ít nhất 6 ký tự');
+  function requestOtp() {
+    if (!isStrongPassword(newPassword)) {
+      setFormError('Mật khẩu mới cần ít nhất 8 ký tự, gồm chữ và số');
       return;
     }
     if (newPassword !== confirmPassword) {
@@ -49,14 +73,28 @@ export function ChangePasswordForm() {
       return;
     }
     setFormError(null);
-    mutation.mutate();
+    requestCode.mutate();
   }
 
-  const disabled =
-    mutation.isPending ||
-    currentPassword.length === 0 ||
-    newPassword.length === 0 ||
-    confirmPassword.length === 0;
+  function confirmOtp() {
+    if (!/^\d{6}$/.test(otpCode)) {
+      setFormError('Mã xác nhận gồm 6 chữ số');
+      return;
+    }
+    setFormError(null);
+    confirmCode.mutate();
+  }
+
+  function resetFlow() {
+    setCodeSent(false);
+    setOtpCode('');
+    setExpiresInMinutes(null);
+    setFormError(null);
+  }
+
+  const busy = requestCode.isPending || confirmCode.isPending;
+  const canRequest =
+    !busy && currentPassword.length > 0 && newPassword.length > 0 && confirmPassword.length > 0;
 
   return (
     <Card style={styles.card}>
@@ -69,6 +107,7 @@ export function ChangePasswordForm() {
           secureTextEntry
           autoCapitalize="none"
           textContentType="password"
+          editable={!codeSent}
         />
         <Input
           label="Mật khẩu mới"
@@ -77,6 +116,7 @@ export function ChangePasswordForm() {
           secureTextEntry
           autoCapitalize="none"
           textContentType="newPassword"
+          editable={!codeSent}
         />
         <Input
           label="Nhập lại mật khẩu mới"
@@ -85,15 +125,51 @@ export function ChangePasswordForm() {
           secureTextEntry
           autoCapitalize="none"
           textContentType="newPassword"
-          error={formError ?? undefined}
+          editable={!codeSent}
+          error={!codeSent ? (formError ?? undefined) : undefined}
         />
+        {codeSent ? (
+          <>
+            <Text style={styles.helper}>
+              Nhập mã 6 số đã gửi đến email. Mã có hiệu lực
+              {expiresInMinutes ? ` ${expiresInMinutes} phút.` : '.'}
+            </Text>
+            <Input
+              label="Mã xác nhận email"
+              value={otpCode}
+              onChangeText={setOtpCode}
+              keyboardType="number-pad"
+              maxLength={6}
+              autoCapitalize="none"
+              textContentType="oneTimeCode"
+              error={formError ?? undefined}
+            />
+          </>
+        ) : null}
       </View>
       <Button
-        title="Cập nhật mật khẩu"
-        onPress={submit}
-        loading={mutation.isPending}
-        disabled={disabled}
+        title={codeSent ? 'Xác nhận đổi mật khẩu' : 'Gửi mã xác nhận'}
+        onPress={codeSent ? confirmOtp : requestOtp}
+        loading={busy}
+        disabled={codeSent ? busy || otpCode.length === 0 : !canRequest}
       />
+      {codeSent ? (
+        <Button
+          title="Gửi lại mã"
+          variant="outline"
+          onPress={requestOtp}
+          loading={requestCode.isPending}
+          disabled={busy}
+        />
+      ) : null}
+      {codeSent ? (
+        <Button
+          title="Đổi thông tin mật khẩu"
+          variant="outline"
+          onPress={resetFlow}
+          disabled={busy}
+        />
+      ) : null}
     </Card>
   );
 }
@@ -102,4 +178,5 @@ const styles = StyleSheet.create({
   card: { gap: spacing.base },
   title: { fontSize: 18, fontWeight: '700', color: colors.text },
   fields: { gap: spacing.base },
+  helper: { color: colors.textSecondary, fontSize: 13, lineHeight: 18 },
 });

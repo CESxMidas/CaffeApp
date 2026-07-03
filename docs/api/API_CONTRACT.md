@@ -398,44 +398,92 @@ Xem thêm [API_ERD_REFACTOR_CHECKLIST.md](../API_ERD_REFACTOR_CHECKLIST.md) §3.
 
 ---
 
-### 2.5 Đổi mật khẩu
+### 2.5 Đổi mật khẩu — gửi mã email
 
-|            |                                     |
-| ---------- | ----------------------------------- |
-| **Method** | `POST`                              |
-| **URL**    | `/auth/change-password`             |
-| **DTO**    | `ChangePasswordRequestDto` → `void` |
+|            |                                                              |
+| ---------- | ------------------------------------------------------------ |
+| **Method** | `POST`                                                       |
+| **URL**    | `/auth/change-password`                                      |
+| **DTO**    | `ChangePasswordRequestDto` → `ChangePasswordCodeResponseDto` |
 
 **Request:**
 
 ```json
 {
   "currentPassword": "old123",
-  "newPassword": "new456"
+  "newPassword": "newpass123"
 }
 ```
 
-**Response `204`:** No body
+**Response `200`:**
 
-| Status | Khi nào               |
-| ------ | --------------------- |
-| `204`  | Đổi thành công        |
-| `400`  | Validation lỗi        |
-| `401`  | Mật khẩu hiện tại sai |
+```json
+{
+  "data": {
+    "expiresInMinutes": 10
+  }
+}
+```
+
+| Status | Khi nào                                   |
+| ------ | ----------------------------------------- |
+| `200`  | Đã gửi mã xác nhận đến email nhân viên    |
+| `400`  | Validation lỗi hoặc mật khẩu hiện tại sai |
+| `401`  | Session không hợp lệ                      |
 
 **Validation:**
 
-| Field             | Rules                                         |
-| ----------------- | --------------------------------------------- |
-| `currentPassword` | required                                      |
-| `newPassword`     | required, min 8 chars, khác `currentPassword` |
+| Field             | Rules                                                      |
+| ----------------- | ---------------------------------------------------------- |
+| `currentPassword` | required                                                   |
+| `newPassword`     | required, min 8 chars, có chữ + số, khác mật khẩu hiện tại |
 
 **Authorization:** `Auth`
 
 **Business rules:**
 
-- Revoke tất cả refresh tokens sau đổi mật khẩu
-- Ghi audit `AUTH_PASSWORD_CHANGE`
+- Sinh OTP 6 số, lưu hash, hết hạn sau 10 phút.
+- OTP gửi về email đăng nhập của nhân viên.
+- Mỗi request mới vô hiệu hóa OTP đổi mật khẩu chưa dùng trước đó.
+
+### 2.6 Xác nhận đổi mật khẩu
+
+|            |                                                    |
+| ---------- | -------------------------------------------------- |
+| **Method** | `POST`                                             |
+| **URL**    | `/auth/change-password/confirm`                    |
+| **DTO**    | `ConfirmChangePasswordRequestDto` → `{ ok: true }` |
+
+**Request:**
+
+```json
+{
+  "code": "123456"
+}
+```
+
+**Response `200`:**
+
+```json
+{
+  "data": {
+    "ok": true
+  }
+}
+```
+
+| Status | Khi nào                                      |
+| ------ | -------------------------------------------- |
+| `200`  | Đổi mật khẩu thành công                      |
+| `400`  | Mã sai, hết hạn, đã dùng hoặc quá số lần thử |
+| `401`  | Session không hợp lệ                         |
+
+**Business rules:**
+
+- Tối đa 5 lần nhập sai cho mỗi OTP.
+- Sau khi xác nhận đúng: cập nhật `users.password_hash`, consume OTP.
+- Ghi audit `auth.password_changed`.
+- Gửi notification `SYSTEM` cho quản lý/chủ quán cùng chi nhánh.
 
 ---
 
@@ -1920,21 +1968,21 @@ Xem thêm [API_ERD_REFACTOR_CHECKLIST.md](../API_ERD_REFACTOR_CHECKLIST.md) §3.
 
 Các DTO cần bổ sung vào `@caffeapp/shared`:
 
-| DTO                                                                            | Module                |
-| ------------------------------------------------------------------------------ | --------------------- |
-| `LoginRequestDto`, `LoginResponseDto`                                          | Auth ✅               |
-| `RefreshTokenRequestDto`, `RefreshTokenResponseDto`                            | Auth                  |
-| `ChangePasswordRequestDto`                                                     | Auth                  |
-| `MeResponseDto`                                                                | Auth                  |
-| `CreateUserRequestDto`, `UpdateUserRequestDto`, `UserDetailDto`                | Users                 |
-| `CreateStaffRequestDto`, `UpdateStaffRequestDto`, `StaffDetailDto`             | Staff                 |
-| `ProductCategoryDto`, `CreateCategoryRequestDto`                               | Categories ✅ partial |
-| `ProductDto`, `CreateProductRequestDto`                                        | Products ✅ partial   |
-| `TableDto`, `CreateTableRequestDto`, `UpdateTableStatusRequestDto`             | Tables ✅ partial     |
-| `OrderDto`, `CreateOrderDto`, `UpdateOrderStatusDto`, `DeliverOrderRequestDto` | Orders ✅             |
-| `PaymentDto`, `CreatePaymentDto`                                               | Payments ✅           |
-| `RevenueReportDto`, `TopProductsReportDto`, `ShiftReportDto`                   | Reports               |
-| `InventoryItemDto`, `InventoryMovementDto`, movement requests                  | Inventory             |
+| DTO                                                                                            | Module                |
+| ---------------------------------------------------------------------------------------------- | --------------------- |
+| `LoginRequestDto`, `LoginResponseDto`                                                          | Auth ✅               |
+| `RefreshTokenRequestDto`, `RefreshTokenResponseDto`                                            | Auth                  |
+| `ChangePasswordRequestDto`, `ChangePasswordCodeResponseDto`, `ConfirmChangePasswordRequestDto` | Auth                  |
+| `MeResponseDto`                                                                                | Auth                  |
+| `CreateUserRequestDto`, `UpdateUserRequestDto`, `UserDetailDto`                                | Users                 |
+| `CreateStaffRequestDto`, `UpdateStaffRequestDto`, `StaffDetailDto`                             | Staff                 |
+| `ProductCategoryDto`, `CreateCategoryRequestDto`                                               | Categories ✅ partial |
+| `ProductDto`, `CreateProductRequestDto`                                                        | Products ✅ partial   |
+| `TableDto`, `CreateTableRequestDto`, `UpdateTableStatusRequestDto`                             | Tables ✅ partial     |
+| `OrderDto`, `CreateOrderDto`, `UpdateOrderStatusDto`, `DeliverOrderRequestDto`                 | Orders ✅             |
+| `PaymentDto`, `CreatePaymentDto`                                                               | Payments ✅           |
+| `RevenueReportDto`, `TopProductsReportDto`, `ShiftReportDto`                                   | Reports               |
+| `InventoryItemDto`, `InventoryMovementDto`, movement requests                                  | Inventory             |
 
 ---
 

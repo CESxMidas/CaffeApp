@@ -1,5 +1,7 @@
 import type {
   ApiDataResponse,
+  ChangePasswordCodeResponseDto,
+  ConfirmChangePasswordRequestDto,
   ChangePasswordRequestDto,
   LoginRequestDto,
   LoginResponseDto,
@@ -22,8 +24,21 @@ export const authService = {
     return data.data;
   },
 
-  async changePassword(payload: ChangePasswordRequestDto): Promise<void> {
-    await apiClient.post<ApiDataResponse<{ ok: true }>>(API_ENDPOINTS.auth.changePassword, payload);
+  async requestPasswordChangeCode(
+    payload: ChangePasswordRequestDto,
+  ): Promise<ChangePasswordCodeResponseDto> {
+    const { data } = await apiClient.post<ApiDataResponse<ChangePasswordCodeResponseDto>>(
+      API_ENDPOINTS.auth.changePassword,
+      payload,
+    );
+    return data.data;
+  },
+
+  async confirmPasswordChange(payload: ConfirmChangePasswordRequestDto): Promise<void> {
+    await apiClient.post<ApiDataResponse<{ ok: true }>>(
+      API_ENDPOINTS.auth.confirmChangePassword,
+      payload,
+    );
   },
 
   async logout(): Promise<void> {

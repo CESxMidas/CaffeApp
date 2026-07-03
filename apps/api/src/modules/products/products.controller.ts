@@ -23,17 +23,6 @@ export class ProductsController {
     return { data };
   }
 
-  // Task 6.1: GET /products/:id endpoint
-  @Get(':productId')
-  @Roles(StaffRole.CASHIER, StaffRole.BARISTA, StaffRole.MANAGER, StaffRole.OWNER)
-  async getOne(
-    @CurrentUser() user: JwtPayload,
-    @Param('productId') productId: string,
-  ): Promise<{ data: ProductDto }> {
-    const data = await this.productsService.getById(user, productId);
-    return { data };
-  }
-
   // Task 6.2: GET /categories endpoint
   @Get('categories')
   @Roles(StaffRole.CASHIER, StaffRole.BARISTA, StaffRole.MANAGER, StaffRole.OWNER)
@@ -42,6 +31,17 @@ export class ProductsController {
     @Query('branchId') branchId?: string,
   ): Promise<{ data: ProductCategoryDto[] }> {
     const data = await this.productsService.listCategories(user, branchId);
+    return { data };
+  }
+
+  // Task 6.1: GET /products/:id endpoint
+  @Get(':productId')
+  @Roles(StaffRole.CASHIER, StaffRole.BARISTA, StaffRole.MANAGER, StaffRole.OWNER)
+  async getOne(
+    @CurrentUser() user: JwtPayload,
+    @Param('productId') productId: string,
+  ): Promise<{ data: ProductDto }> {
+    const data = await this.productsService.getById(user, productId);
     return { data };
   }
 

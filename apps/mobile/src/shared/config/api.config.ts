@@ -38,6 +38,7 @@ export const API_ENDPOINTS = {
     refresh: '/api/v1/auth/refresh',
     me: '/api/v1/auth/me',
     changePassword: '/api/v1/auth/change-password',
+    confirmChangePassword: '/api/v1/auth/change-password/confirm',
     logout: '/api/v1/auth/logout',
   },
   branches: '/api/v1/branches',

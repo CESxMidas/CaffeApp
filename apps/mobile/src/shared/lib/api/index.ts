@@ -9,6 +9,7 @@ export { reportService } from './reportService';
 export { shiftService } from './shiftService';
 export { notificationService } from './notificationService';
 export { tableService } from './tableService';
+export { userService } from './userService';
 export {
   connectOrderSocket,
   disconnectOrderSocket,

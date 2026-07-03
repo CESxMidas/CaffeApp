@@ -31,13 +31,19 @@ cp apps/api/.env.example apps/api/.env
 
 ### Biến tùy chọn (có default trong code)
 
-| Biến                     | Default                | Ghi chú           |
-| ------------------------ | ---------------------- | ----------------- |
-| `PORT`                   | `3000`                 | API listen port   |
-| `NODE_ENV`               | `development`          |                   |
-| `JWT_EXPIRES_IN`         | `15m`                  | Access token TTL  |
-| `JWT_REFRESH_EXPIRES_IN` | `7d`                   | Refresh token TTL |
-| `CORS_ORIGINS`           | localhost Expo origins | Comma-separated   |
+| Biến                     | Default                | Ghi chú                                               |
+| ------------------------ | ---------------------- | ----------------------------------------------------- |
+| `PORT`                   | `3000`                 | API listen port                                       |
+| `NODE_ENV`               | `development`          |                                                       |
+| `JWT_EXPIRES_IN`         | `15m`                  | Access token TTL                                      |
+| `JWT_REFRESH_EXPIRES_IN` | `7d`                   | Refresh token TTL                                     |
+| `CORS_ORIGINS`           | localhost Expo origins | Comma-separated                                       |
+| `SMTP_HOST`              | —                      | SMTP host gửi mã đổi mật khẩu, ví dụ `smtp.gmail.com` |
+| `SMTP_PORT`              | `587`                  | SMTP port                                             |
+| `SMTP_SECURE`            | `false`                | `true` nếu dùng port 465                              |
+| `SMTP_USER`              | —                      | Gmail/email gửi mã                                    |
+| `SMTP_PASS`              | —                      | App Password/SMTP password                            |
+| `SMTP_FROM`              | `SMTP_USER`            | From address                                          |
 
 ### Ví dụ `apps/api/.env` hoàn chỉnh
 
@@ -49,7 +55,15 @@ JWT_SECRET=dev-secret-change-me
 JWT_EXPIRES_IN=15m
 JWT_REFRESH_EXPIRES_IN=7d
 CORS_ORIGINS=http://localhost:8081,http://localhost:19006,http://10.0.2.2:8081
+SMTP_HOST=smtp.gmail.com
+SMTP_PORT=587
+SMTP_SECURE=false
+SMTP_USER=your-gmail@gmail.com
+SMTP_PASS=your-google-app-password
+SMTP_FROM=your-gmail@gmail.com
 ```
+
+> Nếu SMTP chưa cấu hình ở local/dev, API sẽ log mã đổi mật khẩu ra console để dev không bị kẹt. Production phải cấu hình SMTP thật.
 
 ---
 

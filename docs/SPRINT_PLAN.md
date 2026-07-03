@@ -61,78 +61,87 @@
 
 ---
 
-## Sprint 1: Auth Flow (10 pts) — 🔄 Code done; E2E thiết bị thật pending (C-15)
+## Sprint 1: Auth Flow (10 pts) — ✅ Code done; E2E thiết bị thật pending (C-15)
 
 **Stories:** US-A01 → US-A04  
 **Screens:** 01–04 (`03-chon-vai-tro` deprecated — routing theo StaffRole)
 
-| Story                         | Points | FE                                | BE                        | Status                       |
-| ----------------------------- | ------ | --------------------------------- | ------------------------- | ---------------------------- |
-| US-A01 Đăng nhập (API + JWT)  | 3      | `authService.login` + SecureStore | `POST /api/v1/auth/login` | ✅ Done                      |
-| US-A02 Chọn chi nhánh (Owner) | 2      | `useBranches` query               | `GET /api/v1/branches`    | ✅ Done                      |
-| US-A03 Điều hướng sau login   | 2      | Routing theo StaffRole            | `GET /api/v1/auth/me`     | ⚠️ Refactor (bỏ role screen) |
-| US-A04 Trang chủ trạm         | 3      | Wire home + tablet tabs           | —                         | ✅ Done                      |
+| Story                         | Points | FE                                | BE                        | Status  |
+| ----------------------------- | ------ | --------------------------------- | ------------------------- | ------- |
+| US-A01 Đăng nhập (API + JWT)  | 3      | `authService.login` + SecureStore | `POST /api/v1/auth/login` | ✅ Done |
+| US-A02 Chọn chi nhánh (Owner) | 2      | `useBranches` query               | `GET /api/v1/branches`    | ✅ Done |
+| US-A03 Điều hướng sau login   | 2      | Routing theo StaffRole            | `GET /api/v1/auth/me`     | ✅ Done |
+| US-A04 Trang chủ trạm         | 3      | Wire home + tablet tabs           | —                         | ✅ Done |
 
 **DoD:** Login E2E **thiết bị thật** + SecureStore sau kill app (C-15); đồng bộ DEVICE_POLICY v2
 
 ---
 
-## Sprint 2: Order Core (23 pts)
+## Sprint 2: Order Core (23 pts) — ✅ Code done; UAT/manual verification pending
 
 **Stories:** US-B01 → US-B05  
 **Screens:** 05–09
 
-| Story                     | Points |
-| ------------------------- | ------ |
-| US-B01 Chọn loại đơn      | 2      |
-| US-B02 Sơ đồ bàn          | 5      |
-| US-B03 Menu               | 5      |
-| US-B04 Tùy chỉnh món      | 5      |
-| US-B05 Giỏ hàng + Gửi bếp | 8      |
+| Story                     | Points | FE status | BE status |
+| ------------------------- | ------ | --------- | --------- |
+| US-B01 Chọn loại đơn      | 2      | Done      | N/A       |
+| US-B02 Sơ đồ bàn          | 5      | Done      | Done      |
+| US-B03 Menu               | 5      | Done      | Done      |
+| US-B04 Tùy chỉnh món      | 5      | Done      | N/A       |
+| US-B05 Giỏ hàng + Gửi bếp | 8      | Done      | Done      |
 
 ---
 
-## Sprint 3: Payment (13 pts)
+## Sprint 3: Payment + Order Management (13 pts) — ✅ Pilot code done; thẻ/ví/cổng để sau pilot
 
 **Stories:** US-B06 → US-B11  
 **Screens:** 10–15  
-**Payment pilot (Must):** Tiền mặt + Chuyển khoản VietQR · Thẻ/Ví → Could (VNPay Sandbox dev)
+**Payment pilot (Must):** Tiền mặt + Chuyển khoản VietQR. Không dùng cổng online trong MVP/pilot.
 
-| Story                | Points | Priority pilot  |
-| -------------------- | ------ | --------------- |
-| US-B06 Tiền mặt      | 5      | Must            |
-| US-B07 Chuyển khoản  | 3      | Must            |
-| US-B08 Thẻ           | 2      | Could           |
-| US-B09 Ví / VNPay    | 3      | Could (Sandbox) |
-| US-B10 Danh sách đơn | —      | Must            |
-| US-B11 Lịch sử đơn   | —      | Should          |
+| Story                       | Points | Priority pilot | Coding status              |
+| --------------------------- | ------ | -------------- | -------------------------- |
+| US-B06 Tiền mặt             | 5      | Must           | Done                       |
+| US-B07 Chuyển khoản VietQR  | 3      | Must           | Done                       |
+| US-B08 Thẻ                  | 2      | Post-pilot     | Not enabled                |
+| US-B09 Ví / cổng thanh toán | 3      | Out of pilot   | Replaced by VietQR for MVP |
+| US-B10 Danh sách đơn        | —      | Must           | Done                       |
+| US-B11 Lịch sử đơn          | —      | Should         | Done                       |
 
 ---
 
-## Sprint 4: Barista Real-time (19 pts)
+## Sprint 4: Barista Real-time (19 pts) — ✅ Code done; real device/UAT pending
 
 **Stories:** US-C01 → US-C04  
 **Screens:** 16–19  
 **Transport:** WebSocket primary; polling 10s fallback (F-01, F-16)
 
-| Story                   | Points |
-| ----------------------- | ------ |
-| US-C01 Queue + Realtime | 8      |
-| US-C02 Chi tiết đơn     | 3      |
-| US-C03 Đang pha         | 5      |
-| US-C04 Hoàn thành       | 3      |
+| Story                   | Points | Coding status |
+| ----------------------- | ------ | ------------- |
+| US-C01 Queue + Realtime | 8      | Done          |
+| US-C02 Chi tiết đơn     | 3      | Done          |
+| US-C03 Đang pha         | 5      | Done          |
+| US-C04 Hoàn thành       | 3      | Done          |
 
 ---
 
-## Sprint 5: Manager (29 pts)
+## Sprint 5: Manager (29 pts) — ✅ Core code done; UAT/manual verification pending
 
 **Stories:** US-D01 → US-D06, US-E01  
 **Screens:** 20–26  
 **Shift module:** bật bắt buộc `shift_id` (B-05, GAP-06)
 
+| Area                | Coding status |
+| ------------------- | ------------- |
+| Dashboard + revenue | Done          |
+| Revenue reports     | Done          |
+| Shift management    | Done          |
+| Menu CRUD           | Done          |
+| Staff list/detail   | Done          |
+| Table maintenance   | Done          |
+
 ---
 
-## Sprint 6: Polish + UAT (18 pts)
+## Sprint 6: Polish + UAT (18 pts) — 🔄 Partial code done; UAT/manual work pending
 
 **Stories:** US-E02, US-E03 + bug fixes  
 **Screens:** 27–28
@@ -140,6 +149,9 @@
 - UAT tại quán pilot
 - Performance tuning
 - Error handling hardening
+
+**Code-side done:** in-app notifications, settings, change password qua mã email, logout.  
+**Pending:** UAT tại quán, real-device verification, production data/sign-off.
 
 ---
 

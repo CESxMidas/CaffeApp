@@ -83,6 +83,12 @@ NODE_ENV=production node dist/src/main
 | `JWT_EXPIRES_IN`         | ✅       | e.g. `15m`                           |
 | `JWT_REFRESH_EXPIRES_IN` | ✅       | e.g. `7d`                            |
 | `CORS_ORIGINS`           | ✅       | Production mobile/web origins only   |
+| `SMTP_HOST`              | ✅       | SMTP host gửi mã đổi mật khẩu        |
+| `SMTP_PORT`              | ✅       | e.g. `587`                           |
+| `SMTP_SECURE`            | ✅       | `false` for 587, `true` for 465      |
+| `SMTP_USER`              | ✅       | Gmail/SMTP user                      |
+| `SMTP_PASS`              | ✅       | Gmail App Password/SMTP password     |
+| `SMTP_FROM`              | ✅       | Sender email                         |
 | `PORT`                   | Optional | Default `3000`                       |
 | `NODE_ENV`               | ✅       | `production`                         |
 

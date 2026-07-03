@@ -85,6 +85,17 @@ export default function CashierOrdersScreen() {
     );
   }
 
+  const summary = useMemo(() => {
+    const totalOrders = filtered.length;
+    const totalRevenue = filtered
+      .filter((o) => o.status === OrderStatus.PAID)
+      .reduce((sum, o) => sum + o.total, 0);
+    const totalPending = filtered
+      .filter((o) => o.status !== OrderStatus.PAID && o.status !== OrderStatus.CANCELLED)
+      .reduce((sum, o) => sum + o.total, 0);
+    return { totalOrders, totalRevenue, totalPending };
+  }, [filtered]);
+
   return (
     <View style={styles.container}>
       <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.tabs}>
@@ -104,6 +115,14 @@ export default function CashierOrdersScreen() {
           contentContainerStyle={styles.list}
           refreshControl={<RefreshControl refreshing={isRefetching} onRefresh={() => refetch()} />}
         >
+          <View style={styles.summaryRow}>
+            <Text style={styles.summaryText}>
+              {summary.totalOrders} đơn · {formatCurrency(summary.totalRevenue)}
+              {summary.totalPending > 0
+                ? ` · Chưa TT: ${formatCurrency(summary.totalPending)}`
+                : ''}
+            </Text>
+          </View>
           {filtered.map((order) => (
             <OrderRow key={order.id} order={order} />
           ))}
@@ -165,4 +184,6 @@ const styles = StyleSheet.create({
   },
   badgeText: { fontSize: 11, color: colors.primary, fontWeight: '600' },
   rowMeta: { fontSize: 14, color: colors.textSecondary, marginTop: spacing.xs },
+  summaryRow: { marginBottom: spacing.xs },
+  summaryText: { fontSize: 13, color: colors.textSecondary, textAlign: 'center' },
 });

@@ -204,9 +204,14 @@ Chi tiết: [docs/CONVENTIONS.md](docs/CONVENTIONS.md)
 
 ## Sprint status
 
-| Sprint         | Trạng thái               |
-| -------------- | ------------------------ |
-| Sprint 0       | ✅ UI shell              |
-| Sprint 0.5     | ✅ FE/BE split           |
-| Enterprise std | ✅ Tooling + conventions |
-| Sprint 1       | ✅ Auth API              |
+| Sprint         | Trạng thái coding                                       |
+| -------------- | ------------------------------------------------------- |
+| Sprint 0       | ✅ UI shell                                             |
+| Sprint 0.5     | ✅ FE/BE split                                          |
+| Enterprise std | ✅ Tooling + conventions                                |
+| Sprint 1       | ✅ Auth flow code-side                                  |
+| Sprint 2       | ✅ Order core code-side                                 |
+| Sprint 3       | ✅ Payment pilot TM + CK VietQR, order list/history     |
+| Sprint 4       | ✅ Barista realtime code-side                           |
+| Sprint 5       | ✅ Manager core code-side                               |
+| Sprint 6       | 🔄 Notifications/settings code-side; UAT/manual pending |

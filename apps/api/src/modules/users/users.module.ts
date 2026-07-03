@@ -1,5 +1,12 @@
 import { Module } from '@nestjs/common';
+import { NotificationsModule } from '@modules/notifications/notifications.module';
+import { UsersController } from './users.controller';
+import { UsersService } from './users.service';
 
-/** Sprint 1: user profile endpoints */
-@Module({})
+@Module({
+  imports: [NotificationsModule],
+  controllers: [UsersController],
+  providers: [UsersService],
+  exports: [UsersService],
+})
 export class UsersModule {}

@@ -138,7 +138,7 @@ Khóa bộ tài liệu làm **single source of truth** trước refactor; tránh
 **2.4 Payment & VAT (D-17, E-09)**
 
 - Bill tách dòng VAT 8% (giá đã gồm).
-- Pilot: TM + CK VietQR; không VNPay Sandbox tại quán thật.
+- Pilot: TM + CK VietQR; không dùng cổng online trong MVP/pilot.
 
 **2.5 Hạ tầng dev**
 
@@ -1317,7 +1317,7 @@ Implement thanh toán bắt buộc pilot:
 - US-B06 Tiền mặt: nhập tiền khách đưa, tính tiền thừa.
 - US-B07 CK: VietQR sinh theo số tiền + STK CN; xác nhận thủ công; audit người xác nhận (B-24).
 
-KHÔNG bật VNPay production tại quán. Sandbox chỉ dev.
+Thanh toán pilot chỉ bật TM + CK VietQR; cổng online để sau pilot.
 
 Screens: 10–15 theo design.
 

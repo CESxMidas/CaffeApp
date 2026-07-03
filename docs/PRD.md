@@ -1,7 +1,7 @@
 # CaffeApp — Product Requirements Document (PRD)
 
 **Version:** 1.1.0-MVP-v2  
-**Last updated:** 2026-06-29  
+**Last updated:** 2026-07-02  
 **Status:** Aligned with [STAKEHOLDER_QUESTIONNAIRE.md](STAKEHOLDER_QUESTIONNAIRE.md)  
 **Nguồn quyết định nghiệp vụ:** Questionnaire MVP v2 (Phần A–K)
 
@@ -101,23 +101,23 @@ Thanh toán được theo dõi qua bảng `payments` và `orders.status = PAID`.
 
 ### Nhóm B — Thu ngân (màn 05–15)
 
-| ID     | Requirement                                          | Priority |
-| ------ | ---------------------------------------------------- | -------- |
-| FR-B01 | Chọn loại đơn: tại bàn / mang đi                     | Must     |
-| FR-B02 | Sơ đồ bàn real-time (trống/có khách/đang chọn)       | Must     |
-| FR-B03 | Menu theo danh mục (Cà phê, Trà, Bánh)               | Must     |
-| FR-B04 | Tùy chỉnh món: size, đường, đá, ghi chú              | Must     |
-| FR-B05 | Giỏ hàng: sửa SL, xóa món, ghi chú đơn               | Must     |
-| FR-B06 | Lưu nháp đơn (cart local, chưa gửi bếp)              | Should   |
-| FR-B07 | Gửi vào bếp → status PENDING                         | Must     |
-| FR-B08 | Thanh toán tiền mặt (nhập tiền khách đưa, tính thừa) | Must     |
-| FR-B09 | Thanh toán chuyển khoản (VietQR + xác nhận thủ công) | Must     |
-| FR-B10 | Thanh toán thẻ (ghi nhận thủ công, không POS)        | Could    |
-| FR-B11 | Thanh toán ví / cổng (VNPay Sandbox dev; go-live v2) | Could    |
-| FR-B12 | Danh sách đơn đang phục vụ                           | Must     |
-| FR-B13 | Lịch sử đơn trong ca/ngày                            | Should   |
-| FR-B14 | Gộp bàn / chuyển bàn / tách bill theo món            | Should   |
-| FR-B15 | Giảm giá %, số tiền, voucher (một KM/đơn)            | Should   |
+| ID     | Requirement                                                          | Priority |
+| ------ | -------------------------------------------------------------------- | -------- |
+| FR-B01 | Chọn loại đơn: tại bàn / mang đi                                     | Must     |
+| FR-B02 | Sơ đồ bàn real-time (trống/có khách/đang chọn)                       | Must     |
+| FR-B03 | Menu theo danh mục (Cà phê, Trà, Bánh)                               | Must     |
+| FR-B04 | Tùy chỉnh món: size, đường, đá, ghi chú                              | Must     |
+| FR-B05 | Giỏ hàng: sửa SL, xóa món, ghi chú đơn                               | Must     |
+| FR-B06 | Lưu nháp đơn (cart local, chưa gửi bếp)                              | Should   |
+| FR-B07 | Gửi vào bếp → status PENDING                                         | Must     |
+| FR-B08 | Thanh toán tiền mặt (nhập tiền khách đưa, tính thừa)                 | Must     |
+| FR-B09 | Thanh toán chuyển khoản (VietQR + xác nhận thủ công)                 | Must     |
+| FR-B10 | Thanh toán thẻ (ghi nhận thủ công, không POS)                        | Could    |
+| FR-B11 | Thanh toán ví / cổng: không dùng trong pilot; ưu tiên VietQR cho MVP | Could    |
+| FR-B12 | Danh sách đơn đang phục vụ                                           | Must     |
+| FR-B13 | Lịch sử đơn trong ca/ngày                                            | Should   |
+| FR-B14 | Gộp bàn / chuyển bàn / tách bill theo món                            | Should   |
+| FR-B15 | Giảm giá %, số tiền, voucher (một KM/đơn)                            | Should   |
 
 **Business rules:**
 
@@ -165,11 +165,11 @@ Thanh toán được theo dõi qua bảng `payments` và `orders.status = PAID`.
 
 ### Nhóm E — Khác (màn 26–28)
 
-| ID     | Requirement                                | Priority |
-| ------ | ------------------------------------------ | -------- |
-| FR-E01 | Quản lý trạng thái bàn (bao gồm bảo trì)   | Should   |
-| FR-E02 | Feed thông báo (đơn xong, cảnh báo)        | Should   |
-| FR-E03 | Cài đặt: thông tin quán, đổi MK, đăng xuất | Must     |
+| ID     | Requirement                                             | Priority |
+| ------ | ------------------------------------------------------- | -------- |
+| FR-E01 | Quản lý trạng thái bàn (bao gồm bảo trì)                | Should   |
+| FR-E02 | Feed thông báo (đơn xong, cảnh báo)                     | Should   |
+| FR-E03 | Cài đặt: thông tin quán, đổi MK qua mã email, đăng xuất | Must     |
 
 ---
 

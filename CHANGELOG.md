@@ -23,6 +23,8 @@ Versioning: [Semantic Versioning](docs/VERSIONING.md)
 ### Changed
 
 - Documentation aligned with NestJS + Prisma + Expo 56 stack
+- **docs(payment):** cập nhật MVP/pilot dùng Tiền mặt + Chuyển khoản VietQR; cổng online để sau pilot
+- **feat(auth):** đổi mật khẩu 2 bước bằng mã email, audit và notification cho quản lý/chủ quán
 - **MVP v2 doc sync (2026-06-29):** PRD, USER_STORIES, SPRINT_PLAN, API_CONTRACT, ERD, DEVICE_POLICY, BRANCH_ASSIGNMENT, TESTING, MOBILE_ARCHITECTURE, GO_LIVE_PLAN — questionnaire khách đã ký
 - **refactor(auth):** route by `StaffRole` (TASK-P2-01) — bỏ màn chọn role
 - **refactor(orders):** `deliveredAt` thay `SERVING` (TASK-P2-02) — `POST /orders/:id/deliver`, payment khi `READY`

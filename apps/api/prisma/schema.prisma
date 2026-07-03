@@ -71,28 +71,45 @@ model User {
   createdAt    DateTime @default(now()) @map("created_at")
   updatedAt    DateTime @updatedAt @map("updated_at")
 
-  staff     Staff?
-  auditLogs AuditLog[] @relation("AuditActor")
+  staff              Staff?
+  auditLogs          AuditLog[]          @relation("AuditActor")
+  passwordChangeOtps PasswordChangeOtp[]
 
   @@map("users")
 }
 
-model Staff {
-  id                     String                   @id @default(uuid()) @db.Uuid
-  userId                 String                   @unique @map("user_id") @db.Uuid
-  branchId               String?                  @map("branch_id") @db.Uuid
-  role                   StaffRole
-  fullName               String                   @map("full_name")
-  phone                  String?
-  isActive               Boolean                  @default(true) @map("is_active")
-  branchAssignmentStatus BranchAssignmentStatus     @default(NONE) @map("branch_assignment_status")
-  assignedByStaffId      String?                  @map("assigned_by_staff_id") @db.Uuid
-  approvedAt             DateTime?                @map("approved_at")
-  createdAt              DateTime                 @default(now()) @map("created_at")
-  updatedAt              DateTime                 @updatedAt @map("updated_at")
+model PasswordChangeOtp {
+  id              String    @id @default(uuid()) @db.Uuid
+  userId          String    @map("user_id") @db.Uuid
+  codeHash        String    @map("code_hash")
+  newPasswordHash String    @map("new_password_hash")
+  attempts        Int       @default(0)
+  expiresAt       DateTime  @map("expires_at")
+  consumedAt      DateTime? @map("consumed_at")
+  createdAt       DateTime  @default(now()) @map("created_at")
 
-  user   User    @relation(fields: [userId], references: [id], onDelete: Cascade)
-  branch Branch? @relation(fields: [branchId], references: [id])
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, consumedAt, expiresAt])
+  @@map("password_change_otps")
+}
+
+model Staff {
+  id                     String                 @id @default(uuid()) @db.Uuid
+  userId                 String                 @unique @map("user_id") @db.Uuid
+  branchId               String?                @map("branch_id") @db.Uuid
+  role                   StaffRole
+  fullName               String                 @map("full_name")
+  phone                  String?
+  isActive               Boolean                @default(true) @map("is_active")
+  branchAssignmentStatus BranchAssignmentStatus @default(NONE) @map("branch_assignment_status")
+  assignedByStaffId      String?                @map("assigned_by_staff_id") @db.Uuid
+  approvedAt             DateTime?              @map("approved_at")
+  createdAt              DateTime               @default(now()) @map("created_at")
+  updatedAt              DateTime               @updatedAt @map("updated_at")
+
+  user          User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  branch        Branch?        @relation(fields: [branchId], references: [id])
   notifications Notification[]
 
   @@index([branchId, role])
@@ -110,14 +127,14 @@ model Branch {
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
 
-  staff              Staff[]
-  tables             Table[]
-  productCategories  ProductCategory[]
-  products           Product[]
-  orders             Order[]
-  shifts             Shift[]
-  auditLogs          AuditLog[]
-  notifications      Notification[]
+  staff             Staff[]
+  tables            Table[]
+  productCategories ProductCategory[]
+  products          Product[]
+  orders            Order[]
+  shifts            Shift[]
+  auditLogs         AuditLog[]
+  notifications     Notification[]
 
   @@map("branches")
 }
@@ -178,19 +195,19 @@ model Product {
 }
 
 model Shift {
-  id             String      @id @default(uuid()) @db.Uuid
-  branchId       String      @map("branch_id") @db.Uuid
-  name           String
-  shiftType      String      @map("shift_type")
-  startTime      String      @map("start_time")
-  endTime        String      @map("end_time")
-  openedAt       DateTime?   @map("opened_at")
-  closedAt       DateTime?   @map("closed_at")
-  status         ShiftStatus @default(OPEN)
-  totalRevenue   Int         @default(0) @map("total_revenue")
-  totalOrders    Int         @default(0) @map("total_orders")
-  createdAt      DateTime    @default(now()) @map("created_at")
-  updatedAt      DateTime    @updatedAt @map("updated_at")
+  id           String      @id @default(uuid()) @db.Uuid
+  branchId     String      @map("branch_id") @db.Uuid
+  name         String
+  shiftType    String      @map("shift_type")
+  startTime    String      @map("start_time")
+  endTime      String      @map("end_time")
+  openedAt     DateTime?   @map("opened_at")
+  closedAt     DateTime?   @map("closed_at")
+  status       ShiftStatus @default(OPEN)
+  totalRevenue Int         @default(0) @map("total_revenue")
+  totalOrders  Int         @default(0) @map("total_orders")
+  createdAt    DateTime    @default(now()) @map("created_at")
+  updatedAt    DateTime    @updatedAt @map("updated_at")
 
   branch Branch  @relation(fields: [branchId], references: [id], onDelete: Cascade)
   orders Order[]
@@ -229,17 +246,17 @@ model Order {
 }
 
 model OrderItem {
-  id          String   @id @default(uuid()) @db.Uuid
-  orderId     String   @map("order_id") @db.Uuid
-  productId   String   @map("product_id") @db.Uuid
-  productName String   @map("product_name")
+  id          String    @id @default(uuid()) @db.Uuid
+  orderId     String    @map("order_id") @db.Uuid
+  productId   String    @map("product_id") @db.Uuid
+  productName String    @map("product_name")
   quantity    Int
-  unitPrice   Int      @map("unit_price")
-  lineTotal   Int      @map("line_total")
+  unitPrice   Int       @map("unit_price")
+  lineTotal   Int       @map("line_total")
   notes       String?
-  isPrepared  Boolean  @default(false) @map("is_prepared")
+  isPrepared  Boolean   @default(false) @map("is_prepared")
   preparedAt  DateTime? @map("prepared_at")
-  createdAt   DateTime @default(now()) @map("created_at")
+  createdAt   DateTime  @default(now()) @map("created_at")
 
   order   Order   @relation(fields: [orderId], references: [id], onDelete: Cascade)
   product Product @relation(fields: [productId], references: [id], onDelete: Restrict)
