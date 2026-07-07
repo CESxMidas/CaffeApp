@@ -7,6 +7,7 @@ import type { JwtPayload } from '@common/types/jwt-payload.types';
 import { CreateProductDto } from './dto/create-product.dto';
 import { UpdateProductDto } from './dto/update-product.dto';
 import { CreateCategoryDto } from './dto/create-category.dto';
+import { SetAvailabilityDto } from './dto/set-availability.dto';
 import { ProductsService } from './products.service';
 
 @Controller('products')
@@ -18,8 +19,13 @@ export class ProductsController {
   async list(
     @CurrentUser() user: JwtPayload,
     @Query('branchId') branchId?: string,
+    @Query('includeUnavailable') includeUnavailable?: string,
   ): Promise<{ data: ProductDto[] }> {
-    const data = await this.productsService.listForBranch(user, branchId);
+    const data = await this.productsService.listForBranch(
+      user,
+      branchId,
+      includeUnavailable === 'true',
+    );
     return { data };
   }
 
@@ -65,6 +71,18 @@ export class ProductsController {
     @Body() dto: UpdateProductDto,
   ): Promise<{ data: ProductDto }> {
     const data = await this.productsService.update(user, productId, dto);
+    return { data };
+  }
+
+  // Quick out-of-stock toggle — staff can mark items sold-out mid-shift
+  @Patch(':productId/availability')
+  @Roles(StaffRole.CASHIER, StaffRole.BARISTA, StaffRole.MANAGER, StaffRole.OWNER)
+  async setAvailability(
+    @CurrentUser() user: JwtPayload,
+    @Param('productId') productId: string,
+    @Body() dto: SetAvailabilityDto,
+  ): Promise<{ data: ProductDto }> {
+    const data = await this.productsService.setAvailability(user, productId, dto.isAvailable);
     return { data };
   }
 

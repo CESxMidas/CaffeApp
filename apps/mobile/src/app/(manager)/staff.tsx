@@ -16,6 +16,7 @@ import { useProposeBranchAssignment, useStaffList } from '@features/staff';
 import { Button, Card, EmptyState, ErrorScreen } from '@shared/components/ui';
 import { usePermission, useIsOwner } from '@shared/hooks/usePermission';
 import { confirmAction, showMessage } from '@shared/lib/ui/confirm';
+import { getErrorMessage } from '@shared/lib/api';
 
 function statusColor(status: BranchAssignmentStatus): string {
   switch (status) {
@@ -137,10 +138,7 @@ export default function StaffManagementScreen() {
           setSelectedStaffId(null);
         },
         onError: (err: unknown) => {
-          const msg =
-            (err as { response?: { data?: { message?: string } } })?.response?.data?.message ??
-            'Không gửi được đề xuất';
-          showMessage('Lỗi', msg);
+          showMessage('Lỗi', getErrorMessage(err, 'Không gửi được đề xuất'));
         },
       },
     );

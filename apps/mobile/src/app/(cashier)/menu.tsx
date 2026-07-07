@@ -4,8 +4,10 @@ import { router } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import type { ProductDto, DrinkSize } from '@caffeapp/shared';
 import { colors, spacing, borderRadius, formatCurrency, priceForSize } from '@caffeapp/shared';
-import { useProducts } from '@features/orders';
+import { useProducts, useSetProductAvailability } from '@features/orders';
 import { Button, Card, ErrorScreen, SkeletonList } from '@shared/components/ui';
+import { showMessage } from '@shared/lib/ui/confirm';
+import { getErrorMessage } from '@shared/lib/api';
 import { useSessionStore } from '@shared/stores/session';
 import { opStack } from '@shared/lib/navigation/operationalRoutes';
 import { useCartStore } from '@shared/stores/cart';
@@ -19,7 +21,26 @@ export default function MenuScreen() {
   const tableCode = useCartStore((s) => s.tableCode);
   const itemCount = useCartStore((s) => s.itemCount());
   const addItem = useCartStore((s) => s.addItem);
-  const { data: products, isLoading, isError, refetch } = useProducts(activeBranchId);
+  const { data: products, isLoading, isError, refetch } = useProducts(activeBranchId, true);
+  const setAvailability = useSetProductAvailability();
+
+  const toggleAvailability = (product: ProductDto) => {
+    setAvailability.mutate(
+      { productId: product.id, isAvailable: !product.isAvailable },
+      {
+        onSuccess: (updated) => {
+          showMessage(
+            updated.isAvailable ? 'Đã mở bán lại' : 'Đã báo hết món',
+            updated.name,
+            'success',
+          );
+        },
+        onError: (err: unknown) => {
+          showMessage('Lỗi', getErrorMessage(err, 'Không cập nhật được món'), 'error');
+        },
+      },
+    );
+  };
 
   const [activeCategory, setActiveCategory] = useState<string | null>(null);
   const [customProduct, setCustomProduct] = useState<ProductDto | null>(null);
@@ -112,15 +133,31 @@ export default function MenuScreen() {
 
       <ScrollView contentContainerStyle={styles.list}>
         {filtered.map((product) => (
-          <Card key={product.id} style={styles.productCard}>
+          <Card
+            key={product.id}
+            style={[styles.productCard, !product.isAvailable && styles.productCardOut]}
+          >
             <View style={styles.productRow}>
               <View style={styles.productInfo}>
                 <Text style={styles.productName}>{product.name}</Text>
                 <Text style={styles.productPrice}>{formatCurrency(product.price)}</Text>
+                <Pressable
+                  onPress={() => toggleAvailability(product)}
+                  disabled={setAvailability.isPending}
+                  hitSlop={8}
+                >
+                  <Text style={product.isAvailable ? styles.stockToggle : styles.stockToggleOut}>
+                    {product.isAvailable ? 'Báo hết món' : 'Hết món · chạm để mở bán lại'}
+                  </Text>
+                </Pressable>
               </View>
-              <Pressable style={styles.addBtn} onPress={() => openCustomize(product)}>
-                <Ionicons name="add" size={22} color={colors.white} />
-              </Pressable>
+              {product.isAvailable ? (
+                <Pressable style={styles.addBtn} onPress={() => openCustomize(product)}>
+                  <Ionicons name="add" size={22} color={colors.white} />
+                </Pressable>
+              ) : (
+                <Ionicons name="close-circle-outline" size={26} color={colors.textMuted} />
+              )}
             </View>
           </Card>
         ))}
@@ -231,6 +268,9 @@ const styles = StyleSheet.create({
   list: { padding: spacing.base, paddingBottom: 100, gap: spacing.sm },
   skeletonPad: { padding: spacing.base },
   productCard: {},
+  productCardOut: { opacity: 0.55 },
+  stockToggle: { fontSize: 12, color: colors.textMuted, marginTop: spacing.xs },
+  stockToggleOut: { fontSize: 12, color: colors.accent, fontWeight: '600', marginTop: spacing.xs },
   productRow: { flexDirection: 'row', alignItems: 'center' },
   productInfo: { flex: 1 },
   productName: { fontSize: 16, fontWeight: '600', color: colors.text },
@@ -258,7 +298,7 @@ const styles = StyleSheet.create({
   cartFabText: { color: colors.white, fontWeight: '600', fontSize: 15 },
   modalOverlay: {
     flex: 1,
-    backgroundColor: 'rgba(0,0,0,0.4)',
+    backgroundColor: colors.overlay,
     justifyContent: 'flex-end',
   },
   modalCard: {

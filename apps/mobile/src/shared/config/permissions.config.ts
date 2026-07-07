@@ -4,6 +4,7 @@ import type { Role } from '@caffeapp/shared';
 export const PERMISSIONS = {
   'orders:create': ['cashier', 'manager'],
   'orders:pay': ['cashier', 'manager'],
+  'payments:void': ['manager'],
   'orders:cancel': ['cashier', 'manager'],
   'orders:status': ['cashier', 'barista', 'manager'],
   'orders:queue:view': ['barista', 'manager'],

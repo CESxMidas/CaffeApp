@@ -1,7 +1,6 @@
 import { useState } from 'react';
 import {
   ActivityIndicator,
-  Alert,
   Modal,
   Pressable,
   ScrollView,
@@ -18,7 +17,7 @@ import type { BranchDto } from '@caffeapp/shared';
 import { Button, Card, EmptyState, ErrorScreen } from '@shared/components/ui';
 import { useBranches } from '@features/auth';
 import { useIsOwner } from '@shared/hooks/usePermission';
-import { branchService } from '@shared/lib/api';
+import { branchService, getErrorMessage } from '@shared/lib/api';
 import { confirmAction, showMessage } from '@shared/lib/ui/confirm';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 
@@ -52,10 +51,9 @@ function BranchCard({
         <Button title="Sửa" variant="outline" fullWidth={false} style={styles.actionBtn} onPress={onEdit} />
         <Button
           title="Xóa"
-          variant="outline"
+          variant="destructive"
           fullWidth={false}
           style={styles.actionBtn}
-          textStyle={{ color: colors.error }}
           onPress={onDelete}
         />
       </View>
@@ -72,7 +70,7 @@ interface BranchFormData {
 export default function BranchesScreen() {
   const isOwner = useIsOwner();
   const queryClient = useQueryClient();
-  const { data: branches, isLoading, isError, refetch } = useBranches(isOwner);
+  const { data: branches, isLoading, isError, refetch } = useBranches();
 
   const [modalVisible, setModalVisible] = useState(false);
   const [editingBranch, setEditingBranch] = useState<BranchDto | null>(null);
@@ -87,8 +85,7 @@ export default function BranchesScreen() {
       closeModal();
     },
     onError: (err: unknown) => {
-      const msg = (err as { response?: { data?: { message?: string } } })?.response?.data?.message ?? 'Lỗi tạo chi nhánh';
-      showMessage('Lỗi', msg);
+      showMessage('Lỗi', getErrorMessage(err, 'Lỗi tạo chi nhánh'));
     },
   });
 
@@ -101,8 +98,7 @@ export default function BranchesScreen() {
       closeModal();
     },
     onError: (err: unknown) => {
-      const msg = (err as { response?: { data?: { message?: string } } })?.response?.data?.message ?? 'Lỗi cập nhật';
-      showMessage('Lỗi', msg);
+      showMessage('Lỗi', getErrorMessage(err, 'Lỗi cập nhật'));
     },
   });
 
@@ -113,8 +109,7 @@ export default function BranchesScreen() {
       showMessage('Thành công', 'Đã xóa chi nhánh');
     },
     onError: (err: unknown) => {
-      const msg = (err as { response?: { data?: { message?: string } } })?.response?.data?.message ?? 'Lỗi xóa';
-      showMessage('Lỗi', msg);
+      showMessage('Lỗi', getErrorMessage(err, 'Lỗi xóa'));
     },
   });
 

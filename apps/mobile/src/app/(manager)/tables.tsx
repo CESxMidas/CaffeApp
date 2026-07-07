@@ -15,6 +15,7 @@ import { useTables, useUpdateTableStatus } from '@features/orders';
 import { Card, EmptyState, ErrorScreen } from '@shared/components/ui';
 import { usePermission } from '@shared/hooks/usePermission';
 import { showMessage } from '@shared/lib/ui/confirm';
+import { getErrorMessage } from '@shared/lib/api';
 import { useSessionStore } from '@shared/stores/session';
 
 function tableTone(status: TableStatus) {
@@ -82,10 +83,7 @@ export default function ManagerTablesScreen() {
           );
         },
         onError: (err: unknown) => {
-          const msg =
-            (err as { response?: { data?: { message?: string } } })?.response?.data?.message ??
-            'Không cập nhật được trạng thái bàn';
-          showMessage('Lỗi', msg, 'error');
+          showMessage('Lỗi', getErrorMessage(err, 'Không cập nhật được trạng thái bàn'), 'error');
         },
         onSettled: () => setUpdatingTableId(null),
       },

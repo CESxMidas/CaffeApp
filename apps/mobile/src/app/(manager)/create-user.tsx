@@ -1,12 +1,5 @@
 import { useEffect, useState } from 'react';
-import {
-  ActivityIndicator,
-  ScrollView,
-  StyleSheet,
-  Text,
-  TextInput,
-  View,
-} from 'react-native';
+import { Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
 import { router } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { ROLE_LABELS, colors, spacing, borderRadius } from '@caffeapp/shared';
@@ -15,7 +8,7 @@ import { StaffRole } from '@caffeapp/shared';
 import { Button, Card } from '@shared/components/ui';
 import { useBranches } from '@features/auth';
 import { useIsOwner } from '@shared/hooks/usePermission';
-import { userService } from '@shared/lib/api';
+import { userService, getErrorMessage } from '@shared/lib/api';
 import { showMessage } from '@shared/lib/ui/confirm';
 import { useMutation } from '@tanstack/react-query';
 
@@ -32,7 +25,7 @@ interface FormData {
 
 export default function CreateUserScreen() {
   const isOwner = useIsOwner();
-  const { data: branches } = useBranches(true);
+  const { data: branches } = useBranches();
   const [form, setForm] = useState<FormData>({
     email: '',
     fullName: '',
@@ -49,10 +42,7 @@ export default function CreateUserScreen() {
       router.back();
     },
     onError: (err: unknown) => {
-      const msg =
-        (err as { response?: { data?: { message?: string } } })?.response?.data?.message ??
-        'Không tạo được tài khoản';
-      showMessage('Lỗi', msg);
+      showMessage('Lỗi', getErrorMessage(err, 'Không tạo được tài khoản'));
     },
   });
 
@@ -133,40 +123,39 @@ export default function CreateUserScreen() {
         <Text style={styles.label}>Vai trò</Text>
         <View style={styles.roleRow}>
           {ALL_ROLES.map((role) => (
-            <Card
-              key={role}
-              style={[styles.roleCard, form.role === role && styles.roleCardActive]}
-              onPress={() => setForm({ ...form, role })}
-            >
-              <Text
-                style={[styles.roleText, form.role === role && styles.roleTextActive]}
-              >
-                {ROLE_LABELS[role]}
-              </Text>
-            </Card>
+            <Pressable key={role} onPress={() => setForm({ ...form, role })}>
+              <Card style={[styles.roleCard, form.role === role && styles.roleCardActive]}>
+                <Text style={[styles.roleText, form.role === role && styles.roleTextActive]}>
+                  {ROLE_LABELS[role]}
+                </Text>
+              </Card>
+            </Pressable>
           ))}
         </View>
 
         <Text style={styles.label}>Chi nhánh (nếu có)</Text>
         <View style={styles.branchRow}>
           {branches?.map((branch: BranchDto) => (
-            <Card
-              key={branch.id}
-              style={[styles.branchCard, form.branchId === branch.id && styles.branchCardActive]}
-              onPress={() => setForm({ ...form, branchId: branch.id })}
-            >
-              <Ionicons
-                name={form.branchId === branch.id ? 'location' : 'location-outline'}
-                size={16}
-                color={form.branchId === branch.id ? colors.white : colors.primary}
-              />
-              <Text
-                style={[styles.branchText, form.branchId === branch.id && styles.branchTextActive]}
-                numberOfLines={1}
+            <Pressable key={branch.id} onPress={() => setForm({ ...form, branchId: branch.id })}>
+              <Card
+                style={[styles.branchCard, form.branchId === branch.id && styles.branchCardActive]}
               >
-                {branch.name}
-              </Text>
-            </Card>
+                <Ionicons
+                  name={form.branchId === branch.id ? 'location' : 'location-outline'}
+                  size={16}
+                  color={form.branchId === branch.id ? colors.white : colors.primary}
+                />
+                <Text
+                  style={[
+                    styles.branchText,
+                    form.branchId === branch.id && styles.branchTextActive,
+                  ]}
+                  numberOfLines={1}
+                >
+                  {branch.name}
+                </Text>
+              </Card>
+            </Pressable>
           ))}
           {(!branches || branches.length === 0) && (
             <Text style={styles.noBranch}>Chưa có chi nhánh nào</Text>

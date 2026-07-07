@@ -58,15 +58,7 @@ export function useUpdateOrderStatus() {
       actedByStaffId?: string;
     }) => orderService.updateStatus(orderId, { status, actedByStaffId }),
 
-    onSuccess: () => {
-      void queryClient.invalidateQueries({ queryKey: ['orders'] });
-
-      void queryClient.invalidateQueries({ queryKey: ['barista-queue'] });
-
-      void queryClient.invalidateQueries({ queryKey: ['order'] });
-
-      void queryClient.invalidateQueries({ queryKey: ['tables'] });
-    },
+    onSuccess: () => invalidateOrderWorkflow(queryClient),
   });
 }
 
@@ -108,15 +100,7 @@ export function useDeliverOrder() {
       actedByStaffId?: string;
     }) => orderService.deliver(orderId, { actedByStaffId } satisfies DeliverOrderRequestDto),
 
-    onSuccess: () => {
-      void queryClient.invalidateQueries({ queryKey: ['orders'] });
-
-      void queryClient.invalidateQueries({ queryKey: ['barista-queue'] });
-
-      void queryClient.invalidateQueries({ queryKey: ['order'] });
-
-      void queryClient.invalidateQueries({ queryKey: ['tables'] });
-    },
+    onSuccess: () => invalidateOrderWorkflow(queryClient),
   });
 }
 

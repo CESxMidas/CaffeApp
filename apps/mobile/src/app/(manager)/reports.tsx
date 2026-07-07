@@ -1,10 +1,18 @@
-import { ActivityIndicator, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { useState } from 'react';
+import { ActivityIndicator, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { colors, formatCurrency, spacing } from '@caffeapp/shared';
+import { borderRadius, colors, formatCurrency, spacing } from '@caffeapp/shared';
 import type { PaymentMethod } from '@caffeapp/shared';
 import { Card, ErrorScreen } from '@shared/components/ui';
-import { useRevenueReport } from '@features/manager';
+import { revenueRangeForPreset, useRevenueReport, type RevenueRangePreset } from '@features/manager';
 import { useSessionStore } from '@shared/stores/session';
+
+const RANGE_PRESETS: { key: RevenueRangePreset; label: string }[] = [
+  { key: 'today', label: 'Hôm nay' },
+  { key: '7d', label: '7 ngày' },
+  { key: '30d', label: '30 ngày' },
+  { key: 'month', label: 'Tháng này' },
+];
 
 const PAYMENT_METHOD_LABELS: Record<PaymentMethod, string> = {
   CASH: 'Tiền mặt',
@@ -35,12 +43,31 @@ function StatCard({
 
 export default function ReportsScreen() {
   const activeBranchId = useSessionStore((s) => s.activeBranchId);
-  const { data: report, isLoading, isError, refetch } = useRevenueReport(activeBranchId);
+  const [preset, setPreset] = useState<RevenueRangePreset>('today');
+  const range = revenueRangeForPreset(preset);
+  const { data: report, isLoading, isError, refetch } = useRevenueReport(activeBranchId, range);
+
+  const rangePicker = (
+    <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.presetRow}>
+      {RANGE_PRESETS.map((p) => (
+        <Pressable key={p.key} onPress={() => setPreset(p.key)}>
+          <View style={[styles.presetChip, preset === p.key && styles.presetChipActive]}>
+            <Text style={[styles.presetText, preset === p.key && styles.presetTextActive]}>
+              {p.label}
+            </Text>
+          </View>
+        </Pressable>
+      ))}
+    </ScrollView>
+  );
 
   if (isLoading) {
     return (
-      <View style={styles.center}>
-        <ActivityIndicator size="large" color={colors.primary} />
+      <View style={styles.container}>
+        {rangePicker}
+        <View style={styles.center}>
+          <ActivityIndicator size="large" color={colors.primary} />
+        </View>
       </View>
     );
   }
@@ -48,6 +75,7 @@ export default function ReportsScreen() {
   if (isError || !report) {
     return (
       <View style={styles.container}>
+        {rangePicker}
         <ErrorScreen message="Không tải được báo cáo" onRetry={() => refetch()} />
       </View>
     );
@@ -57,7 +85,8 @@ export default function ReportsScreen() {
 
   return (
     <ScrollView style={styles.container} contentContainerStyle={styles.content}>
-      <Text style={styles.title}>Báo cáo hôm nay</Text>
+      <Text style={styles.title}>Báo cáo doanh thu</Text>
+      {rangePicker}
 
       <View style={styles.statsGrid}>
         <StatCard
@@ -77,6 +106,23 @@ export default function ReportsScreen() {
           icon="close-circle-outline"
         />
       </View>
+
+      {report.series.length > 1 ? (
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>Doanh thu theo ngày</Text>
+          {report.series.map((point) => (
+            <Card key={point.period} style={styles.paymentCard}>
+              <View style={styles.paymentRow}>
+                <Text style={styles.paymentMethod}>{point.period}</Text>
+                <View style={styles.paymentStats}>
+                  <Text style={styles.paymentRevenue}>{formatCurrency(point.revenue)}</Text>
+                  <Text style={styles.paymentOrders}>{point.orders} đơn</Text>
+                </View>
+              </View>
+            </Card>
+          ))}
+        </View>
+      ) : null}
 
       {report.topItems.length > 0 ? (
         <View style={styles.section}>
@@ -125,7 +171,20 @@ const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: colors.background },
   content: { padding: spacing.base, paddingBottom: spacing.xl },
   center: { flex: 1, alignItems: 'center', justifyContent: 'center' },
-  title: { fontSize: 22, fontWeight: '700', color: colors.text, marginBottom: spacing.md },
+  title: { fontSize: 22, fontWeight: '700', color: colors.text, marginBottom: spacing.sm },
+  presetRow: { maxHeight: 40, marginBottom: spacing.md },
+  presetChip: {
+    paddingHorizontal: spacing.md,
+    paddingVertical: spacing.sm,
+    borderRadius: borderRadius.full,
+    marginRight: spacing.sm,
+    backgroundColor: colors.surface,
+    borderWidth: 1,
+    borderColor: colors.border,
+  },
+  presetChipActive: { backgroundColor: colors.primaryLight, borderColor: colors.primary },
+  presetText: { fontSize: 13, color: colors.textSecondary },
+  presetTextActive: { color: colors.primary, fontWeight: '600' },
   statsGrid: {
     flexDirection: 'row',
     flexWrap: 'wrap',

@@ -10,10 +10,12 @@ import {
   View,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { colors, formatCurrency, spacing, borderRadius } from '@caffeapp/shared';
 import type { ShiftDto } from '@caffeapp/shared';
 import { Button, Card, ErrorScreen } from '@shared/components/ui';
-import { showMessage } from '@shared/lib/ui/confirm';
+import { confirmAction, showMessage } from '@shared/lib/ui/confirm';
+import { getErrorMessage, paymentService, shiftService } from '@shared/lib/api';
 import { useActiveShift, useCloseShift, useOpenShift, useShifts } from '@features/manager';
 import { useSessionStore } from '@shared/stores/session';
 
@@ -52,6 +54,24 @@ export default function ShiftsScreen() {
   const [startTime, setStartTime] = useState('07:00');
   const [endTime, setEndTime] = useState('15:00');
 
+  const queryClient = useQueryClient();
+  const { data: reconciliation } = useQuery({
+    queryKey: ['shift-reconciliation', activeShift?.id],
+    queryFn: () => shiftService.getReconciliation(activeShift!.id),
+    enabled: Boolean(activeShift?.id),
+    refetchInterval: 60_000,
+  });
+  const verifyTransfer = useMutation({
+    mutationFn: (paymentId: string) => paymentService.verifyPayment(paymentId),
+    onSuccess: () => {
+      void queryClient.invalidateQueries({ queryKey: ['shift-reconciliation'] });
+      showMessage('Đã xác nhận', 'Giao dịch chuyển khoản đã được xác nhận', 'success');
+    },
+    onError: (err: unknown) => {
+      showMessage('Lỗi', getErrorMessage(err, 'Không xác nhận được giao dịch'), 'error');
+    },
+  });
+
   const handleOpen = () => {
     if (!activeBranchId || !shiftName.trim()) return;
     openShift.mutate(
@@ -69,26 +89,28 @@ export default function ShiftsScreen() {
           setShiftName('');
         },
         onError: (err: unknown) => {
-          const msg =
-            (err as { response?: { data?: { message?: string } } })?.response?.data?.message ??
-            'Không mở được ca';
-          showMessage('Lỗi', msg, 'error');
+          showMessage('Lỗi', getErrorMessage(err, 'Không mở được ca'), 'error');
         },
       },
     );
   };
 
-  const handleClose = () => {
+  const handleClose = async () => {
     if (!activeShift) return;
+    const unverifiedCount = reconciliation?.unverifiedTransfers.length ?? 0;
+    if (unverifiedCount > 0) {
+      const proceed = await confirmAction(
+        'Còn chuyển khoản chưa xác nhận',
+        `${unverifiedCount} giao dịch chuyển khoản chưa được xác nhận đã vào tài khoản. Vẫn đóng ca?`,
+      );
+      if (!proceed) return;
+    }
     closeShift.mutate(activeShift.id, {
       onSuccess: () => {
         showMessage('Thành công', 'Đã đóng ca làm việc', 'success');
       },
       onError: (err: unknown) => {
-        const msg =
-          (err as { response?: { data?: { message?: string } } })?.response?.data?.message ??
-          'Không đóng được ca';
-        showMessage('Lỗi', msg, 'error');
+        showMessage('Lỗi', getErrorMessage(err, 'Không đóng được ca'), 'error');
       },
     });
   };
@@ -130,7 +152,7 @@ export default function ShiftsScreen() {
             <Button
               title="Đóng ca"
               loading={closeShift.isPending}
-              onPress={handleClose}
+              onPress={() => void handleClose()}
               variant="outline"
             />
           </View>
@@ -144,6 +166,48 @@ export default function ShiftsScreen() {
           </View>
         </Card>
       )}
+
+      {activeShift && reconciliation ? (
+        <Card>
+          <Text style={styles.reconTitle}>Đối soát ca</Text>
+          <View style={styles.reconRow}>
+            <Text style={styles.reconLabel}>Tiền mặt trong két (dự kiến)</Text>
+            <Text style={styles.reconValue}>{formatCurrency(reconciliation.expectedCash)}</Text>
+          </View>
+          <View style={styles.reconRow}>
+            <Text style={styles.reconLabel}>{`Đơn tiền mặt: ${reconciliation.cashOrders}`}</Text>
+            <Text style={styles.reconLabel}>{`Đơn CK: ${reconciliation.transferOrders}`}</Text>
+          </View>
+          <View style={styles.reconRow}>
+            <Text style={styles.reconLabel}>Tổng chuyển khoản</Text>
+            <Text style={styles.reconValue}>{formatCurrency(reconciliation.transferTotal)}</Text>
+          </View>
+
+          {reconciliation.unverifiedTransfers.length > 0 ? (
+            <View style={styles.reconUnverified}>
+              <Text style={styles.reconWarn}>
+                {`${reconciliation.unverifiedTransfers.length} chuyển khoản chưa xác nhận:`}
+              </Text>
+              {reconciliation.unverifiedTransfers.map((t) => (
+                <View key={t.paymentId} style={styles.reconRow}>
+                  <Text style={styles.reconLabel}>
+                    {`#${t.orderNumber} · ${formatCurrency(t.amount)} · ${formatTime(t.paidAt)}`}
+                  </Text>
+                  <Button
+                    title="Đã nhận"
+                    fullWidth={false}
+                    variant="outline"
+                    loading={verifyTransfer.isPending}
+                    onPress={() => verifyTransfer.mutate(t.paymentId)}
+                  />
+                </View>
+              ))}
+            </View>
+          ) : (
+            <Text style={styles.reconOk}>Tất cả chuyển khoản đã được xác nhận ✓</Text>
+          )}
+        </Card>
+      ) : null}
 
       <Text style={styles.sectionTitle}>Lịch sử ca</Text>
       {shifts && shifts.length > 0 ? (
@@ -306,7 +370,30 @@ const styles = StyleSheet.create({
     paddingVertical: 4,
   },
   statusOpen: { backgroundColor: colors.primaryLight },
-  statusClosed: { backgroundColor: '#F3F4F6' },
+  statusClosed: { backgroundColor: colors.surfaceMuted },
+  reconTitle: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: colors.text,
+    marginBottom: spacing.sm,
+  },
+  reconRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginTop: spacing.xs,
+    gap: spacing.sm,
+  },
+  reconLabel: { fontSize: 13, color: colors.textSecondary, flexShrink: 1 },
+  reconValue: { fontSize: 15, fontWeight: '700', color: colors.text },
+  reconUnverified: {
+    marginTop: spacing.md,
+    paddingTop: spacing.sm,
+    borderTopWidth: 1,
+    borderTopColor: colors.border,
+  },
+  reconWarn: { fontSize: 13, fontWeight: '600', color: colors.warning },
+  reconOk: { fontSize: 13, color: colors.primary, marginTop: spacing.md },
   statusText: { fontSize: 12, fontWeight: '600' },
   statusTextOpen: { color: colors.primary },
   statusTextClosed: { color: colors.textMuted },
@@ -320,7 +407,7 @@ const styles = StyleSheet.create({
   historyRevenue: { fontSize: 13, fontWeight: '600', color: colors.primary },
   modalOverlay: {
     flex: 1,
-    backgroundColor: 'rgba(0,0,0,0.5)',
+    backgroundColor: colors.overlay,
     justifyContent: 'center',
     padding: spacing.lg,
   },

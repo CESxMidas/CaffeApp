@@ -138,7 +138,7 @@ const styles = StyleSheet.create({
   toolbarBtn: { alignSelf: 'flex-end' },
   list: { padding: spacing.base, gap: spacing.sm, paddingBottom: spacing.xl },
   row: { flexDirection: 'row', gap: spacing.md, alignItems: 'flex-start' },
-  rowUnread: { borderColor: colors.primaryLight, backgroundColor: '#FAFFFE' },
+  rowUnread: { borderColor: colors.primaryLight, backgroundColor: colors.background },
   iconWrap: {
     width: 44,
     height: 44,

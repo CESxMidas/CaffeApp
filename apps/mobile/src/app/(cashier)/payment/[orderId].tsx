@@ -15,6 +15,7 @@ import { useCreatePayment, useOrder } from '@features/orders';
 import { useStaffActor } from '@features/staff';
 import { Button, Card, ErrorScreen, Input } from '@shared/components/ui';
 import { showMessage } from '@shared/lib/ui/confirm';
+import { getErrorMessage } from '@shared/lib/api';
 import { opFrontTab } from '@shared/lib/navigation/operationalRoutes';
 
 const METHODS = [PaymentMethod.CASH, PaymentMethod.BANK_TRANSFER] as const;
@@ -94,9 +95,14 @@ export default function CashierPaymentScreen() {
             router.replace(opFrontTab('orders'));
           },
           onError: (err: unknown) => {
-            const msg =
-              (err as { response?: { data?: { message?: string } } })?.response?.data?.message ??
-              'Thanh toán thất bại';
+            const msg = getErrorMessage(err, 'Thanh toán thất bại');
+            // EC-01: if the network dropped after the server processed the first
+            // attempt, a retry returns "Đơn đã thanh toán" — that IS a success.
+            if (msg.includes('Đơn đã thanh toán')) {
+              showMessage('Thành công', `Đơn #${order.orderNumber} đã được thanh toán`, 'success');
+              router.replace(opFrontTab('orders'));
+              return;
+            }
             showMessage('Lỗi', msg, 'error');
           },
         },

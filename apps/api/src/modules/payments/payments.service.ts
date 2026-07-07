@@ -5,7 +5,7 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import type { PaymentDto } from '@caffeapp/shared';
-import { OrderStatus, PaymentMethod } from '@prisma/client';
+import { OrderStatus, PaymentMethod, TableStatus, type Prisma } from '@prisma/client';
 import { PrismaService } from '@common/prisma/prisma.service';
 import { ActorResolverService } from '@common/audit/actor-resolver.service';
 import { AuditService } from '@common/audit/audit.service';
@@ -15,6 +15,8 @@ import { generateVietQRData } from '@common/utils/vietqr.util';
 import type { JwtPayload } from '@common/types/jwt-payload.types';
 import type { CreatePaymentDto } from './dto/create-payment.dto';
 import type { GenerateQrDto } from './dto/generate-qr.dto';
+import type { VerifyPaymentDto } from './dto/verify-payment.dto';
+import type { VoidPaymentDto } from './dto/void-payment.dto';
 
 const PILOT_PAYMENT_METHODS = new Set<PaymentMethod>([
   PaymentMethod.CASH,
@@ -222,12 +224,77 @@ export class PaymentsService {
     }));
   }
 
-  // Verify bank transfer payment (manual confirmation by manager)
-  async verify(
+  // Void a payment (manager corrects a mistaken charge). The payment row is
+  // removed and the order returns to READY; the full payment snapshot plus the
+  // mandatory reason live on in the audit log, which is the accounting record.
+  async void(
     payload: JwtPayload,
     paymentId: string,
-    dto: { verified: boolean; notes?: string },
-  ): Promise<PaymentDto> {
+    dto: VoidPaymentDto,
+  ): Promise<{ orderId: string }> {
+    const payment = await this.prisma.payment.findUnique({
+      where: { id: paymentId },
+      include: { order: true },
+    });
+
+    if (!payment) {
+      throw new NotFoundException('Giao dịch không tồn tại');
+    }
+    assertBranchAccess(payload, payment.order.branchId);
+
+    if (payment.order.status !== OrderStatus.PAID) {
+      throw new ConflictException('Đơn không ở trạng thái đã thanh toán');
+    }
+
+    const actorUserId = await this.actorResolver.resolveActorUserId(
+      payload,
+      dto.actedByStaffId,
+      payment.order.branchId,
+    );
+
+    await this.prisma.$transaction(async (tx) => {
+      await tx.payment.delete({ where: { id: paymentId } });
+
+      await tx.order.update({
+        where: { id: payment.orderId },
+        data: { status: OrderStatus.READY, paidAt: null },
+      });
+
+      // The order is active again, so re-occupy its table.
+      if (payment.order.tableId) {
+        await tx.table.update({
+          where: { id: payment.order.tableId },
+          data: { status: TableStatus.OCCUPIED },
+        });
+      }
+    });
+
+    void this.audit.log({
+      branchId: payment.order.branchId,
+      actorId: actorUserId,
+      entityType: 'payment',
+      entityId: payment.id,
+      action: 'payment.voided',
+      beforeData: {
+        orderId: payment.orderId,
+        orderNumber: payment.order.orderNumber,
+        method: payment.method,
+        amount: payment.amount,
+        changeAmount: payment.changeAmount,
+        reference: payment.reference,
+        paidAt: payment.paidAt.toISOString(),
+      } as Prisma.InputJsonValue,
+      metadata: {
+        reason: dto.reason,
+        ...(dto.actedByStaffId ? { actedByStaffId: dto.actedByStaffId } : {}),
+      } as Prisma.InputJsonValue,
+    });
+
+    return { orderId: payment.orderId };
+  }
+
+  // Verify bank transfer payment (manual confirmation by manager)
+  async verify(payload: JwtPayload, paymentId: string, dto: VerifyPaymentDto): Promise<PaymentDto> {
     const payment = await this.prisma.payment.findUnique({
       where: { id: paymentId },
       include: { order: true },

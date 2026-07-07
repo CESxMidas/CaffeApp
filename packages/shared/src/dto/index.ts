@@ -285,6 +285,20 @@ export interface CloseShiftDto {
   shiftId: string;
 }
 
+export interface ShiftReconciliationDto {
+  shiftId: string;
+  expectedCash: number;
+  cashOrders: number;
+  transferTotal: number;
+  transferOrders: number;
+  unverifiedTransfers: Array<{
+    paymentId: string;
+    orderNumber: string;
+    amount: number;
+    paidAt: string;
+  }>;
+}
+
 export type NotificationType = 'ORDER_READY' | 'ORDER_NEW' | 'BRANCH_ASSIGNMENT' | 'SYSTEM';
 
 export interface NotificationDto {

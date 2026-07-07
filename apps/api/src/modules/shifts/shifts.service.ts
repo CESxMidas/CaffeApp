@@ -1,6 +1,6 @@
 import { ConflictException, Injectable, NotFoundException } from '@nestjs/common';
-import type { ShiftDto } from '@caffeapp/shared';
-import { OrderStatus, ShiftStatus } from '@prisma/client';
+import type { ShiftDto, ShiftReconciliationDto } from '@caffeapp/shared';
+import { OrderStatus, PaymentMethod, ShiftStatus } from '@prisma/client';
 import { PrismaService } from '@common/prisma/prisma.service';
 import { resolveBranchScope } from '@common/utils/branch-scope.util';
 import type { JwtPayload } from '@common/types/jwt-payload.types';
@@ -110,6 +110,84 @@ export class ShiftsService {
     });
 
     return this.toShiftDto(updated);
+  }
+
+  // End-of-shift reconciliation: expected cash in drawer, transfer totals, and
+  // the list of bank transfers still awaiting manual verification (EC-08).
+  async getReconciliation(payload: JwtPayload, shiftId: string): Promise<ShiftReconciliationDto> {
+    const shift = await this.prisma.shift.findUnique({ where: { id: shiftId } });
+    if (!shift) {
+      throw new NotFoundException('Ca không tồn tại');
+    }
+    const scopedBranchId = resolveBranchScope(payload);
+    if (shift.branchId !== scopedBranchId) {
+      throw new NotFoundException('Ca không tồn tại');
+    }
+
+    const windowEnd = shift.closedAt ?? new Date();
+    const orders = await this.prisma.order.findMany({
+      where: {
+        branchId: shift.branchId,
+        status: OrderStatus.PAID,
+        OR: [
+          { shiftId: shift.id },
+          {
+            shiftId: null,
+            paidAt: { gte: shift.openedAt ?? shift.createdAt, lte: windowEnd },
+          },
+        ],
+      },
+      select: {
+        orderNumber: true,
+        payments: {
+          select: {
+            id: true,
+            method: true,
+            amount: true,
+            changeAmount: true,
+            reference: true,
+            paidAt: true,
+          },
+        },
+      },
+    });
+
+    let expectedCash = 0;
+    let cashOrders = 0;
+    let transferTotal = 0;
+    let transferOrders = 0;
+    const unverifiedTransfers: ShiftReconciliationDto['unverifiedTransfers'] = [];
+
+    for (const order of orders) {
+      for (const payment of order.payments) {
+        if (payment.method === PaymentMethod.CASH) {
+          // Money actually kept in the drawer = received minus change returned.
+          expectedCash += payment.amount - (payment.changeAmount ?? 0);
+          cashOrders++;
+        } else if (payment.method === PaymentMethod.BANK_TRANSFER) {
+          transferTotal += payment.amount;
+          transferOrders++;
+          const verified = payment.reference?.startsWith('Verified by') ?? false;
+          if (!verified) {
+            unverifiedTransfers.push({
+              paymentId: payment.id,
+              orderNumber: order.orderNumber,
+              amount: payment.amount,
+              paidAt: payment.paidAt.toISOString(),
+            });
+          }
+        }
+      }
+    }
+
+    return {
+      shiftId: shift.id,
+      expectedCash,
+      cashOrders,
+      transferTotal,
+      transferOrders,
+      unverifiedTransfers,
+    };
   }
 
   private toShiftDto(s: {

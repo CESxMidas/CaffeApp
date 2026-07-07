@@ -6,6 +6,8 @@ import { Roles } from '@common/decorators/roles.decorator';
 import type { JwtPayload } from '@common/types/jwt-payload.types';
 import { CreatePaymentDto } from './dto/create-payment.dto';
 import { GenerateQrDto } from './dto/generate-qr.dto';
+import { VerifyPaymentDto } from './dto/verify-payment.dto';
+import { VoidPaymentDto } from './dto/void-payment.dto';
 import { PaymentsService } from './payments.service';
 
 @Controller('payments')
@@ -53,13 +55,25 @@ export class PaymentsController {
     return { data };
   }
 
+  // Void a mistaken payment — manager only, reason required
+  @Post(':paymentId/void')
+  @Roles(StaffRole.MANAGER, StaffRole.OWNER)
+  async voidPayment(
+    @CurrentUser() user: JwtPayload,
+    @Param('paymentId') paymentId: string,
+    @Body() dto: VoidPaymentDto,
+  ): Promise<{ data: { orderId: string } }> {
+    const data = await this.paymentsService.void(user, paymentId, dto);
+    return { data };
+  }
+
   // Verify bank transfer payment (manual confirmation by manager)
   @Post(':paymentId/verify')
   @Roles(StaffRole.MANAGER, StaffRole.OWNER)
   async verify(
     @CurrentUser() user: JwtPayload,
     @Param('paymentId') paymentId: string,
-    @Body() dto: { verified: boolean; notes?: string },
+    @Body() dto: VerifyPaymentDto,
   ): Promise<{ data: PaymentDto }> {
     const data = await this.paymentsService.verify(user, paymentId, dto);
     return { data };

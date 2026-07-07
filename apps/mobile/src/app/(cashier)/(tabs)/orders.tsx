@@ -69,6 +69,17 @@ export default function CashierOrdersScreen() {
     return (orders ?? []).filter((o) => matchesTab(o, tab));
   }, [orders, tab]);
 
+  const summary = useMemo(() => {
+    const totalOrders = filtered.length;
+    const totalRevenue = filtered
+      .filter((o) => o.status === OrderStatus.PAID)
+      .reduce((sum, o) => sum + o.total, 0);
+    const totalPending = filtered
+      .filter((o) => o.status !== OrderStatus.PAID && o.status !== OrderStatus.CANCELLED)
+      .reduce((sum, o) => sum + o.total, 0);
+    return { totalOrders, totalRevenue, totalPending };
+  }, [filtered]);
+
   if (isLoading) {
     return (
       <View style={styles.center}>
@@ -84,17 +95,6 @@ export default function CashierOrdersScreen() {
       </View>
     );
   }
-
-  const summary = useMemo(() => {
-    const totalOrders = filtered.length;
-    const totalRevenue = filtered
-      .filter((o) => o.status === OrderStatus.PAID)
-      .reduce((sum, o) => sum + o.total, 0);
-    const totalPending = filtered
-      .filter((o) => o.status !== OrderStatus.PAID && o.status !== OrderStatus.CANCELLED)
-      .reduce((sum, o) => sum + o.total, 0);
-    return { totalOrders, totalRevenue, totalPending };
-  }, [filtered]);
 
   return (
     <View style={styles.container}>

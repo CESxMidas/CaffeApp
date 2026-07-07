@@ -14,6 +14,7 @@ import type { ProductDto, ProductCategoryDto } from '@caffeapp/shared';
 import { colors, spacing, borderRadius, formatCurrency } from '@caffeapp/shared';
 import { useProducts, useCategories } from '@features/orders';
 import { Button, Card, EmptyState, ErrorScreen, SkeletonList } from '@shared/components/ui';
+import { getErrorMessage } from '@shared/lib/api';
 import { useSessionStore } from '@shared/stores/session';
 import { useCreateProduct, useUpdateProduct, useDeleteProduct } from '@features/manager';
 
@@ -78,10 +79,7 @@ export default function MenuManagementScreen() {
             void refetch();
           },
           onError: (err: unknown) => {
-            const msg =
-              (err as { response?: { data?: { message?: string } } })?.response?.data?.message ??
-              'Lỗi cập nhật';
-            Alert.alert('Lỗi', msg);
+            Alert.alert('Lỗi', getErrorMessage(err, 'Lỗi cập nhật'));
           },
         },
       );
@@ -94,10 +92,7 @@ export default function MenuManagementScreen() {
             void refetch();
           },
           onError: (err: unknown) => {
-            const msg =
-              (err as { response?: { data?: { message?: string } } })?.response?.data?.message ??
-              'Lỗi tạo mới';
-            Alert.alert('Lỗi', msg);
+            Alert.alert('Lỗi', getErrorMessage(err, 'Lỗi tạo mới'));
           },
         },
       );
@@ -114,10 +109,7 @@ export default function MenuManagementScreen() {
           deleteProduct.mutate(product.id, {
             onSuccess: () => void refetch(),
             onError: (err: unknown) => {
-              const msg =
-                (err as { response?: { data?: { message?: string } } })?.response?.data?.message ??
-                'Lỗi xoá';
-              Alert.alert('Lỗi', msg);
+              Alert.alert('Lỗi', getErrorMessage(err, 'Lỗi xoá'));
             },
           });
         },

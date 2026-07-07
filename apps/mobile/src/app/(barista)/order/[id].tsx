@@ -15,6 +15,7 @@ import { useOrder, useUpdateOrderStatus, useToggleItemPrepared } from '@features
 import { useStaffActor } from '@features/staff';
 import { Button, Card, ErrorScreen } from '@shared/components/ui';
 import { showMessage } from '@shared/lib/ui/confirm';
+import { getErrorMessage } from '@shared/lib/api';
 
 /** Tick interval for timer display (1s). */
 const TIMER_TICK_MS = 1_000;
@@ -96,10 +97,7 @@ export default function BaristaOrderDetailScreen() {
             showMessage('Đã cập nhật', ORDER_STATUS_LABELS[status], 'success');
           },
           onError: (err: unknown) => {
-            const msg =
-              (err as { response?: { data?: { message?: string } } })?.response?.data?.message ??
-              'Không cập nhật được';
-            showMessage('Lỗi', msg, 'error');
+            showMessage('Lỗi', getErrorMessage(err, 'Không cập nhật được'), 'error');
           },
         },
       );
@@ -111,10 +109,7 @@ export default function BaristaOrderDetailScreen() {
       { orderId: order.id, itemId, isPrepared: !isPrepared },
       {
         onError: (err: unknown) => {
-          const msg =
-            (err as { response?: { data?: { message?: string } } })?.response?.data?.message ??
-            'Không cập nhật được';
-          showMessage('Lỗi', msg, 'error');
+          showMessage('Lỗi', getErrorMessage(err, 'Không cập nhật được'), 'error');
         },
       },
     );

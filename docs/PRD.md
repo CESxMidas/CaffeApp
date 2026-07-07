@@ -177,7 +177,7 @@ Thanh toán được theo dõi qua bảng `payments` và `orders.status = PAID`.
 
 | #     | Scenario                                  | Expected behavior                                             |
 | ----- | ----------------------------------------- | ------------------------------------------------------------- |
-| EC-01 | Mất mạng khi đang tạo đơn                 | App không hoạt động; vận hành thủ công tại quán (B-18)        |
+| EC-01 | Mất mạng khi đang tạo đơn                 | Banner offline toàn app; draft cart lưu local (encrypted); retry thanh toán trả "Đơn đã thanh toán" được coi là thành công; vận hành thủ công theo SOP giấy (B-18) |
 | EC-02 | Mất mạng barista                          | Cùng EC-01 — không offline queue MVP                          |
 | EC-03 | Hủy món trong giỏ (chưa gửi bếp)          | Xóa item, cập nhật tổng                                       |
 | EC-04 | Hủy đơn đã gửi bếp                        | Chỉ manager/cashier; confirm dialog; notify barista           |
@@ -187,6 +187,9 @@ Thanh toán được theo dõi qua bảng `payments` và `orders.status = PAID`.
 | EC-08 | Chuyển khoản chưa xác nhận                | Đơn READY, chưa PAID; QL xử lý cuối ca nếu chưa vào TK (E-07) |
 | EC-09 | Barista hoàn thành khi chưa check hết món | Disable nút "Hoàn thành đơn"                                  |
 | EC-10 | Session hết hạn                           | Redirect login; giữ draft local (encrypted)                   |
+| EC-11 | Thu ngân thanh toán nhầm đơn/bàn          | MANAGER/OWNER hủy thanh toán (`POST /payments/:id/void`, lý do bắt buộc); đơn về READY, bàn OCCUPIED lại; snapshot vào audit log |
+| EC-12 | Món hết nguyên liệu giữa ca               | CASHIER/BARISTA toggle "hết món" ngay trên menu (`PATCH /products/:id/availability`); món mờ đi, không thêm được vào giỏ |
+| EC-13 | Cuối ca còn chuyển khoản chưa xác nhận    | Card "Đối soát ca" hiện tiền mặt dự kiến + list CK chưa verify; đóng ca có cảnh báo confirm (EC-08) |
 
 ---
 
@@ -214,6 +217,8 @@ Thanh toán được theo dõi qua bảng `payments` và `orders.status = PAID`.
 - Giao hàng Grab/ShopeeFood (A-08)
 - Inventory / kho chi tiết
 - Lịch ca nhân viên trên app
+
+> **Rủi ro chấp nhận (pilot):** StaffPicker không có PIN — audit log ghi tên NV thao tác nhưng không chống mạo danh trên tài khoản trạm dùng chung. Backlog sau pilot: PIN 4 số/NV khi xác nhận thao tác nhạy cảm. Chủ quán đã được thông báo giới hạn này.
 
 ## 7.1 In Scope MVP v2 (sau pilot)
 

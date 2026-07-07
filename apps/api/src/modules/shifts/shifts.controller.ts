@@ -1,5 +1,5 @@
-import { Body, Controller, Get, Post, Query } from '@nestjs/common';
-import type { ShiftDto } from '@caffeapp/shared';
+import { Body, Controller, Get, Param, Post, Query } from '@nestjs/common';
+import type { ShiftDto, ShiftReconciliationDto } from '@caffeapp/shared';
 import { StaffRole } from '@prisma/client';
 import { CurrentUser } from '@common/decorators/current-user.decorator';
 import { Roles } from '@common/decorators/roles.decorator';
@@ -38,6 +38,16 @@ export class ShiftsController {
     @Body() dto: OpenShiftDto,
   ): Promise<{ data: ShiftDto }> {
     const data = await this.shiftsService.open(user, dto);
+    return { data };
+  }
+
+  @Get(':shiftId/reconciliation')
+  @Roles(StaffRole.MANAGER, StaffRole.OWNER)
+  async reconciliation(
+    @CurrentUser() user: JwtPayload,
+    @Param('shiftId') shiftId: string,
+  ): Promise<{ data: ShiftReconciliationDto }> {
+    const data = await this.shiftsService.getReconciliation(user, shiftId);
     return { data };
   }
 

@@ -1,5 +1,5 @@
 export { useTables, useUpdateTableStatus } from './useTables';
-export { useProducts } from './useProducts';
+export { useProducts, useSetProductAvailability } from './useProducts';
 export { useCategories } from './useCategories';
 export { useCreateOrder } from './useCreateOrder';
 export { useOrders } from './useOrders';

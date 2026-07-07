@@ -3,10 +3,18 @@ import { API_ENDPOINTS } from '@shared/config/api.config';
 import { apiClient } from './apiClient';
 
 export const productService = {
-  async listProducts(branchId: string): Promise<ProductDto[]> {
+  async listProducts(branchId: string, includeUnavailable = false): Promise<ProductDto[]> {
     const { data } = await apiClient.get<ApiDataResponse<ProductDto[]>>(API_ENDPOINTS.products, {
-      params: { branchId },
+      params: { branchId, ...(includeUnavailable ? { includeUnavailable: 'true' } : {}) },
     });
+    return data.data;
+  },
+
+  async setAvailability(productId: string, isAvailable: boolean): Promise<ProductDto> {
+    const { data } = await apiClient.patch<ApiDataResponse<ProductDto>>(
+      `${API_ENDPOINTS.products}/${productId}/availability`,
+      { isAvailable },
+    );
     return data.data;
   },
 

@@ -1,4 +1,4 @@
-import type { ApiDataResponse, ShiftDto } from '@caffeapp/shared';
+import type { ApiDataResponse, ShiftDto, ShiftReconciliationDto } from '@caffeapp/shared';
 import { API_ENDPOINTS } from '@shared/config/api.config';
 import { apiClient } from './apiClient';
 
@@ -28,6 +28,13 @@ export const shiftService = {
     const { data } = await apiClient.post<ApiDataResponse<ShiftDto>>(
       `${API_ENDPOINTS.shifts}/open`,
       payload,
+    );
+    return data.data;
+  },
+
+  async getReconciliation(shiftId: string): Promise<ShiftReconciliationDto> {
+    const { data } = await apiClient.get<ApiDataResponse<ShiftReconciliationDto>>(
+      `${API_ENDPOINTS.shifts}/${shiftId}/reconciliation`,
     );
     return data.data;
   },

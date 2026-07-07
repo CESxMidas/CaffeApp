@@ -1,4 +1,7 @@
 import { create } from 'zustand';
+import { createJSONStorage, persist } from 'zustand/middleware';
+import * as SecureStore from 'expo-secure-store';
+import { Platform } from 'react-native';
 import type { OrderType } from '@caffeapp/shared';
 
 export interface CartLineItem {
@@ -32,42 +35,80 @@ interface CartState {
 
 let lineId = 0;
 
-export const useCartStore = create<CartState>((set, get) => ({
-  branchId: null,
-  orderType: null,
-  tableId: null,
-  tableCode: null,
-  items: [],
-
-  startOrder: ({ branchId, orderType, tableId = null, tableCode = null }) => {
-    set({ branchId, orderType, tableId, tableCode, items: [] });
-  },
-
-  addItem: (item) => {
-    set((s) => ({
-      items: [...s.items, { ...item, id: `line-${++lineId}` }],
-    }));
-  },
-
-  removeItem: (id) => {
-    set((s) => ({ items: s.items.filter((i) => i.id !== id) }));
-  },
-
-  updateQuantity: (id, quantity) => {
-    if (quantity < 1) {
-      get().removeItem(id);
+// EC-10: draft cart survives app kill / session expiry, stored encrypted.
+// SecureStore is native-only; web dev falls back to localStorage.
+const draftStorage = createJSONStorage(() => ({
+  getItem: (name: string) =>
+    Platform.OS === 'web'
+      ? (typeof localStorage !== 'undefined' ? localStorage.getItem(name) : null)
+      : SecureStore.getItemAsync(name),
+  setItem: (name: string, value: string) => {
+    if (Platform.OS === 'web') {
+      if (typeof localStorage !== 'undefined') localStorage.setItem(name, value);
       return;
     }
-    set((s) => ({
-      items: s.items.map((i) => (i.id === id ? { ...i, quantity } : i)),
-    }));
+    return SecureStore.setItemAsync(name, value);
   },
-
-  clearCart: () => {
-    set({ branchId: null, orderType: null, tableId: null, tableCode: null, items: [] });
+  removeItem: (name: string) => {
+    if (Platform.OS === 'web') {
+      if (typeof localStorage !== 'undefined') localStorage.removeItem(name);
+      return;
+    }
+    return SecureStore.deleteItemAsync(name);
   },
-
-  itemCount: () => get().items.reduce((sum, i) => sum + i.quantity, 0),
-
-  subtotal: () => get().items.reduce((sum, i) => sum + i.unitPrice * i.quantity, 0),
 }));
+
+export const useCartStore = create<CartState>()(
+  persist(
+    (set, get) => ({
+      branchId: null,
+      orderType: null,
+      tableId: null,
+      tableCode: null,
+      items: [],
+
+      startOrder: ({ branchId, orderType, tableId = null, tableCode = null }) => {
+        set({ branchId, orderType, tableId, tableCode, items: [] });
+      },
+
+      addItem: (item) => {
+        set((s) => ({
+          items: [...s.items, { ...item, id: `line-${Date.now()}-${++lineId}` }],
+        }));
+      },
+
+      removeItem: (id) => {
+        set((s) => ({ items: s.items.filter((i) => i.id !== id) }));
+      },
+
+      updateQuantity: (id, quantity) => {
+        if (quantity < 1) {
+          get().removeItem(id);
+          return;
+        }
+        set((s) => ({
+          items: s.items.map((i) => (i.id === id ? { ...i, quantity } : i)),
+        }));
+      },
+
+      clearCart: () => {
+        set({ branchId: null, orderType: null, tableId: null, tableCode: null, items: [] });
+      },
+
+      itemCount: () => get().items.reduce((sum, i) => sum + i.quantity, 0),
+
+      subtotal: () => get().items.reduce((sum, i) => sum + i.unitPrice * i.quantity, 0),
+    }),
+    {
+      name: 'caffeapp_draft_cart',
+      storage: draftStorage,
+      partialize: (s) => ({
+        branchId: s.branchId,
+        orderType: s.orderType,
+        tableId: s.tableId,
+        tableCode: s.tableCode,
+        items: s.items,
+      }),
+    },
+  ),
+);

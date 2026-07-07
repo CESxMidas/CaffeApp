@@ -2,6 +2,7 @@ export {
   useTables,
   useUpdateTableStatus,
   useProducts,
+  useSetProductAvailability,
   useCategories,
   useCreateOrder,
   useOrders,

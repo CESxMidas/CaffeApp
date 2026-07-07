@@ -3,7 +3,7 @@ import { router } from 'expo-router';
 import { ActivityIndicator } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { colors, spacing, borderRadius, formatCurrency } from '@caffeapp/shared';
-import { Card } from '@shared/components/ui';
+import { Card, ErrorScreen } from '@shared/components/ui';
 import { useIsOwner, usePermission } from '@shared/hooks/usePermission';
 import { usePendingBranchAssignments } from '@features/staff';
 import { useRevenueReport, useHourlyRevenue, useActiveShift } from '@features/manager';
@@ -40,7 +40,7 @@ export default function ManagerDashboardScreen() {
   const canManageStaff = usePermission('staff:manage');
   const activeBranchId = useSessionStore((s) => s.activeBranchId);
   const { data: pending } = usePendingBranchAssignments(isOwner);
-  const { data: revenue, isLoading } = useRevenueReport(activeBranchId);
+  const { data: revenue, isLoading, isError, refetch } = useRevenueReport(activeBranchId);
   const { data: hourlyData, isLoading: hourlyLoading } = useHourlyRevenue(activeBranchId);
   const { data: activeShift } = useActiveShift(activeBranchId);
   const pendingCount = isOwner ? (pending?.length ?? 0) : 0;
@@ -50,6 +50,14 @@ export default function ManagerDashboardScreen() {
     return (
       <View style={styles.center}>
         <ActivityIndicator size="large" color={colors.primary} />
+      </View>
+    );
+  }
+
+  if (isError) {
+    return (
+      <View style={styles.container}>
+        <ErrorScreen message="Không tải được doanh thu" onRetry={() => refetch()} />
       </View>
     );
   }

@@ -12,6 +12,7 @@ import {
 import { Button, Card, EmptyState, ErrorScreen } from '@shared/components/ui';
 import { useIsOwner } from '@shared/hooks/usePermission';
 import { confirmAction, showMessage } from '@shared/lib/ui/confirm';
+import { getErrorMessage } from '@shared/lib/api';
 
 function PendingCard({
   item,
@@ -85,10 +86,7 @@ export default function BranchApprovalsScreen() {
     approve.mutate(item.id, {
       onSuccess: () => showMessage('Đã duyệt', `${item.fullName} có thể đăng nhập.`),
       onError: (err: unknown) => {
-        const msg =
-          (err as { response?: { data?: { message?: string } } })?.response?.data?.message ??
-          'Không duyệt được';
-        showMessage('Lỗi', msg);
+        showMessage('Lỗi', getErrorMessage(err, 'Không duyệt được'));
       },
     });
   };
@@ -103,10 +101,7 @@ export default function BranchApprovalsScreen() {
     reject.mutate(item.id, {
       onSuccess: () => showMessage('Đã từ chối', 'Quản lý cần đề xuất lại.'),
       onError: (err: unknown) => {
-        const msg =
-          (err as { response?: { data?: { message?: string } } })?.response?.data?.message ??
-          'Không từ chối được';
-        showMessage('Lỗi', msg);
+        showMessage('Lỗi', getErrorMessage(err, 'Không từ chối được'));
       },
     });
   };

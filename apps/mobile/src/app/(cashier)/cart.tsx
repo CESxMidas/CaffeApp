@@ -15,6 +15,7 @@ import { useCreateOrder } from '@features/orders';
 import { useStaffActor } from '@features/staff';
 import { Button, Card } from '@shared/components/ui';
 import { showMessage } from '@shared/lib/ui/confirm';
+import { getErrorMessage } from '@shared/lib/api';
 import { opFrontTab } from '@shared/lib/navigation/operationalRoutes';
 import { useCartStore } from '@shared/stores/cart';
 
@@ -63,9 +64,7 @@ export default function CartScreen() {
             router.replace(opFrontTab('home'));
           },
           onError: (err: unknown) => {
-            const msg =
-              (err as { response?: { data?: { message?: string } } })?.response?.data?.message ??
-              'Không gửi được đơn';
+            const msg = getErrorMessage(err, 'Không gửi được đơn');
             const isTableConflict =
               msg.includes('Bàn đã được chọn') || msg.includes('đang có khách');
             showMessage(isTableConflict ? 'Bàn không khả dụng' : 'Lỗi', msg, 'error');

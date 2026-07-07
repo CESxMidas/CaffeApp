@@ -1,4 +1,9 @@
-export { useRevenueReport } from './useRevenueReport';
+export {
+  useRevenueReport,
+  revenueRangeForPreset,
+  type RevenueRangePreset,
+  type RevenueRange,
+} from './useRevenueReport';
 export { useHourlyRevenue } from './useHourlyRevenue';
 export { useCreateProduct } from './useCreateProduct';
 export { useUpdateProduct } from './useUpdateProduct';

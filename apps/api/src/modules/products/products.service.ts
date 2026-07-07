@@ -12,14 +12,18 @@ import { CreateCategoryDto } from './dto/create-category.dto';
 export class ProductsService {
   constructor(private readonly prisma: PrismaService) {}
 
-  async listForBranch(payload: JwtPayload, branchId?: string): Promise<ProductDto[]> {
+  async listForBranch(
+    payload: JwtPayload,
+    branchId?: string,
+    includeUnavailable = false,
+  ): Promise<ProductDto[]> {
     const scopedBranchId = resolveBranchScope(payload, branchId);
     const isManagerPlus = payload.role === StaffRole.MANAGER || payload.role === StaffRole.OWNER;
 
     const products = await this.prisma.product.findMany({
       where: {
         branchId: scopedBranchId,
-        ...(isManagerPlus ? {} : { isAvailable: true }),
+        ...(isManagerPlus || includeUnavailable ? {} : { isAvailable: true }),
       },
       include: { category: { select: { name: true } } },
       orderBy: [{ category: { sortOrder: 'asc' } }, { name: 'asc' }],
@@ -36,6 +40,43 @@ export class ProductsService {
       isAvailable: p.isAvailable,
       categoryName: p.category.name,
     }));
+  }
+
+  // Quick out-of-stock toggle — open to CASHIER/BARISTA so staff can mark an
+  // item "hết món" mid-shift without waiting for a manager (FR gap: menu CRUD
+  // is manager-only, but stock-outs happen at the counter).
+  async setAvailability(
+    payload: JwtPayload,
+    productId: string,
+    isAvailable: boolean,
+  ): Promise<ProductDto> {
+    const scopedBranchId = resolveBranchScope(payload);
+
+    const product = await this.prisma.product.findUnique({
+      where: { id: productId },
+      include: { category: { select: { name: true } } },
+    });
+    if (!product || product.branchId !== scopedBranchId) {
+      throw new NotFoundException('Sản phẩm không tồn tại');
+    }
+
+    const updated = await this.prisma.product.update({
+      where: { id: productId },
+      data: { isAvailable },
+      include: { category: { select: { name: true } } },
+    });
+
+    return {
+      id: updated.id,
+      branchId: updated.branchId,
+      categoryId: updated.categoryId,
+      name: updated.name,
+      description: updated.description,
+      price: updated.price,
+      imageUrl: updated.imageUrl,
+      isAvailable: updated.isAvailable,
+      categoryName: updated.category.name,
+    };
   }
 
   // Task 6.1: GET /products/:id endpoint

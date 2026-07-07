@@ -1,7 +1,7 @@
 import { Stack } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import { colors } from '@caffeapp/shared';
-import { ToastHost } from '@shared/components/ui';
+import { OfflineBanner, ToastHost } from '@shared/components/ui';
 import { AuthProvider } from '@shared/providers/AuthProvider';
 import { QueryProvider } from '@shared/providers/QueryProvider';
 
@@ -10,6 +10,7 @@ export default function RootLayout() {
     <QueryProvider>
       <AuthProvider>
         <StatusBar style="dark" />
+        <OfflineBanner />
         <Stack
           screenOptions={{
             headerStyle: { backgroundColor: colors.surface },

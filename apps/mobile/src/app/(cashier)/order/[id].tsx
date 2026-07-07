@@ -1,6 +1,7 @@
 import { useMemo, useState } from 'react';
 import { ActivityIndicator, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { router, useLocalSearchParams } from 'expo-router';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import {
   OrderStatus,
   ORDER_STATUS_LABELS,
@@ -24,20 +25,16 @@ import {
   useTransferOrderTable,
 } from '@features/orders';
 import { useStaffActor } from '@features/staff';
-import { Button, Card, ErrorScreen } from '@shared/components/ui';
-import { showMessage } from '@shared/lib/ui/confirm';
+import { Button, Card, ErrorScreen, Input } from '@shared/components/ui';
+import { confirmAction, showMessage } from '@shared/lib/ui/confirm';
+import { getErrorMessage, paymentService } from '@shared/lib/api';
+import { usePermission } from '@shared/hooks/usePermission';
 import { opStack } from '@shared/lib/navigation/operationalRoutes';
 import { useSessionStore } from '@shared/stores/session';
 
 type ActionMode = 'transfer' | 'merge' | 'split' | null;
 
 const ACTIVE_STATUS_FILTER = 'PENDING,MAKING,READY';
-
-function errorMessage(err: unknown, fallback: string): string {
-  return (
-    (err as { response?: { data?: { message?: string } } })?.response?.data?.message ?? fallback
-  );
-}
 
 function isActiveBill(order: OrderDto): boolean {
   return (
@@ -66,6 +63,43 @@ export default function CashierOrderDetailScreen() {
   const [selectedTableId, setSelectedTableId] = useState<string | null>(null);
   const [mergeSourceIds, setMergeSourceIds] = useState<string[]>([]);
   const [splitQuantities, setSplitQuantities] = useState<Record<string, number>>({});
+  const [voidReason, setVoidReason] = useState('');
+
+  const queryClient = useQueryClient();
+  const canVoidPayment = usePermission('payments:void') && order?.status === OrderStatus.PAID;
+  const { data: orderPayments } = useQuery({
+    queryKey: ['payments', order?.id],
+    queryFn: () => paymentService.getByOrder(order!.id),
+    enabled: canVoidPayment && Boolean(order?.id),
+  });
+  const voidPayment = useMutation({
+    mutationFn: (params: { paymentId: string; reason: string }) =>
+      paymentService.voidPayment(params),
+    onSuccess: () => {
+      setVoidReason('');
+      void queryClient.invalidateQueries({ queryKey: ['order'] });
+      void queryClient.invalidateQueries({ queryKey: ['orders'] });
+      void queryClient.invalidateQueries({ queryKey: ['tables'] });
+      void queryClient.invalidateQueries({ queryKey: ['payments'] });
+      showMessage('Đã hủy thanh toán', 'Đơn quay lại trạng thái chờ thanh toán', 'success');
+    },
+    onError: (err: unknown) => {
+      showMessage('Lỗi', getErrorMessage(err, 'Không hủy được thanh toán'), 'error');
+    },
+  });
+
+  const handleVoidPayment = async (paymentId: string) => {
+    if (voidReason.trim().length < 5) {
+      showMessage('Thiếu lý do', 'Nhập lý do hủy thanh toán (ít nhất 5 ký tự)', 'error');
+      return;
+    }
+    const ok = await confirmAction(
+      'Hủy thanh toán',
+      'Đơn sẽ quay lại trạng thái chờ thanh toán. Thao tác được ghi vào nhật ký.',
+    );
+    if (!ok) return;
+    voidPayment.mutate({ paymentId, reason: voidReason.trim() });
+  };
 
   const otherActiveOrders = useMemo(
     () =>
@@ -108,7 +142,7 @@ export default function CashierOrderDetailScreen() {
             showMessage('Đã giao món', 'Có thể thu tiền khi khách sẵn sàng', 'success');
           },
           onError: (err: unknown) => {
-            showMessage('Lỗi', errorMessage(err, 'Không cập nhật được trạng thái'), 'error');
+            showMessage('Lỗi', getErrorMessage(err,'Không cập nhật được trạng thái'), 'error');
           },
         },
       );
@@ -139,7 +173,7 @@ export default function CashierOrderDetailScreen() {
             }
           },
           onError: (err: unknown) => {
-            showMessage('Lỗi', errorMessage(err, 'Không chuyển được bàn'), 'error');
+            showMessage('Lỗi', getErrorMessage(err,'Không chuyển được bàn'), 'error');
           },
         },
       );
@@ -158,7 +192,7 @@ export default function CashierOrderDetailScreen() {
             showMessage('Đã gộp bill', 'Các món đã được chuyển vào bill hiện tại', 'success');
           },
           onError: (err: unknown) => {
-            showMessage('Lỗi', errorMessage(err, 'Không gộp được bill'), 'error');
+            showMessage('Lỗi', getErrorMessage(err,'Không gộp được bill'), 'error');
           },
         },
       );
@@ -185,7 +219,7 @@ export default function CashierOrderDetailScreen() {
             );
           },
           onError: (err: unknown) => {
-            showMessage('Lỗi', errorMessage(err, 'Không tách được bill'), 'error');
+            showMessage('Lỗi', getErrorMessage(err,'Không tách được bill'), 'error');
           },
         },
       );
@@ -336,6 +370,30 @@ export default function CashierOrderDetailScreen() {
         <Text style={styles.hint}>
           Pha xong · giao món cho khách hoặc thu tiền trước nếu khách yêu cầu
         </Text>
+      ) : null}
+
+      {canVoidPayment && orderPayments && orderPayments.length > 0 ? (
+        <Card style={styles.opsCard}>
+          <Text style={styles.sectionTitle}>Hủy thanh toán (Quản lý)</Text>
+          <Text style={styles.mutedText}>
+            {`Đã thu ${formatCurrency(orderPayments[0].amount)} · ${
+              orderPayments[0].method === 'CASH' ? 'Tiền mặt' : 'Chuyển khoản'
+            }`}
+          </Text>
+          <Input
+            label="Lý do hủy (bắt buộc)"
+            value={voidReason}
+            onChangeText={setVoidReason}
+            placeholder="VD: thu nhầm bàn B05"
+          />
+          <Button
+            title="Hủy thanh toán"
+            variant="destructive"
+            loading={voidPayment.isPending}
+            disabled={voidReason.trim().length < 5}
+            onPress={() => void handleVoidPayment(orderPayments[0].id)}
+          />
+        </Card>
       ) : null}
       {pickerModal}
     </ScrollView>

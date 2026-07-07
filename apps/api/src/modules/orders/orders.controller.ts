@@ -15,10 +15,16 @@ import { TableOrdersDto } from './dto/table-orders.dto';
 import { ToggleItemPreparedDto } from './dto/toggle-item-prepared.dto';
 import { TransferOrderTableDto } from './dto/transfer-order-table.dto';
 import { OrdersService } from './orders.service';
+import { OrderBillingService } from './order-billing.service';
+import { OrderStatsService } from './order-stats.service';
 
 @Controller('orders')
 export class OrdersController {
-  constructor(private readonly ordersService: OrdersService) {}
+  constructor(
+    private readonly ordersService: OrdersService,
+    private readonly orderBillingService: OrderBillingService,
+    private readonly orderStatsService: OrderStatsService,
+  ) {}
 
   @Get()
   @Roles(StaffRole.CASHIER, StaffRole.BARISTA, StaffRole.MANAGER, StaffRole.OWNER)
@@ -58,7 +64,7 @@ export class OrdersController {
     @Query('branchId') branchId?: string,
     @Query('date') date?: string,
   ): Promise<{ data: OrderStatsDto }> {
-    const data = await this.ordersService.getStats(user, branchId, date);
+    const data = await this.orderStatsService.getStats(user, branchId, date);
     return { data };
   }
 
@@ -70,7 +76,7 @@ export class OrdersController {
     @Query('branchId') branchId?: string,
     @Query('date') date?: string,
   ): Promise<{ data: { hour: number; revenue: number; orders: number }[] }> {
-    const data = await this.ordersService.getHourlyStats(user, branchId, date);
+    const data = await this.orderStatsService.getHourlyStats(user, branchId, date);
     return { data };
   }
 
@@ -81,7 +87,7 @@ export class OrdersController {
     @CurrentUser() user: JwtPayload,
     @Query('branchId') branchId?: string,
   ): Promise<{ data: TableOrdersDto[] }> {
-    const data = await this.ordersService.getOrdersByTables(user, branchId);
+    const data = await this.orderStatsService.getOrdersByTables(user, branchId);
     return { data };
   }
 
@@ -94,7 +100,7 @@ export class OrdersController {
     @Query('startDate') startDate?: string,
     @Query('endDate') endDate?: string,
   ): Promise<{ data: OrderDto[] }> {
-    const data = await this.ordersService.getHistory(user, branchId, startDate, endDate);
+    const data = await this.orderStatsService.getHistory(user, branchId, startDate, endDate);
     return { data };
   }
 
@@ -124,7 +130,7 @@ export class OrdersController {
     @CurrentUser() user: JwtPayload,
     @Body() dto: MergeOrdersDto,
   ): Promise<{ data: OrderDto }> {
-    const data = await this.ordersService.mergeOrders(user, dto);
+    const data = await this.orderBillingService.mergeOrders(user, dto);
     return { data };
   }
 
@@ -135,7 +141,7 @@ export class OrdersController {
     @Param('orderId') orderId: string,
     @Body() dto: TransferOrderTableDto,
   ): Promise<{ data: OrderDto }> {
-    const data = await this.ordersService.transferTable(user, orderId, dto);
+    const data = await this.orderBillingService.transferTable(user, orderId, dto);
     return { data };
   }
 
@@ -146,7 +152,7 @@ export class OrdersController {
     @Param('orderId') orderId: string,
     @Body() dto: SplitOrderDto,
   ): Promise<{ data: SplitOrderResponseDto }> {
-    const data = await this.ordersService.splitOrder(user, orderId, dto);
+    const data = await this.orderBillingService.splitOrder(user, orderId, dto);
     return { data };
   }
 

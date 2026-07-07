@@ -2,6 +2,7 @@ import { BadRequestException, Injectable } from '@nestjs/common';
 import { OrderStatus, PaymentMethod } from '@prisma/client';
 import { PrismaService } from '@common/prisma/prisma.service';
 import { resolveBranchScope } from '@common/utils/branch-scope.util';
+import { groupBy } from '@common/utils/group-by.util';
 import type { JwtPayload } from '@common/types/jwt-payload.types';
 import type { RevenueReportQueryDto } from './dto/revenue-report-query.dto';
 
@@ -64,14 +65,15 @@ export class ReportsService {
     const totalOrders = paidOrders.length;
     const guestCount = paidOrders.filter((o) => o.orderType === 'DINE_IN').length;
 
-    const seriesMap = new Map<string, { revenue: number; orders: number }>();
-    for (const order of paidOrders) {
-      const period = (order.paidAt ?? from).toISOString().slice(0, 10);
-      const entry = seriesMap.get(period) ?? { revenue: 0, orders: 0 };
-      entry.revenue += order.total;
-      entry.orders += 1;
-      seriesMap.set(period, entry);
-    }
+    const seriesMap = groupBy(
+      paidOrders,
+      (order) => (order.paidAt ?? from).toISOString().slice(0, 10),
+      () => ({ revenue: 0, orders: 0 }),
+      (acc, order) => {
+        acc.revenue += order.total;
+        acc.orders += 1;
+      },
+    );
 
     const series = Array.from(seriesMap.entries())
       .sort(([a], [b]) => a.localeCompare(b))
@@ -85,13 +87,15 @@ export class ReportsService {
       select: { method: true, amount: true, orderId: true },
     });
 
-    const paymentMap = new Map<PaymentMethod, { revenue: number; orders: Set<string> }>();
-    for (const p of payments) {
-      const entry = paymentMap.get(p.method) ?? { revenue: 0, orders: new Set<string>() };
-      entry.revenue += p.amount;
-      entry.orders.add(p.orderId);
-      paymentMap.set(p.method, entry);
-    }
+    const paymentMap = groupBy(
+      payments,
+      (p) => p.method,
+      () => ({ revenue: 0, orders: new Set<string>() }),
+      (acc, p) => {
+        acc.revenue += p.amount;
+        acc.orders.add(p.orderId);
+      },
+    );
 
     const byPaymentMethod = Array.from(paymentMap.entries()).map(([method, data]) => ({
       method,
@@ -100,19 +104,17 @@ export class ReportsService {
     }));
 
     // Top selling items
-    const itemMap = new Map<string, { productName: string; quantity: number; revenue: number }>();
-    for (const order of paidOrders) {
-      for (const item of order.items) {
-        const entry = itemMap.get(item.productId) ?? {
-          productName: item.productName,
-          quantity: 0,
-          revenue: 0,
-        };
-        entry.quantity += item.quantity;
-        entry.revenue += item.lineTotal;
-        itemMap.set(item.productId, entry);
-      }
-    }
+    const orderItems = paidOrders.flatMap((order) => order.items);
+    const itemMap = groupBy(
+      orderItems,
+      (item) => item.productId,
+      () => ({ productName: '', quantity: 0, revenue: 0 }),
+      (acc, item) => {
+        acc.productName = item.productName;
+        acc.quantity += item.quantity;
+        acc.revenue += item.lineTotal;
+      },
+    );
 
     const topItems = Array.from(itemMap.entries())
       .map(([productId, data]) => ({ productId, ...data }))

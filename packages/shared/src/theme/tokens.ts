@@ -9,6 +9,7 @@ export const colors = {
   warning: '#F59E0B',
   background: '#F9FAFB',
   surface: '#FFFFFF',
+  surfaceMuted: '#F3F4F6',
   border: '#E5E7EB',
   text: '#111827',
   textSecondary: '#6B7280',
@@ -18,6 +19,7 @@ export const colors = {
   tableSelected: '#F97316',
   white: '#FFFFFF',
   black: '#000000',
+  overlay: 'rgba(0,0,0,0.45)',
 } as const;
 
 export const spacing = {

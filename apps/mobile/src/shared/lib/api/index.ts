@@ -1,6 +1,7 @@
 export { apiClient, getApiBaseUrl, setApiAccessToken, setOnLogoutCallback } from './apiClient';
+export { getErrorMessage } from './errorMessage';
 export { authService } from './authService';
-export { branchesService } from './branchesService';
+export { branchesService, branchService } from './branchesService';
 export { staffService } from './staffService';
 export { orderService } from './orderService';
 export { paymentService } from './paymentService';

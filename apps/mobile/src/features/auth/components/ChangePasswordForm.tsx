@@ -1,23 +1,9 @@
 import { useState } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
-import { isAxiosError } from 'axios';
 import { useMutation } from '@tanstack/react-query';
 import { colors, spacing } from '@caffeapp/shared';
 import { Button, Card, Input, showToast } from '@shared/components/ui';
-import { authService } from '@shared/lib/api';
-
-function getErrorMessage(error: unknown): string {
-  if (isAxiosError(error)) {
-    const message = error.response?.data?.message;
-    if (Array.isArray(message)) {
-      return message.join('\n');
-    }
-    if (typeof message === 'string') {
-      return message;
-    }
-  }
-  return 'Không đổi được mật khẩu';
-}
+import { authService, getErrorMessage } from '@shared/lib/api';
 
 function isStrongPassword(value: string): boolean {
   return value.length >= 8 && /[A-Za-z]/.test(value) && /\d/.test(value);
@@ -42,7 +28,7 @@ export function ChangePasswordForm() {
       showToast({ title: 'Đã gửi mã xác nhận đến email', variant: 'success' });
     },
     onError: (error) => {
-      setFormError(getErrorMessage(error));
+      setFormError(getErrorMessage(error, 'Không đổi được mật khẩu'));
     },
   });
 
@@ -59,7 +45,7 @@ export function ChangePasswordForm() {
       showToast({ title: 'Đã đổi mật khẩu', variant: 'success' });
     },
     onError: (error) => {
-      setFormError(getErrorMessage(error));
+      setFormError(getErrorMessage(error, 'Không đổi được mật khẩu'));
     },
   });
 

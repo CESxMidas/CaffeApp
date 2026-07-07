@@ -32,7 +32,7 @@ function tableStyles(status: TableStatus, selected: boolean) {
   }
   if (status === TableStatus.MAINTENANCE) {
     return {
-      bg: '#F3F4F6',
+      bg: colors.surfaceMuted,
       border: colors.textMuted,
       text: colors.textMuted,
       icon: colors.textMuted,
