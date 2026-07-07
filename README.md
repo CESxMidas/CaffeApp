@@ -12,6 +12,7 @@ Mobile (Expo)  ──HTTP/Axios──▶  NestJS API  ──Prisma──▶  Pos
 
 | Doc                                                   | Mô tả                                 |
 | ----------------------------------------------------- | ------------------------------------- |
+| [PROJECT_STATUS.md](docs/PROJECT_STATUS.md)           | **Trạng thái dự án** — done/pending   |
 | [ARCHITECTURE.md](docs/ARCHITECTURE.md)               | Kiến trúc hệ thống                    |
 | [MOBILE_ARCHITECTURE.md](docs/MOBILE_ARCHITECTURE.md) | Kiến trúc mobile (Clean Architecture) |
 | [CONVENTIONS.md](docs/CONVENTIONS.md)                 | **Chuẩn hóa** folder, alias, import   |
@@ -47,10 +48,11 @@ CaffeApp/
 │   │   ├── app/                 # Expo Router (thin routes)
 │   │   ├── features/            # Domain modules
 │   │   │   ├── auth/
-│   │   │   ├── cashier/
 │   │   │   ├── barista/
 │   │   │   ├── manager/
-│   │   │   └── orders/
+│   │   │   ├── notifications/
+│   │   │   ├── orders/          # Domain đơn hàng dùng chung (kể cả màn thu ngân)
+│   │   │   └── staff/
 │   │   └── shared/
 │   │       ├── components/ui/
 │   │       ├── config/
@@ -204,14 +206,16 @@ Chi tiết: [docs/CONVENTIONS.md](docs/CONVENTIONS.md)
 
 ## Sprint status
 
-| Sprint         | Trạng thái coding                                       |
-| -------------- | ------------------------------------------------------- |
-| Sprint 0       | ✅ UI shell                                             |
-| Sprint 0.5     | ✅ FE/BE split                                          |
-| Enterprise std | ✅ Tooling + conventions                                |
-| Sprint 1       | ✅ Auth flow code-side                                  |
-| Sprint 2       | ✅ Order core code-side                                 |
-| Sprint 3       | ✅ Payment pilot TM + CK VietQR, order list/history     |
-| Sprint 4       | ✅ Barista realtime code-side                           |
-| Sprint 5       | ✅ Manager core code-side                               |
-| Sprint 6       | 🔄 Notifications/settings code-side; UAT/manual pending |
+**Coding MVP: hoàn thiện 100%** (28/28 user stories + pilot hardening). Việc còn lại là thủ công (UAT, thiết bị thật, data production).
+
+👉 Chi tiết done/pending, coding/thủ công: **[docs/PROJECT_STATUS.md](docs/PROJECT_STATUS.md)**
+
+| Sprint          | Trạng thái coding                                                                |
+| --------------- | -------------------------------------------------------------------------------- |
+| Sprint 0 → 0.9  | ✅ Foundation, FE/BE split, ops docs                                             |
+| Sprint 1        | ✅ Auth flow                                                                     |
+| Sprint 2–3      | ✅ Order core + payment (tiền mặt, VietQR)                                       |
+| Sprint 4        | ✅ Barista realtime (WebSocket + polling fallback)                               |
+| Sprint 5        | ✅ Manager (dashboard, báo cáo, ca, menu, NV)                                    |
+| Sprint 6        | ✅ Notifications, settings, đổi MK qua email                                     |
+| Pilot hardening | ✅ Void payment, đối soát ca, toggle hết món, offline banner, draft cart persist |

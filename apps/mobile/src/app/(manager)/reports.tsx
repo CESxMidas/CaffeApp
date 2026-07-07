@@ -4,7 +4,11 @@ import { Ionicons } from '@expo/vector-icons';
 import { borderRadius, colors, formatCurrency, spacing } from '@caffeapp/shared';
 import type { PaymentMethod } from '@caffeapp/shared';
 import { Card, ErrorScreen } from '@shared/components/ui';
-import { revenueRangeForPreset, useRevenueReport, type RevenueRangePreset } from '@features/manager';
+import {
+  revenueRangeForPreset,
+  useRevenueReport,
+  type RevenueRangePreset,
+} from '@features/manager';
 import { useSessionStore } from '@shared/stores/session';
 
 const RANGE_PRESETS: { key: RevenueRangePreset; label: string }[] = [

@@ -142,7 +142,7 @@ export default function CashierOrderDetailScreen() {
             showMessage('Đã giao món', 'Có thể thu tiền khi khách sẵn sàng', 'success');
           },
           onError: (err: unknown) => {
-            showMessage('Lỗi', getErrorMessage(err,'Không cập nhật được trạng thái'), 'error');
+            showMessage('Lỗi', getErrorMessage(err, 'Không cập nhật được trạng thái'), 'error');
           },
         },
       );
@@ -173,7 +173,7 @@ export default function CashierOrderDetailScreen() {
             }
           },
           onError: (err: unknown) => {
-            showMessage('Lỗi', getErrorMessage(err,'Không chuyển được bàn'), 'error');
+            showMessage('Lỗi', getErrorMessage(err, 'Không chuyển được bàn'), 'error');
           },
         },
       );
@@ -192,7 +192,7 @@ export default function CashierOrderDetailScreen() {
             showMessage('Đã gộp bill', 'Các món đã được chuyển vào bill hiện tại', 'success');
           },
           onError: (err: unknown) => {
-            showMessage('Lỗi', getErrorMessage(err,'Không gộp được bill'), 'error');
+            showMessage('Lỗi', getErrorMessage(err, 'Không gộp được bill'), 'error');
           },
         },
       );
@@ -219,7 +219,7 @@ export default function CashierOrderDetailScreen() {
             );
           },
           onError: (err: unknown) => {
-            showMessage('Lỗi', getErrorMessage(err,'Không tách được bill'), 'error');
+            showMessage('Lỗi', getErrorMessage(err, 'Không tách được bill'), 'error');
           },
         },
       );

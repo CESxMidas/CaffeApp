@@ -1,11 +1,7 @@
 import { BadRequestException, ForbiddenException, Injectable } from '@nestjs/common';
 import * as bcrypt from 'bcrypt';
 import type { UserDto, StaffDto } from '@caffeapp/shared';
-import {
-  BranchAssignmentStatus,
-  NotificationType,
-  StaffRole,
-} from '@prisma/client';
+import { BranchAssignmentStatus, NotificationType, StaffRole } from '@prisma/client';
 import { PrismaService } from '@common/prisma/prisma.service';
 import type { JwtPayload } from '@common/types/jwt-payload.types';
 import { NotificationsService } from '@modules/notifications/notifications.service';
@@ -105,8 +101,8 @@ export class UsersService {
         fullName: result.staff.fullName,
         phone: result.staff.phone,
         isActive: result.staff.isActive,
-        branchAssignmentStatus:
-          result.staff.branchAssignmentStatus as StaffDto['branchAssignmentStatus'],
+        branchAssignmentStatus: result.staff
+          .branchAssignmentStatus as StaffDto['branchAssignmentStatus'],
       },
     };
   }

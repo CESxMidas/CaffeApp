@@ -1,4 +1,9 @@
-import { BadRequestException, ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
+import {
+  BadRequestException,
+  ForbiddenException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import type { BranchBankInfoDto, BranchDto } from '@caffeapp/shared';
 import { StaffRole } from '@prisma/client';
 import { PrismaService } from '@common/prisma/prisma.service';

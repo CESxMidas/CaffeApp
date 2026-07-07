@@ -17,7 +17,10 @@ export interface CreatedUserResponse {
 
 export const userService = {
   async create(dto: CreateUserRequest): Promise<CreatedUserResponse> {
-    const { data } = await apiClient.post<ApiDataResponse<CreatedUserResponse>>('/api/v1/users', dto);
+    const { data } = await apiClient.post<ApiDataResponse<CreatedUserResponse>>(
+      '/api/v1/users',
+      dto,
+    );
     return data.data;
   },
 };

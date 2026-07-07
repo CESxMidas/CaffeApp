@@ -17,7 +17,7 @@ import type { BranchDto } from '@caffeapp/shared';
 import { Button, Card, EmptyState, ErrorScreen } from '@shared/components/ui';
 import { useBranches } from '@features/auth';
 import { useIsOwner } from '@shared/hooks/usePermission';
-import { branchService, getErrorMessage } from '@shared/lib/api';
+import { branchesService, getErrorMessage } from '@shared/lib/api';
 import { confirmAction, showMessage } from '@shared/lib/ui/confirm';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 
@@ -48,7 +48,13 @@ function BranchCard({
         </View>
       </View>
       <View style={styles.actions}>
-        <Button title="Sửa" variant="outline" fullWidth={false} style={styles.actionBtn} onPress={onEdit} />
+        <Button
+          title="Sửa"
+          variant="outline"
+          fullWidth={false}
+          style={styles.actionBtn}
+          onPress={onEdit}
+        />
         <Button
           title="Xóa"
           variant="destructive"
@@ -78,7 +84,7 @@ export default function BranchesScreen() {
   const [submitting, setSubmitting] = useState(false);
 
   const createMutation = useMutation({
-    mutationFn: branchService.create,
+    mutationFn: branchesService.create,
     onSuccess: () => {
       void queryClient.invalidateQueries({ queryKey: ['branches'] });
       showMessage('Thành công', 'Đã tạo chi nhánh mới');
@@ -91,7 +97,7 @@ export default function BranchesScreen() {
 
   const updateMutation = useMutation({
     mutationFn: ({ id, data }: { id: string; data: Partial<BranchFormData> }) =>
-      branchService.update(id, data),
+      branchesService.update(id, data),
     onSuccess: () => {
       void queryClient.invalidateQueries({ queryKey: ['branches'] });
       showMessage('Thành công', 'Đã cập nhật chi nhánh');
@@ -103,7 +109,7 @@ export default function BranchesScreen() {
   });
 
   const deleteMutation = useMutation({
-    mutationFn: branchService.remove,
+    mutationFn: branchesService.remove,
     onSuccess: () => {
       void queryClient.invalidateQueries({ queryKey: ['branches'] });
       showMessage('Thành công', 'Đã xóa chi nhánh');
@@ -159,7 +165,10 @@ export default function BranchesScreen() {
   };
 
   const handleDelete = async (branch: BranchDto) => {
-    const ok = await confirmAction('Xóa chi nhánh', `Xóa "${branch.name}"? Thao tác này không thể hoàn tác.`);
+    const ok = await confirmAction(
+      'Xóa chi nhánh',
+      `Xóa "${branch.name}"? Thao tác này không thể hoàn tác.`,
+    );
     if (!ok) return;
     deleteMutation.mutate(branch.id);
   };
@@ -191,7 +200,11 @@ export default function BranchesScreen() {
         </View>
 
         {!branches || branches.length === 0 ? (
-          <EmptyState icon="business-outline" title="Chưa có chi nhánh" subtitle="Tạo chi nhánh đầu tiên để bắt đầu" />
+          <EmptyState
+            icon="business-outline"
+            title="Chưa có chi nhánh"
+            subtitle="Tạo chi nhánh đầu tiên để bắt đầu"
+          />
         ) : (
           <View style={styles.list}>
             {branches.map((branch) => (
@@ -212,7 +225,9 @@ export default function BranchesScreen() {
             <Pressable onPress={closeModal}>
               <Ionicons name="close" size={28} color={colors.text} />
             </Pressable>
-            <Text style={styles.modalTitle}>{editingBranch ? 'Sửa chi nhánh' : 'Tạo chi nhánh mới'}</Text>
+            <Text style={styles.modalTitle}>
+              {editingBranch ? 'Sửa chi nhánh' : 'Tạo chi nhánh mới'}
+            </Text>
             <View style={{ width: 28 }} />
           </View>
 

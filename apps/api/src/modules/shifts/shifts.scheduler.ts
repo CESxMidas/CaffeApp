@@ -4,11 +4,12 @@ import { ShiftStatus } from '@prisma/client';
 import { PrismaService } from '@common/prisma/prisma.service';
 
 /** Ca hệ thống — 3 khung giờ cố định (theo B-01 STAKEHOLDER_QUESTIONNAIRE) */
-const SHIFT_DEFS: { name: string; type: string; start: string; end: string; hourStart: number }[] = [
-  { name: 'Ca đêm', type: 'night', start: '00:00', end: '08:00', hourStart: 0 },
-  { name: 'Ca sáng', type: 'morning', start: '08:00', end: '16:00', hourStart: 8 },
-  { name: 'Ca chiều', type: 'afternoon', start: '16:00', end: '24:00', hourStart: 16 },
-];
+const SHIFT_DEFS: { name: string; type: string; start: string; end: string; hourStart: number }[] =
+  [
+    { name: 'Ca đêm', type: 'night', start: '00:00', end: '08:00', hourStart: 0 },
+    { name: 'Ca sáng', type: 'morning', start: '08:00', end: '16:00', hourStart: 8 },
+    { name: 'Ca chiều', type: 'afternoon', start: '16:00', end: '24:00', hourStart: 16 },
+  ];
 
 @Injectable()
 export class ShiftsScheduler {
@@ -65,7 +66,9 @@ export class ShiftsScheduler {
           },
         });
 
-        this.logger.log(`Đã tự động mở ca "${def.name}" cho chi nhánh "${branch.name}" (${branch.id})`);
+        this.logger.log(
+          `Đã tự động mở ca "${def.name}" cho chi nhánh "${branch.name}" (${branch.id})`,
+        );
       }
     } catch (error) {
       this.logger.error('Lỗi khi tự động tạo ca', (error as Error).stack);

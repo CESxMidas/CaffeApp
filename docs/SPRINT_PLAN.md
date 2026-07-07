@@ -141,17 +141,27 @@
 
 ---
 
-## Sprint 6: Polish + UAT (18 pts) — 🔄 Partial code done; UAT/manual work pending
+## Sprint 6: Polish + UAT (18 pts) — ✅ Code done; UAT/manual pending
 
 **Stories:** US-E02, US-E03 + bug fixes  
 **Screens:** 27–28
 
-- UAT tại quán pilot
-- Performance tuning
-- Error handling hardening
+**Code-side done:** in-app notifications, settings, change password qua mã email, logout, FR-D03 báo cáo theo khoảng ngày, error handling hardening (getErrorMessage util, dashboard error state).  
+**Pending (thủ công):** UAT tại quán, real-device verification, production data/sign-off — xem [PROJECT_STATUS.md](PROJECT_STATUS.md) §3.
 
-**Code-side done:** in-app notifications, settings, change password qua mã email, logout.  
-**Pending:** UAT tại quán, real-device verification, production data/sign-off.
+---
+
+## Pilot Hardening (2026-07-07) — ✅ Code done
+
+Bổ sung từ PM gate review trước đóng gói (ngoài plan gốc):
+
+| Hạng mục                                                                     | Trạng thái                                      |
+| ---------------------------------------------------------------------------- | ----------------------------------------------- |
+| Void payment + audit (EC-11)                                                 | ✅ Done                                         |
+| Đối soát kết ca + verify CK (EC-08/EC-13)                                    | ✅ Done                                         |
+| Toggle "hết món" cho CASHIER/BARISTA (EC-12)                                 | ✅ Done                                         |
+| Offline banner + draft cart persist + retry thanh toán an toàn (EC-01/EC-10) | ✅ Done                                         |
+| PIN StaffPicker                                                              | ⏸ Backlog sau pilot (rủi ro chấp nhận — PRD §7) |
 
 ---
 

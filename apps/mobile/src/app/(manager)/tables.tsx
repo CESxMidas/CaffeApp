@@ -1,12 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
-import {
-  ActivityIndicator,
-  ScrollView,
-  StyleSheet,
-  Switch,
-  Text,
-  View,
-} from 'react-native';
+import { ActivityIndicator, ScrollView, StyleSheet, Switch, Text, View } from 'react-native';
 import { router } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { TableStatus, TABLE_STATUS_LABELS, colors, spacing, borderRadius } from '@caffeapp/shared';

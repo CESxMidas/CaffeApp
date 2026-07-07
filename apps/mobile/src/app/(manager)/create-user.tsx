@@ -177,7 +177,12 @@ const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: colors.background },
   content: { padding: spacing.base, paddingBottom: spacing.xl },
   title: { fontSize: 22, fontWeight: '700', color: colors.text },
-  subtitle: { fontSize: 14, color: colors.textSecondary, marginTop: spacing.xs, marginBottom: spacing.lg },
+  subtitle: {
+    fontSize: 14,
+    color: colors.textSecondary,
+    marginTop: spacing.xs,
+    marginBottom: spacing.lg,
+  },
   form: { gap: spacing.md },
   label: { fontSize: 14, fontWeight: '600', color: colors.text, marginBottom: -spacing.sm },
   input: {

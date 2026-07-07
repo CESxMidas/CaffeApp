@@ -96,44 +96,26 @@ apps/mobile/
     │   ├── auth/
     │   │   ├── README.md
     │   │   ├── index.ts                  # Public exports only
-    │   │   ├── hooks/
-    │   │   │   ├── useLogin.ts
-    │   │   │   ├── useLogout.ts
-    │   │   │   ├── useMe.ts
-    │   │   │   └── index.ts
-    │   │   ├── use-cases/
-    │   │   │   ├── loginUseCase.ts
-    │   │   │   ├── restoreSessionUseCase.ts
-    │   │   │   └── index.ts
-    │   │   ├── api/
-    │   │   │   └── authApi.ts            # Thin wrapper over shared service
-    │   │   └── types/
-    │   │       └── index.ts
+    │   │   ├── hooks/                    # useLogin, useBranches, ...
+    │   │   └── components/               # ChangePasswordForm
     │   │
-    │   ├── cashier/
-    │   │   ├── hooks/
-    │   │   ├── use-cases/
-    │   │   └── types/
-    │   │
-    │   ├── barista/
-    │   ├── manager/
-    │   ├── orders/
-    │   │   ├── hooks/
-    │   │   │   ├── useOrders.ts
-    │   │   │   ├── useOrder.ts
+    │   ├── orders/                       # Core domain — dùng chung cho màn
+    │   │   ├── hooks/                    # thu ngân/barista/manager:
+    │   │   │   ├── useOrders.ts          # bàn, menu, giỏ, tạo đơn, thanh toán,
+    │   │   │   ├── useOrder.ts           # gộp/tách/chuyển bàn, toggle hết món
     │   │   │   ├── useCreateOrder.ts
-    │   │   │   └── useUpdateOrderStatus.ts
-    │   │   ├── use-cases/
-    │   │   │   ├── createOrderUseCase.ts
-    │   │   │   └── cancelOrderUseCase.ts
-    │   │   └── api/
-    │   │       └── ordersApi.ts
+    │   │   │   ├── useProducts.ts
+    │   │   │   ├── useTables.ts
+    │   │   │   └── useCreatePayment.ts
+    │   │   └── index.ts
     │   │
-    │   ├── products/                     # Sprint 2+
-    │   ├── tables/
-    │   ├── payments/
-    │   ├── reports/
-    │   └── inventory/                  # Sprint 4+
+    │   ├── barista/                      # Queue bếp + BaristaQueueView
+    │   ├── manager/                      # Revenue/shift/menu-CRUD hooks
+    │   ├── staff/                        # Staff list, gán CN, StaffPickerModal
+    │   └── notifications/                # Feed + badge + header button
+    │
+    │   # KHÔNG có feature cashier riêng — màn (cashier)/ dùng domain orders.
+    │   # products/tables/payments nằm trong orders; inventory: backlog MVP v3.
     │
     └── shared/                           # INFRASTRUCTURE + cross-cutting
         ├── index.ts

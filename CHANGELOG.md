@@ -9,6 +9,24 @@ Versioning: [Semantic Versioning](docs/VERSIONING.md)
 
 ## [Unreleased]
 
+### Added (2026-07-07 — Pilot hardening + audit)
+
+- **feat(payments):** void payment `POST /payments/:id/void` — MANAGER/OWNER, lý do bắt buộc, snapshot vào audit log, đơn revert READY (EC-11)
+- **feat(shifts):** đối soát kết ca `GET /shifts/:id/reconciliation` — tiền mặt dự kiến, tổng CK, danh sách CK chưa verify + UI card "Đối soát ca", chặn đóng ca có cảnh báo (EC-08/EC-13)
+- **feat(products):** toggle "hết món" `PATCH /products/:id/availability` mở cho CASHIER/BARISTA + UI một chạm trên menu; `?includeUnavailable=true` cho mọi role (EC-12)
+- **feat(mobile):** `OfflineBanner` toàn app (poll `/health` 15s); draft cart persist SecureStore mã hóa (EC-01/EC-10); retry thanh toán nhận 409 "Đơn đã thanh toán" được coi là thành công
+- **feat(reports):** FR-D03 báo cáo doanh thu theo khoảng ngày — preset Hôm nay/7 ngày/30 ngày/Tháng này + section doanh thu theo ngày
+- **docs:** `PROJECT_STATUS.md` — bảng trạng thái duy nhất tách done/pending, coding/thủ công
+
+### Changed (2026-07-07)
+
+- **fix(mobile):** Rules-of-Hooks violation trong cashier orders tab (useMemo sau early return)
+- **fix(api):** DTO validation cho `payments verify`; N+1 query trong `mergeOrders`; gộp logic thống kê trùng lặp qua `group-by.util`
+- **refactor(mobile):** util chung `getErrorMessage` thay 19 chỗ parse lỗi inline; gộp `invalidateOrderWorkflow`; token `surfaceMuted`/`overlay` thay màu hardcode
+- **refactor(structure):** xóa feature `cashier` rỗng (logic dùng chung ở `orders`); thống nhất tên `branchesService`; thêm README cho `staff`/`notifications`
+- **chore(tsconfig):** `moduleResolution` node → `nodenext` (hết deprecated TS6); base.json bỏ default lỗi thời
+- **docs(sync):** API_CONTRACT cập nhật trạng thái implemented + endpoints shifts/void/verify/generate-qr/availability; PRD thêm EC-11/12/13 + rủi ro chấp nhận StaffPicker không PIN; README/SPRINT_PLAN đồng bộ
+
 ### Added
 
 - Sprint 0.9 production foundation documentation (DEPLOYMENT, SECURITY, TESTING, RELEASE, VERSIONING, GIT)

@@ -5,17 +5,20 @@
 **Content-Type:** `application/json`  
 **Auth:** `Authorization: Bearer {accessToken}` (trừ endpoint `Public`)
 
-> Tài liệu này là **contract thiết kế** — không phải implementation.  
-> DTO names khớp `@caffeapp/shared`. Inventory là domain mới (chưa có trong Prisma).
+> DTO names khớp `@caffeapp/shared`. Source of truth implementation: `apps/api/src/modules/`.
 
-### Trạng thái implementation (2026-06-28)
+### Trạng thái implementation (2026-07-07)
 
-| Endpoint             | Status         | Ghi chú                                                                      |
-| -------------------- | -------------- | ---------------------------------------------------------------------------- |
-| `GET /health`        | ✅ Implemented | Response **không** bọc `{ data }` — trả raw `{ status, service, timestamp }` |
-| Tất cả endpoint khác | 📋 Design only | Module shells tại `apps/api/src/modules/`                                    |
+| Nhóm endpoint                                                       | Status         | Ghi chú                                                                |
+| ------------------------------------------------------------------- | -------------- | ---------------------------------------------------------------------- |
+| Health, Auth, Users, Staff, Branches                                | ✅ Implemented | Health trả raw `{ status, service, timestamp }` — không bọc `{ data }` |
+| Categories, Products (kể cả toggle availability)                    | ✅ Implemented |                                                                        |
+| Tables, Orders (status/deliver/cancel/merge/split/transfer), Shifts | ✅ Implemented | Kèm WebSocket `/ws` cho barista realtime + reconciliation ca           |
+| Payments (create, generate-qr, by-order, verify, void)              | ✅ Implemented | Pilot: CASH + BANK_TRANSFER                                            |
+| Reports revenue                                                     | ✅ Implemented | Hourly stats nằm ở `GET /orders/stats/hourly`                          |
+| Inventory (§11), Export CSV (§10.5), pagination đầy đủ (§1.2)       | 📋 Design only | Backlog sau pilot — chưa có trong Prisma/modules                       |
 
-OpenAPI machine-readable: **chưa generate**.
+OpenAPI machine-readable: **chưa generate** — contract này là source of truth.
 
 ---
 
@@ -106,6 +109,18 @@ UI tab **Chờ giao** = `READY` + `deliveredAt IS NULL`; **Chờ thanh toán** =
 
 - **Pilot / Sprint 1–4:** `shift_id` **optional** — gắn theo `created_at` / ca hệ thống (B-05)
 - **Sprint 5+:** bắt buộc shift `OPEN` khi tạo order (GAP-06)
+
+**Endpoints (implemented):**
+
+| Endpoint                               | Roles      | Mô tả                                                                                                                   |
+| -------------------------------------- | ---------- | ----------------------------------------------------------------------------------------------------------------------- |
+| `GET /shifts`                          | `MANAGER+` | Lịch sử ca (30 gần nhất) → `ShiftDto[]`                                                                                 |
+| `GET /shifts/active`                   | `CASHIER+` | Ca đang mở của chi nhánh → `ShiftDto \| null`                                                                           |
+| `POST /shifts/open`                    | `MANAGER+` | Mở ca (`OpenShiftDto`); 409 nếu đã có ca mở                                                                             |
+| `POST /shifts/close`                   | `MANAGER+` | Đóng ca (`CloseShiftDto`); rollup `totalRevenue`/`totalOrders`                                                          |
+| `GET /shifts/{shiftId}/reconciliation` | `MANAGER+` | Đối soát EC-08/EC-13 → `ShiftReconciliationDto`: tiền mặt dự kiến (đã trừ tiền thối), tổng CK, danh sách CK chưa verify |
+
+Ngoài ra scheduler (`shifts.scheduler.ts`) tự mở ca theo 3 khung giờ cố định.
 
 ### 1.7.2 Station device — `actedByStaffId`
 
@@ -958,7 +973,8 @@ Xem thêm [API_ERD_REFACTOR_CHECKLIST.md](../API_ERD_REFACTOR_CHECKLIST.md) §3.
 
 **Business rules:**
 
-- CASHIER/BARISTA: chỉ products `isAvailable = true` (trừ MANAGER+ có `?includeUnavailable=true`)
+- Mặc định CASHIER/BARISTA chỉ thấy `isAvailable = true`; MANAGER/OWNER thấy tất cả
+- `?includeUnavailable=true`: **mọi role** thấy cả món hết — cần cho toggle "hết món" tại quầy (EC-12)
 
 ---
 
@@ -1035,6 +1051,24 @@ Xem thêm [API_ERD_REFACTOR_CHECKLIST.md](../API_ERD_REFACTOR_CHECKLIST.md) §3.
 
 - Đổi giá không ảnh hưởng order items đã tạo (snapshot `unitPrice` trên order_item)
 - `isAvailable = false` → không thêm vào order mới
+
+---
+
+### 6.4.1 Toggle còn/hết món (quick availability) — ✅ Implemented
+
+|            |                                      |
+| ---------- | ------------------------------------ |
+| **Method** | `PATCH`                              |
+| **URL**    | `/products/{productId}/availability` |
+| **DTO**    | `SetAvailabilityDto` → `ProductDto`  |
+
+**Request:** `{ "isAvailable": false }`
+
+| Status | `200`, `404` |
+
+**Authorization:** `CASHIER`, `BARISTA`, `MANAGER`, `OWNER`
+
+**Business rules (EC-12):** nhân viên báo "hết món" ngay giữa ca không cần quyền menu CRUD; chỉ đổi được `isAvailable`, các field khác vẫn `MANAGER+` (§6.4).
 
 ---
 
@@ -1499,31 +1533,69 @@ Xem thêm [API_ERD_REFACTOR_CHECKLIST.md](../API_ERD_REFACTOR_CHECKLIST.md) §3.
 
 ---
 
-### 9.4 Hoàn tiền (void payment)
+### 9.4 Hủy thanh toán (void payment) — ✅ Implemented
 
-|            |                                        |
-| ---------- | -------------------------------------- |
-| **Method** | `POST`                                 |
-| **URL**    | `/payments/{paymentId}/void`           |
-| **DTO**    | `VoidPaymentRequestDto` → `PaymentDto` |
+|            |                                          |
+| ---------- | ---------------------------------------- |
+| **Method** | `POST`                                   |
+| **URL**    | `/payments/{paymentId}/void`             |
+| **DTO**    | `VoidPaymentDto` → `{ orderId: string }` |
 
 **Request:**
 
 ```json
 {
-  "reason": "Thu nhầm"
+  "reason": "Thu nhầm bàn B05",
+  "actedByStaffId": "uuid (optional)"
 }
 ```
 
-| Status | `200`, `404`, `409` |
+| Status | `200`, `400` (reason < 5 ký tự), `404`, `409` (đơn không ở PAID) |
 
-**Authorization:** `MANAGER+`
+**Authorization:** `MANAGER`, `OWNER`
 
-**Business rules:**
+**Business rules (EC-11):**
 
-- Chỉ trong 24h kể từ `paidAt` (configurable)
-- Order revert → `READY` hoặc `CANCELLED` tùy policy
-- Ghi audit `PAYMENT_VOID`
+- `reason` bắt buộc, 5–500 ký tự
+- Transaction: xóa payment row → order revert `READY` (`paidAt = null`) → bàn về `OCCUPIED`
+- Snapshot payment đầy đủ + reason ghi audit `payment.voided` — audit log là chứng từ kế toán
+- Chưa giới hạn cửa sổ 24h (backlog sau pilot nếu cần)
+
+---
+
+### 9.5 Xác nhận chuyển khoản (verify) — ✅ Implemented
+
+|            |                                   |
+| ---------- | --------------------------------- |
+| **Method** | `POST`                            |
+| **URL**    | `/payments/{paymentId}/verify`    |
+| **DTO**    | `VerifyPaymentDto` → `PaymentDto` |
+
+**Request:** `{ "verified": true, "notes": "optional ≤500 ký tự" }`
+
+| Status | `200`, `400` (không phải BANK_TRANSFER), `404` |
+
+**Authorization:** `MANAGER`, `OWNER`
+
+**Business rules (EC-08):** đánh dấu CK đã vào tài khoản; `reference` được ghi `Verified by {email} at {time}`. Reconciliation ca (§1.7.1) liệt kê các payment chưa verify.
+
+---
+
+### 9.6 Sinh mã VietQR — ✅ Implemented
+
+|            |                                                                                  |
+| ---------- | -------------------------------------------------------------------------------- |
+| **Method** | `POST`                                                                           |
+| **URL**    | `/payments/generate-qr`                                                          |
+| **DTO**    | `GenerateQrDto` → `{ qrUrl, bankCode, accountNo, accountName, amount, addInfo }` |
+
+**Request:** `{ "orderId": "uuid", "amount": 130000, "description": "optional" }`
+
+| Status | `200`, `404` (đơn/bank info không tồn tại) |
+
+**Authorization:** `CASHIER+`
+
+**Business rules:** bank info lấy từ `branch.bankInfo` (JSON); `addInfo = "Don#{orderNumber}"`.
 
 ---
 

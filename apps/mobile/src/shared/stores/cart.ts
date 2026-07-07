@@ -40,7 +40,9 @@ let lineId = 0;
 const draftStorage = createJSONStorage(() => ({
   getItem: (name: string) =>
     Platform.OS === 'web'
-      ? (typeof localStorage !== 'undefined' ? localStorage.getItem(name) : null)
+      ? typeof localStorage !== 'undefined'
+        ? localStorage.getItem(name)
+        : null
       : SecureStore.getItemAsync(name),
   setItem: (name: string, value: string) => {
     if (Platform.OS === 'web') {

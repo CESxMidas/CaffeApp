@@ -13,15 +13,21 @@ export const branchesService = {
     return data.data;
   },
 
-  async update(id: string, dto: { name?: string; address?: string; phone?: string }): Promise<BranchDto> {
-    const { data } = await apiClient.patch<ApiDataResponse<BranchDto>>(`${API_ENDPOINTS.branches}/${id}`, dto);
+  async update(
+    id: string,
+    dto: { name?: string; address?: string; phone?: string },
+  ): Promise<BranchDto> {
+    const { data } = await apiClient.patch<ApiDataResponse<BranchDto>>(
+      `${API_ENDPOINTS.branches}/${id}`,
+      dto,
+    );
     return data.data;
   },
 
   async remove(id: string): Promise<BranchDto> {
-    const { data } = await apiClient.delete<ApiDataResponse<BranchDto>>(`${API_ENDPOINTS.branches}/${id}`);
+    const { data } = await apiClient.delete<ApiDataResponse<BranchDto>>(
+      `${API_ENDPOINTS.branches}/${id}`,
+    );
     return data.data;
   },
 };
-
-export { branchesService as branchService };
