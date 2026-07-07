@@ -28,6 +28,8 @@ Tài liệu này là **bảng trạng thái duy nhất** tách rõ: (1) đã ho�
 
 ### 1.3 Pilot hardening (2026-07-07 — từ PM gate review)
 
+> User story + acceptance criteria: [USER_STORIES.md](USER_STORIES.md) §Nhóm F (US-F01→F04). Test case thủ công: [DEMO_SCRIPT_INTERNAL.md](DEMO_SCRIPT_INTERNAL.md) Flow 6. Tầng API đã verify E2E; tầng UI mobile chờ verify trên thiết bị.
+
 | Hạng mục                             | Endpoint / vị trí                                           |
 | ------------------------------------ | ----------------------------------------------------------- |
 | Void payment (EC-11)                 | `POST /payments/:id/void` + UI chi tiết đơn (MANAGER/OWNER) |

@@ -1,6 +1,6 @@
 # CaffeApp — Demo Script Nội Bộ Phase 3
 
-**Mục tiêu:** chạy 5 luồng pilot chính trong 30–45 phút trước khi mời Owner/QL UAT.  
+**Mục tiêu:** chạy 6 luồng pilot chính (5 luồng gốc + Flow 6 hardening) trong 40–55 phút trước khi mời Owner/QL UAT.  
 **Môi trường:** staging API + mobile build staging trên ít nhất 1 tablet Android thật.  
 **Ngày chuẩn bị:** 2026-06-30.  
 **Trạng thái:** repo-side ready; buổi demo thật, video và sign-off vẫn pending.
@@ -151,14 +151,47 @@ Nếu Sprint 5 dashboard chưa bật trong build demo, ghi `N/A` vào minutes, k
 
 ---
 
+## 7b. Flow 6 — Pilot Hardening: Sai sót tiền & Hết món
+
+> Bổ sung sau PM gate review (2026-07-07). Kiểm tra US-F01/F02/F03/F04. Tầng API đã verify E2E; đây là bước xác minh tầng UI mobile.
+
+**6A. Hủy thanh toán ghi nhầm (US-F01)**
+
+| #   | Role / thiết bị | Bước                                            | Expected UI                                       | Evidence   |
+| --- | --------------- | ----------------------------------------------- | ------------------------------------------------- | ---------- |
+| 1   | Cashier         | Thanh toán 1 đơn READY (tiền mặt) → PAID        | Đơn chuyển "Hoàn thành"                            | Screenshot |
+| 2   | Manager         | Mở chi tiết đơn → để trống/nhập lý do < 5 ký tự | Nút chặn, báo "Lý do hủy cần ít nhất 5 ký tự"     | Screenshot |
+| 3   | Manager         | Nhập lý do hợp lệ → xác nhận dialog             | Đơn quay lại "Chờ thanh toán", bàn OCCUPIED lại   | Screenshot |
+| 4   | Cashier         | Xem lại đơn                                      | Không thấy nút "Hủy thanh toán" (chỉ Manager thấy) | Screenshot |
+
+**6B. Đối soát kết ca (US-F02)**
+
+| #   | Role / thiết bị | Bước                                     | Expected UI                                             | Evidence   |
+| --- | --------------- | ---------------------------------------- | ------------------------------------------------------ | ---------- |
+| 1   | Manager         | Thu 1 đơn CK VietQR → mở màn Ca làm việc | Card "Đối soát ca": tiền mặt dự kiến + CK chưa xác nhận | Screenshot |
+| 2   | Manager         | Nhấn "Đã nhận" trên giao dịch CK         | Giao dịch biến khỏi danh sách chưa xác nhận            | Screenshot |
+| 3   | Manager         | Còn CK chưa xác nhận, nhấn "Đóng ca"     | Cảnh báo confirm số CK chưa xác nhận trước khi đóng    | Screenshot |
+
+**6C. Báo hết món tại quầy (US-F03)**
+
+| #   | Role / thiết bị | Bước                                | Expected UI                            | Evidence   |
+| --- | --------------- | ----------------------------------- | -------------------------------------- | ---------- |
+| 1   | Cashier         | Trên menu, nhấn "Báo hết món" 1 món | Món mờ đi, ẩn nút thêm, nhãn "Hết món" | Screenshot |
+| 2   | Cashier         | Nhấn để mở bán lại                  | Món trở về bình thường, thêm được vào giỏ | Screenshot |
+
+**6D. Mất mạng (US-F04):** ngắt WiFi thiết bị → banner đỏ "Mất kết nối" hiện trên mọi màn; kill app rồi mở lại → giỏ nháp còn nguyên.
+
+---
+
 ## 8. Checklist Pass/Fail tại buổi demo
 
 | Gate                                  | Pass/Fail | Ghi chú |
 | ------------------------------------- | --------- | ------- |
-| 5 luồng demo không crash              |           |         |
+| 6 luồng demo không crash              |           |         |
 | Không bug Critical/High mở            |           |         |
 | UI khớp design màn pilot >= 90%       |           |         |
 | Offline/network error có thông báo rõ |           |         |
+| Void + đối soát ca hoạt động đúng     |           |         |
 | PO nội bộ đồng ý vào UAT              |           |         |
 
 Sau demo, tạo `docs/DEMO_MINUTES_YYYY-MM-DD.md` từ template `docs/DEMO_MINUTES_TEMPLATE.md`.

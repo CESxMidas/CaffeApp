@@ -497,15 +497,104 @@
 
 ---
 
+## Nhóm F — Pilot Hardening (bổ sung sau PM gate review 2026-07-07)
+
+> Các story dưới đây phát sinh từ rà soát vận hành trước đóng gói pilot, **không** nằm trong 112 điểm plan gốc. Đã code + verify tầng API; dùng làm test case thủ công cho tầng UI. Tham chiếu edge case: PRD §5 EC-11/EC-12/EC-13.
+
+### US-F01: Hủy thanh toán (void)
+
+**Là** quản lý, **tôi muốn** hủy một thanh toán bị ghi nhầm, **để** đơn quay lại chờ thanh toán và két không lệch (EC-11).
+
+**Acceptance Criteria:**
+
+- Given đơn đã `PAID`, đăng nhập vai trò MANAGER/OWNER
+- When mở chi tiết đơn → nhập lý do < 5 ký tự → nhấn "Hủy thanh toán"
+- Then bị chặn với lỗi "Lý do hủy cần ít nhất 5 ký tự"
+
+- Given nhập lý do hợp lệ và xác nhận dialog
+- Then payment bị xóa, đơn quay lại `READY`, bàn `OCCUPIED` lại
+- And thao tác (kèm snapshot số tiền + lý do) được ghi vào audit log
+
+- Given vai trò CASHIER
+- Then **không** thấy nút "Hủy thanh toán"
+
+**API:** `POST /api/v1/payments/{paymentId}/void` | **Points:** 3
+
+---
+
+### US-F02: Đối soát kết ca
+
+**Là** quản lý, **tôi muốn** xem tiền mặt dự kiến và các chuyển khoản chưa xác nhận trước khi đóng ca, **để** đối chiếu với két thực tế (EC-08/EC-13).
+
+**Acceptance Criteria:**
+
+- Given ca đang mở có đơn đã thanh toán
+- When mở màn Ca làm việc
+- Then card "Đối soát ca" hiện: tiền mặt dự kiến (đã trừ tiền thối), tổng CK, số đơn từng loại
+- And liệt kê các CK **chưa xác nhận** với nút "Đã nhận"
+
+- Given nhấn "Đã nhận" trên 1 giao dịch CK
+- Then giao dịch đó biến khỏi danh sách chưa xác nhận
+
+- Given còn CK chưa xác nhận
+- When nhấn "Đóng ca"
+- Then hiện cảnh báo confirm số lượng CK chưa xác nhận trước khi cho đóng
+
+**API:** `GET /api/v1/shifts/{shiftId}/reconciliation`, `POST /api/v1/payments/{paymentId}/verify` | **Points:** 3
+
+---
+
+### US-F03: Báo hết món tại quầy
+
+**Là** thu ngân/barista, **tôi muốn** báo hết một món ngay trên menu, **để** không nhận thêm đơn món đó giữa ca cao điểm (EC-12).
+
+**Acceptance Criteria:**
+
+- Given menu thu ngân đang mở
+- When nhấn "Báo hết món" trên 1 món
+- Then món mờ đi, ẩn nút thêm vào giỏ, hiện nhãn "Hết món · chạm để mở bán lại"
+- And món vẫn hiển thị (không biến mất) để có thể mở bán lại
+
+- Given món đang hết
+- When nhấn để mở bán lại
+- Then món trở về trạng thái bán bình thường
+
+**API:** `PATCH /api/v1/products/{productId}/availability` | **Points:** 2
+
+---
+
+### US-F04: Khả năng chịu lỗi khi mất mạng
+
+**Là** nhân viên, **tôi muốn** biết rõ khi mất kết nối và không mất giỏ hàng đang tạo, **để** không thao tác nhầm hoặc thu tiền 2 lần (EC-01/EC-10).
+
+**Acceptance Criteria:**
+
+- Given mất kết nối máy chủ
+- Then banner đỏ "Mất kết nối máy chủ" hiện trên mọi màn hình
+
+- Given đang có giỏ hàng nháp
+- When app bị kill hoặc hết session rồi mở lại
+- Then giỏ hàng nháp vẫn còn (lưu mã hóa qua SecureStore)
+
+- Given mạng chập chờn khi bấm thanh toán, request đầu đã xử lý ở server
+- When bấm lại lần 2 và nhận lỗi "Đơn đã thanh toán"
+- Then app coi là **thành công** (không báo lỗi, không thu 2 lần)
+
+**Points:** 2
+
+---
+
 ## Tổng hợp Story Points
 
-| Nhóm      | Stories | Total Points |
-| --------- | ------- | ------------ |
-| A         | 4       | 10           |
-| B         | 11      | 43           |
-| C         | 4       | 19           |
-| D         | 6       | 29           |
-| E         | 3       | 11           |
-| **Total** | **28**  | **112**      |
+| Nhóm             | Stories | Total Points |
+| ---------------- | ------- | ------------ |
+| A                | 4       | 10           |
+| B                | 11      | 43           |
+| C                | 4       | 19           |
+| D                | 6       | 29           |
+| E                | 3       | 11           |
+| **MVP total**    | **28**  | **112**      |
+| F (hardening)    | 4       | 10           |
+| **Grand total**  | **32**  | **122**      |
 
-**Velocity giả định:** 20 points/sprint → ~6 sprints (khớp plan)
+**Velocity giả định:** 20 points/sprint → ~6 sprints (khớp plan). Nhóm F là công việc hardening sau plan gốc.
