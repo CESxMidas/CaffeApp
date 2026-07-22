@@ -1528,8 +1528,19 @@ Xem thêm API_ERD_REFACTOR_CHECKLIST.md §3 (planned — chưa được tạo).
 - Non-CASH: `changeAmount` phải null/0
 - Sau payment thành công: order → `PAID`, set `paidAt`, table → `EMPTY` nếu DINE_IN
 - Cập nhật `shift.totalRevenue`, `shift.totalOrders`
-- Một order chỉ PAID một lần (partial payment: Sprint 2+)
 - Ghi audit `PAYMENT_CREATE`
+
+**Concurrency & idempotency (MVP):**
+
+- Mỗi order chỉ có **một** payment thành công/hiện hành tại một thời điểm.
+- Server thực hiện chuyển trạng thái **atomic `READY → PAID`** bên trong transaction
+  (conditional update theo `status = READY`). Hai request đồng thời trên cùng order,
+  hoặc retry sau khi đã `PAID`, chỉ có một request thắng; các request còn lại nhận
+  `409 "Đơn đã thanh toán"` và **không** tạo payment thứ hai.
+- Void đưa order về `READY` và cho phép thanh toán lại (payment cũ bị xóa — §9.4).
+- **Chưa** hỗ trợ: split/partial payment, `Idempotency-Key` header. Không có unique
+  constraint ở database cho `payment.orderId` (giữ mở khả năng split-tender sau này);
+  bảo đảm correctness đến từ atomic conditional transition ở tầng application.
 
 ---
 
