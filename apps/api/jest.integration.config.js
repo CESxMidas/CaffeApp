@@ -1,9 +1,8 @@
 /**
- * Jest config for unit / characterization tests.
+ * Jest config for REAL PostgreSQL integration tests.
  *
- * These run WITHOUT a database (PrismaService is faked in-memory), so they are
- * fast and safe to run anywhere. Real PostgreSQL integration tests live under
- * `test/integration/` and use `jest.integration.config.js`.
+ * Requires a dedicated test database via `TEST_DATABASE_URL` (enforced by
+ * test/integration/setup-env.ts). Run with: `npm run test:integration`.
  *
  * @type {import('jest').Config}
  */
@@ -11,8 +10,8 @@ module.exports = {
   moduleFileExtensions: ['js', 'json', 'ts'],
   rootDir: '.',
   testEnvironment: 'node',
-  testRegex: '.*\\.spec\\.ts$',
-  testPathIgnorePatterns: ['/node_modules/', '<rootDir>/test/integration/'],
+  testMatch: ['<rootDir>/test/integration/**/*.integration.spec.ts'],
+  setupFiles: ['<rootDir>/test/integration/setup-env.ts'],
   transform: {
     '^.+\\.ts$': ['ts-jest', { tsconfig: '<rootDir>/tsconfig.json' }],
   },
