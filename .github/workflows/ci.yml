@@ -51,6 +51,8 @@ jobs:
           node-version: '20'
           cache: 'npm'
       - run: npm ci
+      - name: Build shared package
+        run: npm run build --workspace=@caffeapp/shared
       - run: npm run db:generate
       - run: npm run api:build
 
@@ -88,6 +90,12 @@ jobs:
   # (Mobile has no automated tests yet — its script is still a placeholder.)
   test-unit:
     runs-on: ubuntu-latest
+    # The characterization suite boots AppModule, which validates env at startup.
+    # PrismaService is faked in-memory, so these are non-secret placeholder values
+    # (no real database is contacted).
+    env:
+      DATABASE_URL: postgresql://placeholder:placeholder@localhost:5432/placeholder
+      JWT_SECRET: ci-unit-test-placeholder-secret
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
