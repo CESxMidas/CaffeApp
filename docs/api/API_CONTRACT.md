@@ -141,7 +141,7 @@ Tablet trạm dùng tài khoản chung (A-09, B-15). Mỗi mutation quan trọng
 - Staff phải `isActive` và cùng `branchId` với request
 - Audit `actor_id` = `actedByStaffId` nếu có, else JWT staff
 
-Xem thêm [API_ERD_REFACTOR_CHECKLIST.md](../API_ERD_REFACTOR_CHECKLIST.md) §3.
+Xem thêm API_ERD_REFACTOR_CHECKLIST.md §3 (planned — chưa được tạo).
 
 ### 1.7.3 OrderDto — fields lifecycle
 

@@ -16,7 +16,7 @@
 | 3   | **PostgreSQL** is the single source of truth (Prisma ORM)               |
 | 4   | **Shared package** (`@caffeapp/shared`) defines FE/BE boundary          |
 | 5   | Mobile: **Zustand** = local UI state; **TanStack Query** = server state |
-| 6   | API: **Controller → Service → Repository** (Prisma) per module          |
+| 6   | API: **Controller → Service** per module; repository **optional**       |
 | 7   | Every order/payment mutation → **audit_logs** (Sprint 2+)               |
 
 ---
@@ -58,7 +58,6 @@ CaffeApp/
 ├── database/                   # DB documentation
 └── docs/
     ├── ARCHITECTURE.md         # This file
-    ├── ARCHITECTURE_REVIEW.md  # Principal review
     └── adr/                    # Decision records
 ```
 

@@ -157,26 +157,26 @@ Nếu Sprint 5 dashboard chưa bật trong build demo, ghi `N/A` vào minutes, k
 
 **6A. Hủy thanh toán ghi nhầm (US-F01)**
 
-| #   | Role / thiết bị | Bước                                            | Expected UI                                       | Evidence   |
-| --- | --------------- | ----------------------------------------------- | ------------------------------------------------- | ---------- |
+| #   | Role / thiết bị | Bước                                            | Expected UI                                        | Evidence   |
+| --- | --------------- | ----------------------------------------------- | -------------------------------------------------- | ---------- |
 | 1   | Cashier         | Thanh toán 1 đơn READY (tiền mặt) → PAID        | Đơn chuyển "Hoàn thành"                            | Screenshot |
-| 2   | Manager         | Mở chi tiết đơn → để trống/nhập lý do < 5 ký tự | Nút chặn, báo "Lý do hủy cần ít nhất 5 ký tự"     | Screenshot |
-| 3   | Manager         | Nhập lý do hợp lệ → xác nhận dialog             | Đơn quay lại "Chờ thanh toán", bàn OCCUPIED lại   | Screenshot |
-| 4   | Cashier         | Xem lại đơn                                      | Không thấy nút "Hủy thanh toán" (chỉ Manager thấy) | Screenshot |
+| 2   | Manager         | Mở chi tiết đơn → để trống/nhập lý do < 5 ký tự | Nút chặn, báo "Lý do hủy cần ít nhất 5 ký tự"      | Screenshot |
+| 3   | Manager         | Nhập lý do hợp lệ → xác nhận dialog             | Đơn quay lại "Chờ thanh toán", bàn OCCUPIED lại    | Screenshot |
+| 4   | Cashier         | Xem lại đơn                                     | Không thấy nút "Hủy thanh toán" (chỉ Manager thấy) | Screenshot |
 
 **6B. Đối soát kết ca (US-F02)**
 
 | #   | Role / thiết bị | Bước                                     | Expected UI                                             | Evidence   |
-| --- | --------------- | ---------------------------------------- | ------------------------------------------------------ | ---------- |
+| --- | --------------- | ---------------------------------------- | ------------------------------------------------------- | ---------- |
 | 1   | Manager         | Thu 1 đơn CK VietQR → mở màn Ca làm việc | Card "Đối soát ca": tiền mặt dự kiến + CK chưa xác nhận | Screenshot |
-| 2   | Manager         | Nhấn "Đã nhận" trên giao dịch CK         | Giao dịch biến khỏi danh sách chưa xác nhận            | Screenshot |
-| 3   | Manager         | Còn CK chưa xác nhận, nhấn "Đóng ca"     | Cảnh báo confirm số CK chưa xác nhận trước khi đóng    | Screenshot |
+| 2   | Manager         | Nhấn "Đã nhận" trên giao dịch CK         | Giao dịch biến khỏi danh sách chưa xác nhận             | Screenshot |
+| 3   | Manager         | Còn CK chưa xác nhận, nhấn "Đóng ca"     | Cảnh báo confirm số CK chưa xác nhận trước khi đóng     | Screenshot |
 
 **6C. Báo hết món tại quầy (US-F03)**
 
-| #   | Role / thiết bị | Bước                                | Expected UI                            | Evidence   |
-| --- | --------------- | ----------------------------------- | -------------------------------------- | ---------- |
-| 1   | Cashier         | Trên menu, nhấn "Báo hết món" 1 món | Món mờ đi, ẩn nút thêm, nhãn "Hết món" | Screenshot |
+| #   | Role / thiết bị | Bước                                | Expected UI                               | Evidence   |
+| --- | --------------- | ----------------------------------- | ----------------------------------------- | ---------- |
+| 1   | Cashier         | Trên menu, nhấn "Báo hết món" 1 món | Món mờ đi, ẩn nút thêm, nhãn "Hết món"    | Screenshot |
 | 2   | Cashier         | Nhấn để mở bán lại                  | Món trở về bình thường, thêm được vào giỏ | Screenshot |
 
 **6D. Mất mạng (US-F04):** ngắt WiFi thiết bị → banner đỏ "Mất kết nối" hiện trên mọi màn; kill app rồi mở lại → giỏ nháp còn nguyên.

@@ -30,7 +30,7 @@
 | ☐       | Chưa trả lời                              |
 | ☑       | Đã chốt                                   |
 
-**Liên kết tài liệu:** [PRD](PRD.md) · [USER_STORIES](USER_STORIES.md) · [SPRINT_PLAN](SPRINT_PLAN.md) · [DISCOVERY](DISCOVERY.md) · [DEVICE_POLICY](DEVICE_POLICY.md) · [BRANCH_ASSIGNMENT](BRANCH_ASSIGNMENT.md) · [API_CONTRACT](api/API_CONTRACT.md) · [GO_LIVE_PLAN](GO_LIVE_PLAN.md) · **[GO_LIVE_PROMPTS_FULL](GO_LIVE_PROMPTS_FULL.md)**
+**Liên kết tài liệu:** [PRD](PRD.md) · [USER_STORIES](USER_STORIES.md) · [SPRINT_PLAN](SPRINT_PLAN.md) · [DISCOVERY](DISCOVERY.md) · [DEVICE_POLICY](DEVICE_POLICY.md) · BRANCH_ASSIGNMENT (planned) · [API_CONTRACT](api/API_CONTRACT.md) · [GO_LIVE_PLAN](GO_LIVE_PLAN.md) · **GO_LIVE_PROMPTS_FULL (planned)**
 
 ---
 
@@ -477,7 +477,7 @@
 - [x] Cập nhật `API_CONTRACT.md`, `ERD.md`, `MOBILE_ARCHITECTURE.md`, `TESTING.md`
 - [x] **Order lifecycle (P2-02):** `deliveredAt` thay `SERVING`; `POST /orders/:id/deliver`
 - [ ] **Code refactor** còn lại: tablet trạm picker (xem MOBILE_ARCHITECTURE)
-- [x] Thông báo team / ghi changelog nội bộ — [CHANGELOG.md](../CHANGELOG.md) mục Doc Freeze 2026-06-29 · [DOC_FREEZE_MEMO.md](DOC_FREEZE_MEMO.md)
+- [x] Thông báo team / ghi changelog nội bộ — [CHANGELOG.md](../CHANGELOG.md) mục Doc Freeze 2026-06-29 · DOC_FREEZE_MEMO.md (planned — chưa được tạo)
 
 ---
 
