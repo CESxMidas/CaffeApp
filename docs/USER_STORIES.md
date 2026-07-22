@@ -586,15 +586,15 @@
 
 ## Tổng hợp Story Points
 
-| Nhóm             | Stories | Total Points |
-| ---------------- | ------- | ------------ |
-| A                | 4       | 10           |
-| B                | 11      | 43           |
-| C                | 4       | 19           |
-| D                | 6       | 29           |
-| E                | 3       | 11           |
-| **MVP total**    | **28**  | **112**      |
-| F (hardening)    | 4       | 10           |
-| **Grand total**  | **32**  | **122**      |
+| Nhóm            | Stories | Total Points |
+| --------------- | ------- | ------------ |
+| A               | 4       | 10           |
+| B               | 11      | 43           |
+| C               | 4       | 19           |
+| D               | 6       | 29           |
+| E               | 3       | 11           |
+| **MVP total**   | **28**  | **112**      |
+| F (hardening)   | 4       | 10           |
+| **Grand total** | **32**  | **122**      |
 
 **Velocity giả định:** 20 points/sprint → ~6 sprints (khớp plan). Nhóm F là công việc hardening sau plan gốc.

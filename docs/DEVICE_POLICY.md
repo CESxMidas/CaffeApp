@@ -2,7 +2,7 @@
 
 **Version:** 2.0  
 **Áp dụng:** MVP v2 — aligned [STAKEHOLDER_QUESTIONNAIRE.md](STAKEHOLDER_QUESTIONNAIRE.md)  
-**Liên quan:** [BRANCH_ASSIGNMENT.md](BRANCH_ASSIGNMENT.md), [MOBILE_ARCHITECTURE.md](MOBILE_ARCHITECTURE.md)
+**Liên quan:** BRANCH_ASSIGNMENT.md (planned — chưa được tạo), [MOBILE_ARCHITECTURE.md](MOBILE_ARCHITECTURE.md)
 
 ---
 

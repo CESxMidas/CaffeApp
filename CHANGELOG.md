@@ -74,7 +74,7 @@ Versioning: [Semantic Versioning](docs/VERSIONING.md)
 5. **P2-04** — VAT 8% trên bill
 6. **P2-05** — E2E C-15 (SecureStore thiết bị thật)
 
-**Tham chiếu:** [GO_LIVE_PLAN.md — Phase 2](docs/GO_LIVE_PLAN.md#phase-2--code-refactor) · [DOC_FREEZE_MEMO.md](docs/DOC_FREEZE_MEMO.md)
+**Tham chiếu:** [GO_LIVE_PLAN.md — Phase 2](docs/GO_LIVE_PLAN.md#phase-2--code-refactor) · DOC_FREEZE_MEMO.md (planned — chưa được tạo)
 
 **Freeze rule:** Thay đổi nghiệp vụ sau freeze → ticket + PO + cập nhật questionnaire trước khi code.
 

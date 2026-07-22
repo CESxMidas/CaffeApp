@@ -1,8 +1,50 @@
 # Testing Strategy — CaffeApp
 
-**Sprint 0.9** — Test plan. **Không implement** test framework trong sprint này.
+**Test plan + current implementation.** Phần lớn tài liệu là kế hoạch; mục
+[§0 Trạng thái hiện tại](#0-trạng-thái-hiện-tại-thực-tế) mô tả những gì đã chạy thật.
 
-Stack: Jest (NestJS default) · future Detox/Maestro (mobile E2E)
+Stack: Jest (NestJS) · future Detox/Maestro (mobile E2E)
+
+---
+
+## 0. Trạng thái hiện tại (thực tế)
+
+| Lớp                           | Có thật? | Vị trí                                            | Database              |
+| ----------------------------- | -------- | ------------------------------------------------- | --------------------- |
+| API characterization (in-mem) | ✅       | `apps/api/src/app.characterization.spec.ts`       | InMemoryPrisma (fake) |
+| API integration (real DB)     | ✅       | `apps/api/test/integration/*.integration.spec.ts` | PostgreSQL thật       |
+| Shared unit                   | ✅       | `packages/shared/test/*.test.mjs`                 | —                     |
+| Mobile unit/hooks             | ❌ gap   | script `test` vẫn là placeholder `echo`           | —                     |
+
+> **Characterization ≠ integration.** `app.characterization.spec.ts` khởi động Nest
+> app thật nhưng **override PrismaService bằng fake in-memory** — nhanh, không cần DB,
+> nhưng **không** kiểm chứng migration/constraint/transaction thật. Việc đó thuộc về
+> integration suite dùng PostgreSQL thật.
+
+### Cách chạy local
+
+```bash
+# Unit / characterization + shared (không cần DB)
+npm test
+
+# Integration thật — cần PostgreSQL test database
+#   1. Tạo DB test (tên phải chứa "test"):
+#        createdb caffeapp_test   # hoặc dùng infra/docker-compose.yml
+#   2. Apply migrations vào DB test:
+TEST_DATABASE_URL=postgresql://postgres:postgres@localhost:5432/caffeapp_test?schema=public \
+  npm run db:migrate:deploy --workspace=@caffeapp/api
+#   3. Chạy integration suite:
+TEST_DATABASE_URL=postgresql://postgres:postgres@localhost:5432/caffeapp_test?schema=public \
+  npm run test:integration
+```
+
+### Database safety rules (integration)
+
+- Bắt buộc `TEST_DATABASE_URL`; **không** fallback âm thầm sang `DATABASE_URL`.
+- Tên database **phải chứa "test"** — guard từ chối nếu không.
+- Từ chối chạy khi `NODE_ENV=production`.
+- **Không** log full connection string (có credential).
+- Cleanup có phạm vi xác định (chỉ xoá data test namespaced), không phụ thuộc seed.
 
 ---
 
@@ -113,7 +155,9 @@ Automated regression: CI chạy unit + integration trên mỗi PR.
 | Mobile hooks            | ≥ 60%      | Sprint 2 |
 | E2E critical paths      | 100% paths | Sprint 4 |
 
-Hiện tại: **0%** — placeholders in `package.json` test scripts.
+Hiện tại: API có characterization suite + integration suite (real PostgreSQL) và
+shared unit tests đang chạy; **mobile vẫn 0%** (script `test` là placeholder). Coverage
+số hoá formal chưa được đo — xem [§0](#0-trạng-thái-hiện-tại-thực-tế).
 
 ---
 
@@ -138,20 +182,19 @@ Test accounts (planned Sprint 1 seed):
 
 ## 5. CI integration (target)
 
-```yaml
-# Future job in .github/workflows/ci.yml
-test:
-  runs-on: ubuntu-latest
-  services:
-    postgres:
-      image: postgres:16-alpine
-  steps:
-    - run: npm ci
-    - run: npm run db:migrate:deploy --workspace=@caffeapp/api
-    - run: npm run test
-```
+Current CI (`.github/workflows/ci.yml`):
 
-Current CI: typecheck, lint, format, api-build — **no test job yet**.
+| Job                | Chạy gì                                                                  |
+| ------------------ | ------------------------------------------------------------------------ |
+| `typecheck`        | `npm run typecheck`                                                      |
+| `lint`             | `npm run lint`                                                           |
+| `format`           | `npm run format:check`                                                   |
+| `api-build`        | `npm run api:build`                                                      |
+| `mobile-typecheck` | `npm run typecheck --workspace=@caffeapp/mobile`                         |
+| `test-unit`        | `npm test` (API characterization + shared; **mobile placeholder**)       |
+| `test-integration` | PostgreSQL 16 service → `db:migrate:deploy` → `npm run test:integration` |
+
+Mobile chưa có test tự động → chưa có job test cho mobile.
 
 ---
 
