@@ -46,6 +46,21 @@ TEST_DATABASE_URL=postgresql://postgres:postgres@localhost:5432/caffeapp_test?sc
 - **Không** log full connection string (có credential).
 - Cleanup có phạm vi xác định (chỉ xoá data test namespaced), không phụ thuộc seed.
 
+### Payment concurrency suite
+
+`test/integration/payment-concurrency.integration.spec.ts` — PostgreSQL thật, dùng
+production `PaymentsService` + transaction thật:
+
+- **Deterministic barrier** (không sleep/timing): wrap `prisma.order.findUnique`; hai
+  request `create()` bị giữ tới khi **cả hai** đã đọc order ở `READY`, rồi thả cùng lúc.
+- Assert: đúng 1 request thắng, 1 nhận `409 "Đơn đã thanh toán"`; DB có **đúng 1**
+  Payment; tổng tiền không double-count; order `PAID` + `paidAt`.
+- Regression: retry sau `PAID` → `409`, không sinh payment thứ hai; void → thanh toán lại
+  → vẫn 1 payment.
+- **Audit assertion dùng spy** (`jest.spyOn(audit, 'log')`): đếm số lần gọi
+  `payment.created` một cách xác định. DB concurrency là **thật**; riêng audit assert là
+  spy-based vì audit hiện chạy fire-and-forget ngoài transaction (không đổi ở phase này).
+
 ---
 
 ## 1. Test pyramid

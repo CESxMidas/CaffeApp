@@ -76,6 +76,22 @@ export class PaymentsService {
     );
 
     const payment = await this.prisma.$transaction(async (tx) => {
+      // Atomic READY -> PAID transition. The pre-transaction status check above
+      // is not enough on its own: two requests can both read READY before either
+      // commits. This conditional update is the real guard — under READ COMMITTED
+      // the two racing transactions contend on the same order row, the first
+      // commits the transition, and when the second's UPDATE re-evaluates its
+      // predicate the row is no longer READY, so it matches 0 rows. We reject
+      // that loser before creating any payment, so exactly one payment can exist.
+      const transition = await tx.order.updateMany({
+        where: { id: order.id, status: OrderStatus.READY },
+        data: { status: OrderStatus.PAID, paidAt },
+      });
+
+      if (transition.count !== 1) {
+        throw new ConflictException('Đơn đã thanh toán');
+      }
+
       const created = await tx.payment.create({
         data: {
           orderId: order.id,
@@ -85,11 +101,6 @@ export class PaymentsService {
           reference: dto.reference ?? null,
           paidAt,
         },
-      });
-
-      await tx.order.update({
-        where: { id: order.id },
-        data: { status: OrderStatus.PAID, paidAt },
       });
 
       if (order.tableId) {

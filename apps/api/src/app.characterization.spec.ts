@@ -596,6 +596,26 @@ class InMemoryPrisma {
         return { ...order, items: order.items.map((item) => ({ ...item })) };
       },
     ),
+    // Conditional update mirroring the real Prisma `updateMany` used by the
+    // payment READY -> PAID transition guard: matches on both id AND status, so
+    // it returns { count: 0 } once the order is no longer READY (never blindly 1).
+    updateMany: jest.fn(
+      async ({
+        where,
+        data,
+      }: {
+        where: { id: string; status?: OrderStatus };
+        data: Partial<Omit<OrderRecord, 'id' | 'items'>>;
+      }) => {
+        const order = this.orders.find((row) => row.id === where.id);
+        if (!order) return { count: 0 };
+        if (where.status !== undefined && order.status !== where.status) {
+          return { count: 0 };
+        }
+        Object.assign(order, data, { updatedAt: new Date() });
+        return { count: 1 };
+      },
+    ),
   };
 
   orderItem = {
